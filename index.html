@@ -20,87 +20,103 @@
             font-family: 'Press Start 2P', cursive;
             overflow: hidden;
             display: flex; justify-content: center; align-items: center;
+            touch-action: none; /* Prevents scrolling while playing */
         }
 
         #game-container {
-            width: 375px; height: 667px;
+            width: 100vw; height: 100vh;
+            max-width: 375px; max-height: 667px;
             background: var(--cream);
-            border: 6px solid white;
-            border-radius: 20px;
+            border: 4px solid white;
             position: relative;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        /* UI / Hearts */
+        /* UI Layer */
         #ui-layer {
             position: absolute; top: 15px; left: 15px; right: 15px;
             z-index: 100; display: none; justify-content: space-between;
-            pointer-events: none;
         }
         #heart-bar { color: var(--hot-pink); font-size: 10px; }
 
+        /* Navigation Safeguard */
+        #emergency-next {
+            position: absolute; bottom: 10px; right: 10px;
+            font-size: 8px; opacity: 0.5; z-index: 5000;
+            background: none; border: none; color: #aaa;
+        }
+
         /* Screens */
         .screen {
-            position: absolute; width: 100%; height: 100%;
+            position: absolute; inset: 0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            text-align: center; padding: 20px; box-sizing: border-box;
+            text-align: center; padding: 20px;
             background: var(--cream);
+            z-index: 10;
         }
         .hidden { display: none !important; }
 
-        .instruction-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.98);
-            z-index: 200; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; padding: 30px;
-            text-align: center; box-sizing: border-box;
-        }
-
-        h1 { font-size: 16px; color: var(--hot-pink); margin-bottom: 20px; }
-        p { font-size: 10px; color: #555; line-height: 1.8; }
-
+        /* Buttons Optimized for Mobile Hit-Area */
         .btn {
             background: var(--hot-pink); color: white;
-            border: none; padding: 15px; border-radius: 10px;
+            border: none; padding: 20px 30px; /* Increased padding */
+            border-radius: 12px;
             font-family: 'Press Start 2P', cursive;
-            font-size: 10px; cursor: pointer; margin: 10px;
-            box-shadow: 0 4px 0 #c9184a;
-            z-index: 10;
+            font-size: 12px; cursor: pointer;
+            box-shadow: 0 5px 0 #c9184a;
+            margin: 10px;
+            -webkit-tap-highlight-color: transparent;
         }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #c9184a; }
 
-        /* FIXED: Added absolute positioning and initial placement */
-        #no-btn { 
-            position: absolute; 
-            top: 60%; 
-            left: 50%; 
-            transform: translate(-50%, -50%);
-            transition: 0.2s ease;
-            white-space: nowrap;
-            z-index: 50; 
+        #no-btn {
+            position: absolute; z-index: 1000;
+            top: 65%; left: 50%; transform: translateX(-50%);
+            transition: all 0.15s ease-out;
+        }
+
+        /* Level 2 Landscape Warning */
+        #landscape-warning {
+            position: absolute; inset: 0; background: var(--hot-pink);
+            color: white; z-index: 3000; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
         }
 
         canvas { display: none; width: 100%; height: 100%; background: #fff0f3; }
+
+        .instruction-overlay {
+            position: absolute; inset: 0;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 2000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 30px;
+        }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     <div id="ui-layer">
-        <div id="heart-bar"></div>
+        <div id="heart-bar">❤️</div>
         <div id="lvl-display" style="font-size: 8px;">LVL: 1</div>
+    </div>
+
+    <button id="emergency-next" class="hidden" onclick="nextLevel()">SKIP LVL</button>
+
+    <div id="landscape-warning">
+        <div style="font-size: 30px;">🔄</div>
+        <p style="font-size: 10px; margin-top: 15px;">Rotate Phone for Strawberry Impact!</p>
     </div>
 
     <div id="instruction-screen" class="instruction-overlay hidden">
         <h2 id="ins-title" style="color: var(--hot-pink); font-size: 14px;"></h2>
-        <p id="ins-text"></p>
-        <button class="btn" onclick="startLevelAfterInstructions()">START LEVEL</button>
+        <p id="ins-text" style="font-size: 10px; line-height: 1.6; margin: 20px 0;"></p>
+        <div id="countdown" style="font-size: 20px; color: var(--hot-pink); margin-bottom: 10px;"></div>
+        <button id="start-lvl-btn" class="btn" onclick="initLevelTimer()">START LEVEL</button>
     </div>
 
     <div id="scr-intro" class="screen">
-        <div style="font-size: 40px;">🍓</div>
+        <div style="font-size: 40px; margin-bottom: 20px;">🍓</div>
         <h1>Strawberry Multiverse</h1>
         <button class="btn" onclick="goToStep(1)">START ADVENTURE</button>
     </div>
@@ -112,16 +128,14 @@
     </div>
 
     <div id="scr-love2" class="screen hidden">
-        <h1>Do you REALLY love me?</h1>
-        <div style="height: 100px; width: 100%; position: relative;">
-            <button class="btn" onclick="nextLevel()" style="position: absolute; top: 0; left: 50%; transform: translateX(-110%);">YES</button>
-            <button class="btn" id="no-btn" onmouseover="dodge()" ontouchstart="dodge()">NO</button>
-        </div>
+        <h1>Do you REALLY<br>love me?</h1>
+        <button class="btn" onclick="nextLevel()">YES</button>
+        <button class="btn" id="no-btn" onmouseover="dodge()" onclick="dodge()" ontouchstart="dodge(event)">NO</button>
     </div>
 
     <div id="scr-quiz" class="screen hidden">
         <h1 id="q-num">Q1</h1>
-        <p id="q-text" style="margin-bottom:20px;"></p>
+        <p id="q-text" style="margin-bottom:20px; font-size: 10px;"></p>
         <div id="quiz-options"></div>
     </div>
 
@@ -129,95 +143,73 @@
 
     <div id="scr-final" class="screen hidden">
         <h1>Happy 1st Month!</h1>
-        <div style="background:white; padding:10px; border:2px solid #eee; margin:10px;">
-            <div style="width:200px; height:200px; background:#ffd1dc; display:flex; align-items:center; justify-content:center;">👩‍❤️‍💋‍👩</div>
-        </div>
-        <p>You cleared all levels!</p>
-        <div id="timer" style="font-size: 12px; color: var(--hot-pink); margin-top:10px;"></div>
+        <div style="font-size: 60px; margin: 20px;">👩‍❤️‍💋‍👩</div>
+        <div id="timer" style="font-size: 10px; color: var(--hot-pink);"></div>
     </div>
 </div>
 
 <script>
-    const state = {
-        level: 0,
-        hearts: 10,
-        quizIndex: 0,
-        isPaused: true,
-        coins: 0
-    };
-
+    const state = { level: 0, hearts: 10, quizIndex: 0, isPaused: true };
     const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = 375;
-    canvas.height = 667;
+    
+    // --- UTILS ---
+    function dodge(e) { if(e) e.preventDefault(); const b = document.getElementById('no-btn'); b.style.left = Math.random()*70+15+'%'; b.style.top = Math.random()*70+15+'%'; b.style.transform = 'none'; }
+    function goToStep(s) { document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden')); if(s===1) document.getElementById('scr-love1').classList.remove('hidden'); if(s===2) document.getElementById('scr-love2').classList.remove('hidden'); }
 
-    const levelInstructions = {
-        1: { title: "LEVEL 1: Connection Quiz", text: "Answer honestly! 10 questions to test our digital chemistry. Click the answer that fits us best!" },
-        2: { title: "LEVEL 2: Space Impact", text: "Distance is the enemy! Drag to move the Strawberry Ship. Tap/Click to shoot SEEDS at the Clocks and Flags. Collect COINS!" }
-    };
+    function updateHearts() { document.getElementById('heart-bar').innerText = "❤️".repeat(state.hearts); }
 
-    // FIXED DODGE FUNCTION
-    function dodge() {
-        const btn = document.getElementById('no-btn');
-        // Calculate random positions within the game container
-        const maxX = 375 - btn.offsetWidth;
-        const maxY = 667 - btn.offsetHeight;
-        
-        const randomX = Math.floor(Math.random() * maxX);
-        const randomY = Math.floor(Math.random() * maxY);
-
-        // Remove the initial centering transform and use raw coordinates
-        btn.style.transform = 'none';
-        btn.style.left = randomX + 'px';
-        btn.style.top = randomY + 'px';
-    }
-
-    function goToStep(s) {
-        document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
-        if(s===1) document.getElementById('scr-love1').classList.remove('hidden');
-        if(s===2) document.getElementById('scr-love2').classList.remove('hidden');
-    }
-
+    // --- LEVEL MANAGEMENT ---
     function nextLevel() {
         state.level++;
         document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
         document.getElementById('ui-layer').style.display = 'flex';
         document.getElementById('lvl-display').innerText = "LVL: " + state.level;
+        document.getElementById('emergency-next').classList.remove('hidden');
         updateHearts();
         
-        const ins = levelInstructions[state.level];
-        if (ins) {
+        const instructions = {
+            1: { title: "LVL 1: Connection Quiz", text: "10 questions to test our digital chemistry. Tap the heart-answers!" },
+            2: { title: "LVL 2: Strawberry Impact", text: "DRAG TO MOVE. SHOOTING IS AUTOMATIC! Destroy Clocks and Flags. Good luck, baby!" }
+        };
+
+        const ins = instructions[state.level];
+        if(ins) {
             document.getElementById('ins-title').innerText = ins.title;
             document.getElementById('ins-text').innerText = ins.text;
             document.getElementById('instruction-screen').classList.remove('hidden');
-        } else {
-            showFinal();
-        }
+            document.getElementById('start-lvl-btn').classList.remove('hidden');
+            document.getElementById('countdown').innerText = "";
+        } else { showFinal(); }
+    }
+
+    function initLevelTimer() {
+        document.getElementById('start-lvl-btn').classList.add('hidden');
+        let count = 3;
+        const cd = document.getElementById('countdown');
+        const timer = setInterval(() => {
+            cd.innerText = count > 0 ? count : "GO!";
+            count--;
+            if(count < -1) {
+                clearInterval(timer);
+                startLevelAfterInstructions();
+            }
+        }, 800);
     }
 
     function startLevelAfterInstructions() {
         document.getElementById('instruction-screen').classList.add('hidden');
         state.isPaused = false;
         if(state.level === 1) startQuiz();
-        if(state.level === 2) startSpaceImpact();
+        if(state.level === 2) startStrawberryImpact();
     }
 
-    function updateHearts() {
-        document.getElementById('heart-bar').innerText = "❤️".repeat(state.hearts);
-    }
-
-    // --- LEVEL 1 QUIZ ---
+    // --- LEVEL 1: QUIZ ---
     const quizData = [
         { q: "Who yaps more on the phone?", a: ["Me", "You"] },
-        { q: "Who is the most likely to fall asleep on video calls?", a: ["Me", "You"] },
-        { q: "Who is the 'softest' for the other?", a: ["Me", "You"] },
-        { q: "Who is the morning person?", a: ["Me", "You"] },
-        { q: "Who is more clingy (in a cute way)?", a: ["Me", "You"] },
-        { q: "Our favorite way to spend a digital date?", a: ["Movies","Gaming","Yap","All of the above"] },
-        { q: "Who fell first?", a: ["Me", "You"] },
-        { q: "Who is the biggest overthinker?", a: ["Me", "You"] },
-        { q: "Who sends more 'I love you' texts?", a: ["Me", "You"] },
-        { q: "Ready to fight distance?", a: ["YES", "YES!"] }
+        { q: "Who falls asleep on FaceTime?", a: ["Me", "You"] },
+        { q: "Who is the softest?", a: ["Me", "You"] },
+        { q: "Ready for Space?", a: ["YES", "Ready!"] }
     ];
 
     function startQuiz() {
@@ -232,58 +224,54 @@
         const options = document.getElementById('quiz-options');
         options.innerHTML = '';
         data.a.forEach(choice => {
-            const b = document.createElement('button');
-            b.className = 'btn'; b.innerText = choice;
-            b.onclick = () => {
-                state.quizIndex++;
-                if(state.quizIndex < quizData.length) showQuestion();
-                else nextLevel();
-            };
+            const b = document.createElement('button'); b.className = 'btn'; b.innerText = choice;
+            b.onclick = () => { state.quizIndex++; if(state.quizIndex < quizData.length) showQuestion(); else nextLevel(); };
             options.appendChild(b);
         });
     }
 
-    // --- LEVEL 2 SPACE IMPACT ---
-    let ship = { x: 50, y: 330 };
-    let seeds = [];
-    let enemies = [];
-    let coins = [];
-    let frames = 0;
-
-    canvas.addEventListener('mousedown', () => { if(state.level === 2) seeds.push({x: ship.x+20, y: ship.y}); });
-    canvas.addEventListener('mousemove', (e) => { 
-        const rect = canvas.getBoundingClientRect();
-        ship.y = e.clientY - rect.top; 
-    });
-
-    function startSpaceImpact() {
+    // --- LEVEL 2: STRAWBERRY IMPACT (Auto-Shoot) ---
+    function startStrawberryImpact() {
         canvas.style.display = 'block';
+        canvas.width = 375; canvas.height = 667;
+        let ship = { x: 50, y: 300 }, seeds = [], enemies = [], frames = 0;
+
+        // Auto-shoot timer
+        const shootInterval = setInterval(() => {
+            if(state.level === 2 && !state.isPaused) seeds.push({x: ship.x + 25, y: ship.y});
+        }, 400);
+
+        // Move Logic
+        const move = (e) => {
+            const touchY = e.touches ? e.touches[0].clientY : e.clientY;
+            const rect = canvas.getBoundingClientRect();
+            ship.y = touchY - rect.top;
+        };
+        canvas.addEventListener('mousemove', move);
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e); }, {passive: false});
+
         function loop() {
-            if(state.level !== 2 || state.isPaused) return;
+            if(state.level !== 2 || state.isPaused) { clearInterval(shootInterval); return; }
             ctx.clearRect(0,0,canvas.width, canvas.height);
             
-            // Player
-            ctx.font = "30px Arial";
-            ctx.fillText("🍓", ship.x, ship.y + 10);
+            // Ship & Ghost Guide
+            ctx.font = "30px Arial"; ctx.fillText("🍓", ship.x, ship.y + 10);
+            if(frames < 100) { ctx.font = "10px 'Press Start 2P'"; ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.fillText("DRAG ME!", ship.x - 20, ship.y - 30); }
 
-            // Seeds
+            // Seeds (Auto)
             seeds.forEach((s, i) => {
-                s.x += 7; ctx.fillText("🌱", s.x, s.y + 10);
+                s.x += 8; ctx.fillText("🌱", s.x, s.y + 10);
                 if(s.x > canvas.width) seeds.splice(i,1);
             });
 
             // Enemies
-            if(frames % 60 === 0) enemies.push({x: 400, y: Math.random()*600, t: Math.random()>0.5?"⏰":"🚩"});
+            if(frames % 40 === 0) enemies.push({x: 400, y: Math.random()*600 + 30, t: Math.random()>0.5?"⏰":"🚩"});
             enemies.forEach((en, i) => {
-                en.x -= 3; ctx.fillText(en.t, en.x, en.y);
+                en.x -= 4; ctx.fillText(en.t, en.x, en.y);
                 seeds.forEach((sd, si) => {
-                    if(Math.abs(sd.x - en.x) < 30 && Math.abs(sd.y - en.y) < 30) {
-                        enemies.splice(i,1); seeds.splice(si,1);
-                    }
+                    if(Math.abs(sd.x - en.x) < 30 && Math.abs(sd.y - en.y) < 30) { enemies.splice(i,1); seeds.splice(si,1); }
                 });
-                if(en.x < 80 && en.x > 30 && Math.abs(en.y - ship.y) < 30) {
-                    state.hearts--; updateHearts(); enemies.splice(i,1);
-                }
+                if(en.x < 80 && en.x > 20 && Math.abs(en.y - ship.y) < 30) { state.hearts--; updateHearts(); enemies.splice(i,1); }
             });
 
             frames++;
@@ -296,13 +284,10 @@
     function showFinal() {
         document.getElementById('scr-final').classList.remove('hidden');
         document.getElementById('ui-layer').style.display = 'none';
-        const nextMonth = new Date(); nextMonth.setMonth(nextMonth.getMonth()+1);
+        document.getElementById('emergency-next').classList.add('hidden');
         setInterval(() => {
-            const diff = nextMonth - new Date();
-            const d = Math.floor(diff / 86400000);
-            const h = Math.floor((diff % 86400000) / 3600000);
-            const m = Math.floor((diff % 3600000) / 60000);
-            document.getElementById('timer').innerText = `${d}d ${h}h ${m}m To Next Month`;
+            const diff = (new Date().setMonth(new Date().getMonth()+1)) - new Date();
+            document.getElementById('timer').innerText = Math.floor(diff/86400000) + "d to month 2";
         }, 1000);
     }
 </script>
