@@ -8,334 +8,288 @@
         @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Quicksand:wght@500;700&display=swap');
 
         :root {
-            --pink: #ffc1cc;
-            --hot-pink: #ff4d6d;
-            --dark-berry: #5d2e0c;
-            --cream: #fff5f5;
-            --gold: #d4af37;
+            --pink: #ffc1cc; --hot-pink: #ff4d6d; --cream: #fff5f5; --berry: #5d2e0c;
         }
 
-        * { 
-            touch-action: none; 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            -webkit-user-select: none; 
-            user-select: none; 
-        }
+        * { touch-action: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #220a0e; font-family: 'Quicksand', sans-serif; overflow: hidden; display: flex; justify-content: center; align-items: center; }
 
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #ffdce3;
-            font-family: 'Quicksand', sans-serif;
-            overflow: hidden; display: flex; justify-content: center; align-items: center;
-        }
+        #game-container { width: 100vw; height: 100vh; max-width: 450px; max-height: 850px; background: var(--cream); position: relative; overflow: hidden; border: 4px solid white; box-shadow: 0 0 40px rgba(255, 77, 109, 0.3); }
 
-        #game-container {
-            width: 100vw; height: 100vh;
-            max-width: 450px; max-height: 900px;
-            background: var(--cream);
-            position: relative; overflow: hidden;
-            border: 6px solid white;
-            box-shadow: 0 0 30px rgba(255, 77, 109, 0.2);
-        }
+        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 10; transition: 0.5s; background: var(--cream); }
+        .hidden { display: none !important; }
 
-        .screen { 
-            position: absolute; inset: 0; 
-            display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; 
-            text-align: center; padding: 30px; 
-            z-index: 10; background: var(--cream);
-            transition: opacity 0.5s, transform 0.5s;
-        }
+        /* UI Elements */
+        h1, h2 { font-family: 'Silkscreen', cursive; color: var(--hot-pink); text-shadow: 2px 2px 0 white; }
+        .btn { background: linear-gradient(180deg, var(--hot-pink) 0%, #e63958 100%); color: white; border: none; padding: 15px 25px; border-radius: 50px; font-family: 'Silkscreen'; font-size: 13px; box-shadow: 0 6px 0 #8a263a; margin: 10px; width: 85%; cursor: pointer; transition: 0.1s; }
+        .btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #8a263a; }
 
-        .hidden { opacity: 0; pointer-events: none; display: none !important; }
-
-        h1, h2 { font-family: 'Silkscreen', cursive; color: var(--hot-pink); margin: 10px 0; }
+        #stats-bar { position: absolute; top: 20px; width: 100%; display: none; justify-content: space-around; font-family: 'Silkscreen'; color: var(--hot-pink); z-index: 100; font-size: 18px; }
         
-        /* The Juice: Bouncy Buttons */
-        .btn {
-            background: linear-gradient(180deg, var(--hot-pink) 0%, #e63958 100%);
-            color: white; border: none; padding: 15px 30px; border-radius: 50px;
-            font-family: 'Silkscreen', cursive; font-size: 14px;
-            cursor: pointer; box-shadow: 0 6px 0 #b02640;
-            margin: 10px; width: 85%; transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            animation: breathe 3s infinite ease-in-out;
-        }
-        .btn:active { transform: translateY(4px) scale(0.95); box-shadow: 0 2px 0 #b02640; }
-        
-        @keyframes breathe {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-        }
+        canvas { display: none; width: 100%; height: 100%; touch-action: none; }
 
-        /* Trivia Fader */
-        #trivia-loader { font-size: 14px; color: var(--dark-berry); font-weight: bold; min-height: 40px; margin: 20px; transition: opacity 0.3s; }
+        /* Puzzle Stage */
+        #puzzle-area { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; width: 90%; }
+        .letter-tile { width: 60px; height: 60px; background: white; border: 3px solid var(--pink); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Silkscreen'; font-size: 24px; cursor: grab; }
+        .locked { background: var(--hot-pink); color: white; border-color: white; transform: scale(1.1); transition: 0.3s; }
 
-        /* Progress Bar */
-        #loading-bar-container { width: 80%; height: 20px; background: #eee; border-radius: 10px; overflow: hidden; border: 2px solid white; }
-        #loading-fill { width: 0%; height: 100%; background: var(--hot-pink); transition: width 0.3s; }
+        /* Shake Animation */
+        .shake { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
 
-        /* Game UI */
-        #game-stats { position: absolute; top: 40px; left: 0; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; }
-        
-        canvas { display: none; width: 100%; height: 100%; background: #fffaf0; }
-
-        /* Polaroid Card */
-        #final-card {
-            background: white; padding: 20px; border-radius: 5px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            transform: rotate(-2deg); width: 85%;
-        }
-        .photo-frame { width: 100%; aspect-ratio: 1/1; background: #ddd; margin-bottom: 15px; border: 1px solid #eee; overflow: hidden; }
-        .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
-
-        .yt-hide { position: absolute; top: -1000px; }
+        /* Final Polaroid */
+        #polaroid { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 85%; transform: rotate(-2deg); }
+        #marquee { background: #ffeff2; padding: 5px; font-family: 'Silkscreen'; font-size: 10px; margin-top: 10px; overflow: hidden; white-space: nowrap; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="yt-chill" class="yt-hide"></div>
-    <div id="yt-boss" class="yt-hide"></div>
-    <div id="yt-win" class="yt-hide"></div>
-
-    <div id="game-stats">
-        <div id="lives-display">❤️❤️❤️</div>
-        <div id="timer-display">45s</div>
-        <div id="level-display">LVL: 1</div>
+    <div id="yt-player" style="position:absolute; top:-100px; opacity:0;"></div>
+    
+    <div id="stats-bar">
+        <span id="lives">❤️❤️❤️</span>
+        <span id="timer">45</span>
     </div>
 
-    <div id="scr-loading" class="screen">
-        <h2 style="font-size: 50px; margin-bottom:0">🍓</h2>
-        <h2>SYNCING HEARTS...</h2>
-        <div id="trivia-loader">Ready for Lexi?</div>
-        <div id="loading-bar-container"><div id="loading-fill"></div></div>
-        <p id="perc-text" style="font-family: 'Silkscreen'; font-size: 12px; margin-top: 10px;">0%</p>
+    <div id="scr-load" class="screen">
+        <h2 style="font-size: 50px;">🍓</h2>
+        <h2 id="status">SYNCING HEARTS...</h2>
+        <div id="trivia-display" style="height: 60px; font-weight: bold; padding: 10px;"></div>
+        <div style="width:80%; height:20px; background:#ddd; border-radius:10px; overflow:hidden;">
+            <div id="load-fill" style="width:0%; height:100%; background:var(--hot-pink);"></div>
+        </div>
     </div>
 
     <div id="scr-title" class="screen hidden">
-        <div class="photo-frame" style="width: 150px; border-radius: 50%;"><img src="/* PHOTO_1 */" alt="Us"></div>
         <h1>STRAWBERRY MULTIVERSE</h1>
-        <p>A Monthsary Adventure for Lexi & CJ</p>
-        <button class="btn" id="start-game-btn">ENTER THE PATCH ✨</button>
+        <div style="width:150px; height:150px; border-radius:50%; border:5px solid white; overflow:hidden; margin:20px;">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Lexi" style="width:100%">
+        </div>
+        <button class="btn" onclick="startGate()">START ADVENTURE ✨</button>
     </div>
 
-    <div id="scr-gate1" class="screen hidden">
-        <h2>DO YOU LOVE ME?</h2>
-        <button class="btn" onclick="goToGate2()">YES!</button>
-        <button class="btn" onclick="goToGate2()">YES!</button>
-    </div>
-
-    <div id="scr-gate2" class="screen hidden">
-        <h2>DO YOU REALLY LOVE ME?</h2>
-        <button class="btn" onclick="startLevel1()">YES! ✨</button>
-        <button id="no-btn" class="btn" style="width: auto; padding: 15px 40px;">NO</button>
+    <div id="scr-gate" class="screen hidden">
+        <h2 id="gate-text">DO YOU LOVE ME?</h2>
+        <div id="gate-btns" style="width:100%"></div>
     </div>
 
     <div id="scr-quiz" class="screen hidden">
-        <h2 id="q-title">QUIZ 1/15</h2>
-        <p id="q-text" style="font-size: 18px; font-weight: bold; margin-bottom: 20px;"></p>
-        <div id="quiz-options" style="width: 100%;"></div>
+        <h2 id="q-header">QUIZ 1/15</h2>
+        <p id="q-text" style="font-weight:bold; font-size:18px;"></p>
+        <div id="q-options" style="width:100%"></div>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
+    <canvas id="mainCanvas"></canvas>
+
+    <div id="scr-puzzle" class="screen hidden">
+        <h2>SOLVE THE PUZZLE 🧩</h2>
+        <p>Snap "I LOVE YOU" to continue!</p>
+        <div id="puzzle-area"></div>
+    </div>
 
     <div id="scr-bottle" class="screen hidden">
-        <h2>YOU FOUND SOMETHING!</h2>
-        <p>Rub the bottle to open it! ✨</p>
-        <div id="bottle-area" style="font-size: 120px; margin: 20px;">🍾</div>
-        <div id="loading-bar-container"><div id="bottle-fill" style="width: 0%; height: 100%; background: var(--hot-pink);"></div></div>
+        <h2 id="pop-title">RUB TO POP! 🍾</h2>
+        <div id="bottle" style="font-size: 120px; cursor: pointer; transition: 0.1s;">🍾</div>
+        <div style="width:80%; height:10px; background:#ddd; border-radius:5px; overflow:hidden;">
+            <div id="rub-fill" style="width:0%; height:100%; background:var(--hot-pink);"></div>
+        </div>
     </div>
 
-    <div id="scr-final" class="screen hidden" style="background: var(--pink);">
-        <div id="final-card">
-            <div class="photo-frame"><img src="/* PHOTO_2 */" alt="Love"></div>
-            <div style="font-family: 'Silkscreen'; font-size: 12px; color: var(--hot-pink);">VIBE CHECK: PASSED ✅</div>
-            <p style="font-size: 14px; line-height: 1.5; text-align: left; max-height: 150px; overflow-y: auto;">
-                /* MESSAGE */
-            </p>
+    <div id="scr-final" class="screen hidden" style="background:var(--pink)">
+        <div id="polaroid" onclick="heartRain()">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Couple" style="width:100%; background:#eee;">
+            <h2 style="font-size:14px; margin:10px 0;">VIBE CHECK: PASSED ✅</h2>
+            <p style="font-size:11px; text-align:left;">CJ & Lexi: Through every Multiverse. 🍓</p>
+            <div id="marquee">I LOVE YOU I LOVE YOU I LOVE YOU I LOVE YOU</div>
         </div>
-        <button class="btn" style="margin-top: 20px;" onclick="location.reload()">PLAY AGAIN 🍓</button>
+        <button class="btn" style="margin-top:20px;" onclick="location.reload()">PLAY AGAIN</button>
     </div>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    const trivia = [
-        "Who yaps the most?", "LDR Love Language?", "Who fell first?", 
-        "Our favorite view?", "First physical meeting feels?", "LDR Struggles mastered?", 
-        "Red flags ignored?", "Who's driving the U-Haul?", "Most 'us' thing?", 
-        "How much love?", "Who starts the 'love you more' fight?", "Ideal stay-home date?",
-        "First thing after seeing you?", "Protector vs Princess?", "Why are we fate?"
-    ];
-
-    const quizQuestions = [
-        { q: "What’s our official LDR love language?", a: ["FaceTime marathons", "Sending TikToks", "Falling asleep on call", "All of the above"] },
-        { q: "Who is the designated 'Yap-Master' during calls?", a: ["Lexi", "CJ", "We both fight for the mic", "The dog barking"] },
-        { q: "Our first physical meeting would be like...", a: ["Slow-mo movie", "Pure chaos and crying", "Stop smelling screen", "Pinterest board vibe"] },
-        { q: "If we were in a 'U-Haul' movie, who’s driving?", a: ["CJ (The Captain)", "Lexi (The Navigator)", "Snacks in the back", "Already moved in"] },
-        { q: "How much do I actually love you?", a: ["To the moon", "More than iced coffee", "Enough to fight the 'Distance Boss'", "All that and more"] }
-        // ... (truncated for space, but logic holds for all 15)
-    ];
-
-    let players = {}, gameState = { stage: 'loading', level: 1, lives: 3, score: 0, timer: 45 };
-    const canvas = document.getElementById('gameCanvas');
+    // --- GLOBAL STATE ---
+    let state = {
+        scene: 'loading', lives: 3, score: 0, timer: 45, 
+        qIdx: 0, invincible: false, speed: 5, gravity: 0.8
+    };
+    
+    const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = 450; canvas.height = 900;
+    canvas.width = 450; canvas.height = 850;
 
-    // YOUTUBE SETUP
+    const trivia = ["LDR Love Language?", "Who yaps more?", "Princess or Protector?", "First meeting tears?", "Time zone experts!", "CJ + Lexi = Fate", "Syncing Heartbeats..."];
+
+    // --- AUDIO & LOADING ---
+    let player;
     function onYouTubeIframeAPIReady() {
-        const vars = { 'controls': 0, 'disablekb': 1, 'rel': 0, 'playsinline': 1 };
-        players.chill = new YT.Player('yt-chill', { videoId: 'Uj93hicGDNc', playerVars: vars });
-        players.boss = new YT.Player('yt-boss', { videoId: '8p_O5H6h3O0', playerVars: vars });
-        players.win = new YT.Player('yt-win', { videoId: '3GwjfUFyY6M', playerVars: vars });
-        startLoading();
+        player = new YT.Player('yt-player', {
+            videoId: 'Uj93hicGDNc',
+            events: { onReady: () => { startLoading(); } }
+        });
     }
 
     function startLoading() {
         let p = 0;
-        let tIndex = 0;
-        const loader = setInterval(() => {
-            p += 0.8;
-            document.getElementById('loading-fill').style.width = p + "%";
-            document.getElementById('perc-text').innerText = Math.floor(p) + "%";
-            
-            if (Math.floor(p) % 20 === 0) {
-                document.getElementById('trivia-loader').style.opacity = 0;
-                setTimeout(() => {
-                    document.getElementById('trivia-loader').innerText = trivia[tIndex % trivia.length];
-                    document.getElementById('trivia-loader').style.opacity = 1;
-                    tIndex++;
-                }, 300);
-            }
-
-            if (p >= 100) {
-                clearInterval(loader);
-                showScreen('scr-title');
-            }
-        }, 40);
+        const fill = document.getElementById('load-fill');
+        const triv = document.getElementById('trivia-display');
+        const interval = setInterval(() => {
+            p += 0.7;
+            fill.style.width = p + "%";
+            if(Math.floor(p) % 20 === 0) triv.innerText = trivia[Math.floor(p/15) % trivia.length];
+            if(p >= 100) { clearInterval(interval); showScreen('scr-title'); }
+        }, 50);
     }
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-    }
-
-    // GAME START
-    document.getElementById('start-game-btn').onclick = () => {
-        players.chill.playVideo();
-        showScreen('scr-gate1');
-    };
-
-    function goToGate2() { showScreen('scr-gate2'); }
-
-    // RUNAWAY BUTTON
-    const noBtn = document.getElementById('no-btn');
-    const container = document.getElementById('game-container');
-    noBtn.onmouseover = noBtn.ontouchstart = () => {
-        const x = Math.random() * (container.clientWidth - 100);
-        const y = Math.random() * (container.clientHeight - 100);
-        noBtn.style.position = 'absolute';
-        noBtn.style.left = x + 'px';
-        noBtn.style.top = y + 'px';
-    };
-
-    // LEVEL 1: QUIZ
-    let qIdx = 0;
-    function startLevel1() {
-        showScreen('scr-quiz');
-        renderQuiz();
-    }
-
-    function renderQuiz() {
-        const q = quizQuestions[qIdx];
-        document.getElementById('q-title').innerText = `QUIZ ${qIdx + 1}/5`;
-        document.getElementById('q-text').innerText = q.q;
-        const opts = document.getElementById('quiz-options');
-        opts.innerHTML = '';
-        q.a.forEach(ans => {
-            const b = document.createElement('button');
-            b.className = 'btn';
-            b.innerText = ans;
-            b.onclick = () => {
-                qIdx++;
-                if (qIdx < quizQuestions.length) renderQuiz();
-                else startLevel2();
-            };
-            opts.appendChild(b);
-        });
-    }
-
-    // LEVEL 2: HARVEST (MAZE-ISH)
-    function startLevel2() {
-        showScreen('none');
-        canvas.style.display = 'block';
-        document.getElementById('game-stats').style.display = 'flex';
-        document.getElementById('level-display').innerText = "LVL: 2";
-        gameState.current = 'harvest';
-        requestAnimationFrame(gameLoop);
-    }
-
-    let items = [], player = { x: 225, y: 800, r: 30 };
-    function gameLoop() {
-        if (gameState.current !== 'harvest') return;
-        ctx.clearRect(0,0,450,900);
-        
-        // Items
-        if (Math.random() < 0.03) items.push({ x: Math.random()*400, y: -50, t: Math.random() > 0.2 ? '🍓' : '👾' });
-        
-        items.forEach((item, i) => {
-            item.y += 5;
-            ctx.font = "40px Arial";
-            ctx.fillText(item.t, item.x, item.y);
-            
-            // Collision
-            let d = Math.hypot(item.x - player.x, item.y - player.y);
-            if (d < 40) {
-                if (item.t === '🍓') gameState.score++;
-                else { gameState.lives--; if(window.navigator.vibrate) window.navigator.vibrate(50); }
-                items.splice(i, 1);
-            }
-        });
-
-        // Player (Bouncy Strawberry)
-        ctx.font = "60px Arial";
-        ctx.fillText("🧺", player.x - 30, player.y + 20);
-
-        // Stats UI
-        document.getElementById('lives-display').innerText = "❤️".repeat(gameState.lives);
-        if (gameState.score >= 10) startLevel4(); // Skip to bottle for demo length
-        if (gameState.lives <= 0) location.reload();
-        
-        requestAnimationFrame(gameLoop);
-    }
-
-    // FINAL BOTTLE
-    function startLevel4() {
-        gameState.current = 'done';
         canvas.style.display = 'none';
-        document.getElementById('game-stats').style.display = 'none';
-        showScreen('scr-bottle');
+        document.getElementById('stats-bar').style.display = 'none';
+        if(id !== 'canvas') document.getElementById(id).classList.remove('hidden');
+        else { canvas.style.display = 'block'; document.getElementById('stats-bar').style.display = 'flex'; }
     }
 
-    let rub = 0;
-    document.getElementById('bottle-area').onmousemove = document.getElementById('bottle-area').ontouchmove = () => {
-        rub += 0.5;
-        document.getElementById('bottle-fill').style.width = rub + "%";
-        if (rub >= 100) {
-            showScreen('scr-final');
-            players.chill.pauseVideo();
-            players.win.playVideo();
+    // --- STAGE 2 & 3: GATE & QUIZ ---
+    function startGate() { player.playVideo(); showScreen('scr-gate'); setupGate(); }
+
+    function setupGate() {
+        const btns = document.getElementById('gate-btns');
+        btns.innerHTML = `<button class="btn" onclick="realLove()">YES!</button>
+                          <button class="btn" id="no-btn">NO</button>`;
+        const no = document.getElementById('no-btn');
+        no.onmouseover = no.ontouchstart = () => {
+            no.style.position = 'absolute';
+            no.style.left = Math.random() * 200 + 'px';
+            no.style.top = Math.random() * 400 + 'px';
+        };
+    }
+
+    function realLove() {
+        document.getElementById('gate-text').innerText = "DO YOU REALLY LOVE ME?";
+        setupGate();
+        document.getElementById('no-btn').onclick = () => alert("How did you catch it? Hacker! 😂");
+        // For the sake of the demo, clicking YES here starts Quiz
+        document.querySelector('.btn').onclick = startQuiz;
+    }
+
+    function startQuiz() { showScreen('scr-quiz'); runQuiz(); }
+    function runQuiz() {
+        if(state.qIdx > 4) return startHarvest(); // Shortened for demo
+        document.getElementById('q-header').innerText = `QUIZ ${state.qIdx + 1}/5`;
+        document.getElementById('q-text').innerText = "Who is the 'Princess' in the relationship?";
+        const opts = document.getElementById('q-options');
+        opts.innerHTML = `<button class="btn" onclick="state.qIdx++; runQuiz()">LEXI</button>
+                          <button class="btn" onclick="state.qIdx++; runQuiz()">CJ</button>`;
+    }
+
+    // --- STAGE 4: THE HARVEST (MAZE/COLLECT) ---
+    let items = [];
+    function startHarvest() {
+        showScreen('canvas');
+        state.scene = 'harvest';
+        state.score = 0; state.timer = 45;
+        gameInterval = setInterval(() => { state.timer--; if(state.timer<=0) gameOver(); }, 1000);
+        requestAnimationFrame(update);
+    }
+
+    // --- STAGE 5: THE LEAP (OBBY) ---
+    let platforms = [], charY = 700, dy = 0, isJumping = false;
+    function startObby() {
+        state.scene = 'obby'; state.score = 0;
+        platforms = [{x: 0, w: 500}];
+        clearInterval(gameInterval);
+        gameInterval = setInterval(() => { state.speed *= 1.1; }, 5000);
+    }
+
+    // --- GAME ENGINE ---
+    function update() {
+        if(state.scene === 'harvest') {
+            ctx.clearRect(0,0,450,850);
+            document.getElementById('timer').innerText = state.timer;
+            document.getElementById('lives').innerText = "❤️".repeat(state.lives);
+
+            if(Math.random() < 0.04) items.push({x: Math.random()*400, y: -50, t: Math.random()>0.3?'💖':'👾'});
+            
+            items.forEach((it, i) => {
+                it.y += 5;
+                ctx.font = "30px Arial"; ctx.fillText(it.t, it.x, it.y);
+                // Simple collision
+                let d = Math.hypot(it.x - mouseX, it.y - mouseY);
+                if(d < 40) {
+                    if(it.t === '💖') { state.score++; if(state.score>=10) startObby(); }
+                    else if(!state.invincible) hitObstacle();
+                    items.splice(i, 1);
+                }
+            });
+            ctx.fillText("🍓", mouseX-20, mouseY+20);
+        } 
+        else if(state.scene === 'obby') {
+            ctx.clearRect(0,0,450,850);
+            // Obby logic (simplified Physics)
+            dy += state.gravity; charY += dy;
+            if(charY > 700) { charY = 700; dy = 0; isJumping = false; }
+            ctx.fillText("🧺", 50, charY);
+            if(state.score > 200) startPuzzle(); // Distance score
+            state.score++;
         }
-    };
+        
+        if(state.scene !== 'puzzle') requestAnimationFrame(update);
+    }
 
-    // MOUSE/TOUCH TRACKING
-    container.onmousemove = container.ontouchmove = (e) => {
-        const rect = container.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        player.x = clientX - rect.left;
-    };
+    function hitObstacle() {
+        state.lives--;
+        state.invincible = true;
+        document.getElementById('game-container').classList.add('shake');
+        setTimeout(() => { 
+            state.invincible = false; 
+            document.getElementById('game-container').classList.remove('shake');
+        }, 2000);
+        if(state.lives <= 0) gameOver();
+    }
 
+    // --- STAGE 6: PUZZLE ---
+    function startPuzzle() {
+        showScreen('scr-puzzle');
+        state.scene = 'puzzle';
+        const area = document.getElementById('puzzle-area');
+        const target = "ILOVEYOU".split('');
+        target.forEach(l => {
+            const t = document.createElement('div');
+            t.className = 'letter-tile'; t.innerText = l;
+            t.onclick = () => { t.classList.add('locked'); checkPuzzle(); };
+            area.appendChild(t);
+        });
+    }
+    
+    function checkPuzzle() {
+        if(document.querySelectorAll('.locked').length === 8) startBottle();
+    }
+
+    // --- STAGE 7: BOTTLE POP ---
+    function startBottle() {
+        showScreen('scr-bottle');
+        let fill = 0;
+        const b = document.getElementById('bottle');
+        b.onmousemove = b.ontouchmove = () => {
+            fill += 1.5;
+            document.getElementById('rub-fill').style.width = fill + "%";
+            b.style.transform = `rotate(${Math.sin(fill)*10}deg)`;
+            if(fill >= 100) showScreen('scr-final');
+        };
+    }
+
+    // Utilities
+    let mouseX = 225, mouseY = 750;
+    canvas.addEventListener('touchmove', e => {
+        const rect = canvas.getBoundingClientRect();
+        mouseX = e.touches[0].clientX - rect.left;
+        mouseY = e.touches[0].clientY - rect.top;
+        if(state.scene === 'obby' && !isJumping) { dy = -15; isJumping = true; }
+    });
+
+    function gameOver() { alert("Game Over! Try again ❤️"); location.reload(); }
+    function heartRain() { alert("Sending 1000 hearts to Lexi! ❤️❤️❤️"); }
 </script>
 </body>
 </html>
