@@ -22,12 +22,17 @@
         .tight-btn { width: auto !important; padding: 10px 25px !important; display: inline-block; }
         #load-bar-container { width: 80%; height: 22px; background: var(--surface-white); border-radius: 12px; border: 3px solid #ffb3c1; overflow: hidden; margin: 20px 0; position: relative; }
         #load-bar-fill { width: 0%; height: 100%; background: var(--accent-red); position: absolute; left: 0; top: 0; transition: width 0.1s linear; }
+        #victory-overlay { position: absolute; inset: 0; z-index: 2000; background: rgba(255, 245, 247, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .victory-text { font-family: 'Fredoka One'; color: var(--deep-berry); font-size: 32px; animation: bounce 0.5s infinite alternate; }
+        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
+        #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 90%; max-width: 320px; }
+        .card { aspect-ratio: 1/1; background: #ffc2d1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; color: transparent; border: 3px solid white; box-shadow: 0 4px 0 #fb6f92; transition: 0.3s; }
+        .card.flipped { background: white; color: initial; transform: rotateY(180deg); }
+        .card.matched { background: #f0fff4; border-color: #b7e4c7; box-shadow: none; }
         #final-scroll { display: none; position: absolute; inset: 0; z-index: 1000; background: var(--scroll-paper); padding: 40px 25px; overflow-y: auto; border: 10px solid #ffdae0; transform: scale(0); transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #final-scroll.open { display: block; transform: scale(1); }
         #letter { text-align: left; font-size: 10px; line-height: 1.8; color: var(--text-dark); font-family: 'Press Start 2P', cursive; white-space: pre-wrap; }
-        canvas { background: transparent; width: 100%; height: 100%; display: none; object-fit: contain; }
-        
-        /* Celebration Final Page */
+        canvas { background: transparent; width: 100%; height: 100%; display: none; object-fit: contain; pointer-events: none; }
         .countdown-timer { font-family: 'Silkscreen'; font-size: 18px; color: var(--deep-berry); margin: 20px 0; background: white; padding: 15px; border-radius: 20px; border: 3px dashed var(--accent-red); width: 100%; }
         .monthsary-title { font-family: 'Fredoka One'; color: var(--deep-berry); font-size: 26px; line-height: 1.2; margin-bottom: 10px; }
     </style>
@@ -36,7 +41,7 @@
 <div id="game-container">
     <div id="stats-bar" style="position: absolute; top: 20px; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; color: var(--deep-berry);"><div id="lives-ui">❤️❤️❤️❤️❤️❤️❤️❤️❤️</div></div>
     <div id="music-player-container" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;"><div id="player"></div></div>
-    <div id="victory-overlay" style="position: absolute; inset: 0; z-index: 2000; background: rgba(255, 245, 247, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center;"><div class="victory-text" style="font-family: 'Fredoka One'; color: var(--deep-berry); font-size: 32px; animation: bounce 0.5s infinite alternate;">LEVEL CLEAR! ✨</div></div>
+    <div id="victory-overlay"><div class="victory-text">LEVEL CLEAR! ✨</div></div>
 
     <div id="scr-load" class="screen">
         <div style="font-size:65px; animation: pulse 1s infinite;">🍓</div>
@@ -53,16 +58,17 @@
     <div id="scr-gate1" class="screen hidden"><h2>DO YOU LOVE ME?</h2><div style="display:flex; gap:10px;"><button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button><button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button></div></div>
     <div id="scr-gate2" class="screen hidden"><h2>DO YOU REALLY LOVE ME?</h2><div id="gate-area-logic" style="width:100%; height:300px; position:relative; display:flex; gap:10px; align-items:center; justify-content:center;"><button id="yes-btn-3" class="btn tight-btn" onclick="handleYesSequence()">YES!</button><button id="no-run" class="btn tight-btn" onmouseover="teleportNo()" ontouchstart="teleportNo()" onclick="handleNoClick()">NO</button></div></div>
     <div id="scr-quiz" class="screen hidden"><h2 id="quiz-count" style="font-size:11px; color:var(--deep-berry);">SYNCING...</h2><p id="quiz-q" style="min-height:50px; font-weight:bold; font-size:16px; font-family: 'Fredoka One';"></p><div id="quiz-options" style="display:flex; flex-direction:column; align-items:center; width:100%; gap:8px;"></div></div>
+    
     <div id="scr-memory" class="screen hidden"><h2 style="font-family:'Fredoka One'; color: var(--deep-berry);">✨ HEART SNAP ✨</h2><div id="matches-text" style="font-family:'Silkscreen'; margin-bottom: 10px;">Matches: 0 / 6</div><div id="memory-grid"></div></div>
+
     <div id="scr-boss" class="screen hidden" style="padding:0;">
         <div class="hud-mini" style="position: absolute; top: 15px; width: 90%; left: 5%; display: flex; align-items: center; justify-content: space-between; background: var(--surface-white); padding: 8px 12px; border-radius: 15px; border: 2px solid #ffb3c1; z-index: 100;">
             <span class="flag">🇸🇪</span>
-            <div class="distance-bar-container" style="flex-grow: 1; margin: 0 10px; height: 14px; background: #eee; border-radius: 7px; position: relative; overflow: hidden; border: 1px solid #ddd;"><div class="km-label" id="km-text" style="font-size: 10px; color: var(--text-dark); font-weight: 900; position: absolute; width: 100%; text-align: center; top: 0;">10,500 KM</div><div class="distance-fill" style="height: 100%; width: 0%; background: var(--accent-red); border-radius: 5px; transition: width 0.1s;"></div></div>
+            <div class="distance-bar-container" style="flex-grow: 1; margin: 0 10px; height: 14px; background: #eee; border-radius: 7px; position: relative; overflow: hidden; border: 1px solid #ddd;"><div class="km-label" id="km-text" style="font-size: 10px; color: var(--text-dark); font-weight: 900; position: absolute; width: 100%; text-align: center; top: 0;">10,500 KM</div><div class="distance-fill" id="dist-fill-boss" style="height: 100%; width: 0%; background: var(--accent-red); border-radius: 5px; transition: width 0.1s;"></div></div>
             <span class="flag">🇵🇭</span>
         </div>
         <div id="boss-tag" style="position: absolute; top: 75px; width: 100%; display: none; flex-direction: column; align-items: center; z-index: 100;"><div class="boss-name" id="boss-label" style="font-size: 11px; font-weight: 900; color: var(--deep-berry); margin-bottom: 3px; letter-spacing: 1px;">VILLAIN</div><div class="hp-container" style="width: 60%; height: 10px; background: #ddd; border-radius: 5px; border: 1.5px solid var(--deep-berry); overflow: hidden;"><div class="hp-fill" id="hp-fill" style="height: 100%; width: 100%; background: var(--deep-berry); transition: width 0.2s;"></div></div></div>
-        <div id="bubble" style="position: absolute; background: white; border: 3px solid var(--deep-berry); padding: 10px; border-radius: 18px; font-size: 14px; color: #444; font-weight: bold; text-align: center; z-index: 90; display: none; width: 180px;"></div>
-        <canvas id="gameCanvas"></canvas>
+        <div id="bubble-boss" style="position: absolute; background: white; border: 3px solid var(--deep-berry); padding: 10px; border-radius: 18px; font-size: 14px; color: #444; font-weight: bold; text-align: center; z-index: 90; display: none; width: 180px;"></div>
     </div>
 
     <div id="final-scroll">
@@ -74,15 +80,16 @@
         </center>
     </div>
 
-    <div id="scr-celebration" class="screen hidden" style="z-index: 2000; background: var(--bg-gradient);">
+    <div id="scr-celebration" class="screen hidden" style="background: var(--bg-gradient); z-index: 2000;">
         <div style="font-size: 50px;">☁️🌸☁️</div>
         <h1 class="monthsary-title">Happy 1st Monthsary! 🍓</h1>
         <p style="font-family: 'Quicksand'; font-weight: bold;">Every second with you is a high score.</p>
-        <div style="font-size: 12px; margin-top: 20px;">Countdown to Month 2:</div>
+        <div style="font-size: 12px; margin-top: 20px; font-family:'Silkscreen';">Countdown to Month 2:</div>
         <div class="countdown-timer" id="monthsary-timer">00:00:00:00</div>
         <button class="btn tight-btn" onclick="location.reload()" style="background: var(--accent-red); margin-top: 20px;">Replay Adventure</button>
     </div>
 
+    <canvas id="gameCanvas"></canvas>
     <div id="death-screen" style="position: absolute; inset: 0; background: rgba(94, 58, 62, 0.95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><h1 style="font-family:'Silkscreen';">YOU DIED</h1><div id="fill-ui"></div><p>BLOW INTO MIC!</p><button class="btn tight-btn" onclick="initMic()">REVIVE</button></div>
     <div id="ready-overlay" class="screen hidden" style="background:rgba(255,245,247,0.98); z-index:1000;"><h2 id="ready-title" style="font-family:'Fredoka One'; color: var(--deep-berry);"></h2><p id="ready-instr" style="font-weight: bold;"></p><h1 id="countdown" style="font-family:'Silkscreen';">3</h1></div>
 </div>
@@ -93,19 +100,17 @@
     document.head.appendChild(tag);
     function onYouTubeIframeAPIReady() { ytPlayer = new YT.Player('player', { height: '1', width: '1', videoId: 'Uj93hicGDNc', playerVars: { 'autoplay': 1, 'controls': 0, 'modestbranding': 1, 'loop': 1, 'playlist': 'Uj93hicGDNc', 'origin': window.location.origin }, events: { 'onReady': (e) => { e.target.mute(); e.target.playVideo(); }, 'onStateChange': (e) => { if (e.data == 1) musicReady = true; } } }); }
 
-    // Countdown Logic for Month 2 (Feb 20th)
     const milestoneDate = new Date("2026-02-20T00:00:00").getTime();
     setInterval(() => {
         const now = new Date().getTime();
         const diff = milestoneDate - now;
         if (diff > 0) {
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const secs = Math.floor((diff % (1000 * 60)) / 1000);
-            document.getElementById('monthsary-timer').innerText = `${days}d ${hours}h ${mins}m ${secs}s`;
-        } else {
-            document.getElementById('monthsary-timer').innerText = "Milestone Reached! ❤️";
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            const el = document.getElementById('monthsary-timer');
+            if(el) el.innerText = `${d}d ${h}h ${m}m ${s}s`;
         }
     }, 1000);
 
@@ -139,10 +144,9 @@
     function renderQuiz() {
         if(state.qIdx >= 10) { triggerVictory('harvest'); return; }
         const d = quizData[state.qIdx];
-        const cont = document.getElementById('quiz-options');
         document.getElementById('quiz-count').innerText = `SYNC: ${state.qIdx+1}/10`;
         document.getElementById('quiz-q').innerText = d.q;
-        cont.innerHTML = '';
+        const cont = document.getElementById('quiz-options'); cont.innerHTML = '';
         d.a.forEach(opt => {
             const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt;
             b.onclick = () => { state.qIdx++; renderQuiz(); }; cont.appendChild(b);
@@ -168,7 +172,8 @@
     function initLogic(s) { 
         document.getElementById('stats-bar').style.display = 'flex'; 
         if(s === 'memory') { canvas.style.display = 'none'; showScreen('scr-memory'); setupMemory(); } 
-        else { canvas.style.display = 'block'; state.active = true; if(s==='boss') loopBoss(); else requestAnimationFrame(engine); } 
+        else if(s === 'boss') { canvas.style.display = 'block'; showScreen('scr-boss'); state.active = true; loopBoss(); } 
+        else { canvas.style.display = 'block'; state.active = true; requestAnimationFrame(engine); } 
     }
 
     function engine() {
@@ -182,7 +187,7 @@
                 state.enemies.splice(i,1);
             }
         });
-        ctx.fillStyle = "#5d3a3e"; ctx.font = "bold 20px Fredoka One"; ctx.fillText(`Hearts: ${state.score}/10`, 20, 50);
+        ctx.fillStyle = "#5e3a3e"; ctx.font = "bold 20px Fredoka One"; ctx.fillText(`Hearts: ${state.score}/10`, 20, 50);
         ctx.font="50px Arial"; ctx.fillText("🧺", state.pX-25, 700);
         if(state.score >= 10) triggerVictory('memory');
         requestAnimationFrame(engine);
@@ -193,7 +198,7 @@
         ctx.clearRect(0,0,450,800);
         state.frameCount++; state.pX += (state.targetX - state.pX) * 0.15; state.pY += (state.targetY - state.pY) * 0.15;
         if(!state.boss.active) {
-            state.travel += 0.085; document.querySelector('.distance-fill').style.width = state.travel + '%'; 
+            state.travel += 0.085; document.getElementById('dist-fill-boss').style.width = state.travel + '%'; 
             document.getElementById('km-text').innerText = Math.floor(10500 * (1 - state.travel/100)).toLocaleString() + " KM";
             if(state.travel >= 30 && state.currentBossStage === 0) startBossInstance("STORM", "Lexi, you can't pass!", "⛈️", 250);
             if(state.travel >= 65 && state.currentBossStage === 1) startBossInstance("GHOST", "7 hour gap!", "👻", 350);
@@ -211,8 +216,8 @@
         requestAnimationFrame(loopBoss);
     }
 
-    function startBossInstance(name, txt, icon, hp) { state.boss = { active: true, name, icon, hp, max: hp }; document.getElementById('boss-label').innerText = name; document.getElementById('boss-tag').style.display='flex'; document.querySelector('#scr-boss #bubble').style.display='block'; document.querySelector('#scr-boss #bubble').innerText=txt; document.querySelector('#scr-boss #bubble').style.left='135px'; document.querySelector('#scr-boss #bubble').style.top='200px'; }
-    function winBossInstance() { document.getElementById('boss-tag').style.display='none'; document.querySelector('#scr-boss #bubble').style.display='none'; if(state.currentBossStage === 2) { state.active=false; showFinalScroll(); } else state.currentBossStage++; state.boss.active=false; }
+    function startBossInstance(name, txt, icon, hp) { state.boss = { active: true, name, icon, hp, max: hp }; document.getElementById('boss-label').innerText = name; document.getElementById('boss-tag').style.display='flex'; const b = document.getElementById('bubble-boss'); b.style.display='block'; b.innerText=txt; b.style.left='135px'; b.style.top='200px'; }
+    function winBossInstance() { document.getElementById('boss-tag').style.display='none'; document.getElementById('bubble-boss').style.display='none'; if(state.currentBossStage === 2) { state.active=false; showFinalScroll(); } else state.currentBossStage++; state.boss.active=false; }
     function setupMemory() { const grid = document.getElementById('memory-grid'); const emojis = ['🦄', '🌈', '👩‍❤️‍👩', '🌸', '✨', '🍓']; let cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5); grid.innerHTML = ''; cards.forEach(emoji => { const card = document.createElement('div'); card.className = 'card'; card.innerText = emoji; card.onclick = () => { if(card.classList.contains('flipped') || (state.flippedCards && state.flippedCards.length >= 2)) return; card.classList.add('flipped'); state.flippedCards = state.flippedCards || []; state.flippedCards.push(card); if(state.flippedCards.length === 2) { if(state.flippedCards[0].innerText === state.flippedCards[1].innerText) { state.flippedCards.forEach(c => c.classList.add('matched')); state.flippedCards = []; if(document.querySelectorAll('.matched').length === 12) triggerVictory('boss'); } else { setTimeout(() => { state.flippedCards.forEach(c => c.classList.remove('flipped')); state.flippedCards = []; }, 800); } } }; grid.appendChild(card); }); }
 
     function showFinalScroll() {
@@ -222,15 +227,13 @@
         function type() { if(i < letterContent.length) { letterDiv.innerHTML += letterContent[i]==='\n'?'\n':letterContent[i]; i++; setTimeout(type, 30); scroll.scrollTop=scroll.scrollHeight; } else { document.getElementById('letter-footer').classList.remove('hidden'); scroll.scrollTop=scroll.scrollHeight; } } type();
     }
 
-    function showCelebration() {
-        document.getElementById('final-scroll').classList.remove('open');
-        setTimeout(() => {
-            document.getElementById('final-scroll').style.display = 'none';
-            showScreen('scr-celebration');
-        }, 500);
-    }
-
-    const handleInput = (e) => { const rect = canvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const touchX = (clientX - rect.left) * (canvas.width / rect.width); state.targetX = touchX; state.pX = touchX; };
+    function showCelebration() { document.getElementById('final-scroll').classList.remove('open'); setTimeout(() => { document.getElementById('final-scroll').style.display = 'none'; showScreen('scr-celebration'); }, 500); }
+    const handleInput = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const touchX = (clientX - rect.left) * (canvas.width / rect.width);
+        state.targetX = touchX; state.pX = touchX;
+    };
     window.addEventListener('mousedown', handleInput); window.addEventListener('touchstart', handleInput);
     window.addEventListener('mousemove', handleInput);
     function hit() { state.lives--; document.getElementById('lives-ui').innerText = "❤️".repeat(state.lives); if(state.lives<=0) { state.active=false; document.getElementById('death-screen').style.display='flex'; } }
