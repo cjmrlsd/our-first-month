@@ -2,260 +2,198 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Strawberry Multiverse 🍓</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For Lexi 🍓</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Quicksand:wght@500;700&display=swap');
-        :root { --pink: #ffc1cc; --hot-pink: #ff4d6d; --cream: #fff5f5; --berry: #5d2e0c; --btn-shadow: #e63958; --gold: #ffd700; --gold-shadow: #b8860b; }
-        * { touch-action: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #1a0508; font-family: 'Quicksand', sans-serif; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        #game-container { width: 100vw; height: 100vh; max-width: 450px; max-height: 850px; background: var(--cream); position: relative; overflow: hidden; border: 4px solid white; box-shadow: 0 0 50px rgba(255, 77, 109, 0.4); }
-        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 10; background: var(--cream); }
+        @import url('https://fonts.googleapis.com/css2?family=Silkscreen&family=Quicksand:wght@500;700&display=swap');
+        
+        :root { --pink: #ffc1cc; --hot-pink: #ff4d6d; --berry: #5d2e0c; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: #1a0508; 
+            font-family: 'Quicksand', sans-serif; 
+            height: 100vh; 
+            width: 100vw; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden; 
+        }
+
+        #game-container { 
+            width: 100%; 
+            height: 100%; 
+            max-width: 450px; 
+            background: #fff5f5; 
+            position: relative; 
+            border: 4px solid white;
+        }
+
+        .screen { 
+            position: absolute; 
+            inset: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            padding: 20px; 
+            z-index: 10; 
+            background: #fff5f5;
+        }
+
         .hidden { display: none !important; }
-        .btn { background: var(--hot-pink); color: white; border: none; padding: 12px 24px; border-radius: 15px; font-family: 'Silkscreen'; font-size: 11px; box-shadow: 0 8px 0 var(--btn-shadow); cursor: pointer; transition: 0.1s; position: relative; margin: 5px; }
-        .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 var(--btn-shadow); }
-        
-        /* Loading Bar (Reverted) */
+
+        /* Stage 1: Loading */
         #load-bar-container { width: 80%; height: 20px; background: #eee; border-radius: 10px; border: 2px solid var(--berry); overflow: hidden; margin: 20px 0; }
-        #load-bar-fill { width: 0%; height: 100%; background: var(--hot-pink); transition: width 0.1s linear; }
+        #load-bar-fill { width: 0%; height: 100%; background: var(--hot-pink); }
         
-        /* Final UI */
-        .flawless-gold { background: linear-gradient(45deg, #fff7ad, #ffd700) !important; border: 2px solid var(--gold-shadow); }
-        .gold-text { color: #856404 !important; font-weight: 900 !important; }
-        
-        #stats-bar { position: absolute; top: 20px; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; color: var(--hot-pink); }
-        #death-screen { position: absolute; inset: 0; background: rgba(26, 5, 8, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        canvas { background: #fff5f5; width: 100%; height: 100%; display: none; }
-        #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
-        .card { width: 70px; height: 70px; background: var(--hot-pink); border-radius: 8px; font-size: 30px; display: flex; align-items: center; justify-content: center; color: transparent; box-shadow: 0 4px 0 var(--btn-shadow); }
-        .card.flipped { background: white; color: initial; transform: rotateY(180deg); transition: 0.3s; pointer-events: none; }
-        
-        @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
-        .shake { animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+        .btn { 
+            background: var(--hot-pink); 
+            color: white; 
+            border: none; 
+            padding: 15px 30px; 
+            border-radius: 50px; 
+            font-family: 'Silkscreen'; 
+            box-shadow: 0 6px 0 #e63958; 
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #no-run { 
+            position: absolute; 
+            transition: 0.1s translate; 
+            z-index: 100;
+        }
+
+        canvas { width: 100%; height: 100%; display: none; }
+
+        /* Heartfelt Ending */
+        #final-msg {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--berry);
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            width: 90%;
+            animation: fadeIn 2s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="stats-bar"><div id="lives-ui">❤️❤️❤️❤️❤️❤️❤️❤️❤️</div></div>
+    <div id="scr-vibe" class="screen">
+        <h2 style="font-family:'Silkscreen'; color:var(--hot-pink); margin-bottom:20px;">READY FOR YOUR GIFT?</h2>
+        <button class="btn" onclick="initGame()">ENTER MULTIVERSE 🍓</button>
+        <p style="margin-top:15px; font-size:12px;">(Turns on music & vibe)</p>
+    </div>
 
-    <div id="scr-load" class="screen">
+    <div id="scr-load" class="screen hidden">
         <div style="font-size:60px;">🍓</div>
-        <div id="percent-text" style="font-family:'Silkscreen'; color:var(--hot-pink); margin-top:10px;">0%</div>
+        <div id="percent-text" style="font-family:'Silkscreen'; color:var(--hot-pink);">0%</div>
         <div id="load-bar-container"><div id="load-bar-fill"></div></div>
-        <div id="trivia-box" style="height: 60px; font-size:12px; font-weight:bold; padding:0 20px; color:var(--berry);">Initializing Multiverse...</div>
+        <div id="trivia-box" style="font-size:12px; font-weight:bold; color:var(--berry);">Connecting to Lexi's heart...</div>
     </div>
 
-    <div id="scr-title" class="screen hidden">
-        <h1 style="font-family:'Silkscreen'; color:var(--hot-pink)">STRAWBERRY MULTIVERSE</h1>
-        <button class="btn" style="margin-top:20px" onclick="showScreen('scr-gate1')">START ADVENTURE ✨</button>
-    </div>
-
-    <div id="scr-gate1" class="screen hidden"><h2>DO YOU LOVE ME?</h2><button class="btn" onclick="showScreen('scr-gate2')">YES</button></div>
-    <div id="scr-gate2" class="screen hidden">
-        <h2>DO YOU REALLY LOVE ME?</h2>
-        <div id="gate2-area" style="width:100%; height:200px; position:relative;">
-            <button id="yes-grow" class="btn" style="position:absolute; left:50%; transform:translateX(-50%)" onclick="startQuiz()">YES!</button>
-            <button id="no-run" class="btn" style="position:absolute; left:50%; top:100px; transform:translateX(-50%); background:#555;">NO</button>
+    <div id="scr-gate" class="screen hidden">
+        <h2 style="margin-bottom:40px;">DO YOU REALLY LOVE ME?</h2>
+        <div style="position:relative; width:100%; height:300px;">
+            <button class="btn" onclick="startQuiz()">YES, FOREVER!</button>
+            <button id="no-run" class="btn" style="background:#555; box-shadow:0 6px 0 #333;">NO</button>
         </div>
     </div>
 
     <div id="scr-quiz" class="screen hidden">
-        <h2 id="quiz-count" style="font-size:12px; color:var(--hot-pink)">THE SYNC</h2>
-        <p id="quiz-q" style="min-height:60px; font-weight:bold;"></p>
-        <div id="quiz-options" style="display:flex; flex-direction:column; gap:8px; width:100%;"></div>
-    </div>
-
-    <div id="death-screen">
-        <h1 style="font-family:'Silkscreen';">HEARTS EMPTY</h1>
-        <div id="fill-ui" style="font-size:30px; margin:20px;"></div>
-        <p id="mic-status">BLOW INTO MIC TO REVIVE!</p>
-        <button id="revive-btn" class="btn" onclick="initMic()">REVIVE NOW</button>
-    </div>
-
-    <div id="ready-overlay" class="screen hidden" style="background:rgba(255,245,245,0.98); z-index:1000;">
-        <h2 id="ready-title" style="font-family:'Silkscreen'; color:var(--hot-pink)"></h2>
-        <p id="ready-instr" style="font-weight:bold; margin-bottom:20px;"></p>
-        <h1 id="countdown" style="font-size:60px; font-family:'Silkscreen'">3</h1>
+        <p id="quiz-q" style="font-weight:bold; margin-bottom:20px;"></p>
+        <div id="quiz-options" style="display:grid; gap:10px; width:100%;"></div>
     </div>
 
     <canvas id="gameCanvas"></canvas>
-    <div id="scr-memory" class="screen hidden"><h2 style="font-family:'Silkscreen'">HEART SNAP 🧩</h2><div id="memory-grid"></div></div>
 
-    <div id="scr-bottle" class="screen hidden">
-        <div id="drop-gift" class="hidden" style="font-size:80px;">🎁<br><span style="font-family:'Silkscreen'; font-size:40px;">5</span></div>
-        <h2 id="vic-header" style="font-family:'Silkscreen'; margin-top:20px;">RUB TO POP! 🍾</h2>
-        <div id="bottle" style="font-size:120px; cursor:pointer;">🍾</div>
-    </div>
-
-    <div id="scr-final" class="screen hidden" style="background:var(--pink)">
-        <div id="final-card" style="background:white; padding:20px; border-radius:15px; width:85%; box-shadow:0 15px 30px rgba(0,0,0,0.2);">
-            <div id="final-icon" style="font-size:80px;">🍓</div>
-            <h2 id="final-status" style="font-family:'Silkscreen'; margin-top:15px;">VIBE PASSED ✅</h2>
-            <div id="marquee-box" style="background: #ffeff2; padding: 10px; font-family: 'Silkscreen'; font-size: 11px; overflow: hidden; white-space: nowrap; width: 100%; border-radius: 8px;">
-                <div id="marquee-text" style="display:inline-block; animation: scroll 12s linear infinite; color: var(--hot-pink);">I LOVE YOU LEXI! FOREVER YOURS, CJ. 🍓</div>
-            </div>
+    <div id="scr-final" class="screen hidden" style="background:var(--pink);">
+        <div id="final-msg">
+            <h1 style="font-family:'Silkscreen'; margin-bottom:15px;">MY LEXI 🍓</h1>
+            <p>Every mile between us is just a reminder of how much you're worth the wait. You didn't just play a game; you've been winning my heart every single day. No boss is tougher than distance, and no game is as sweet as you.</p>
+            <p style="margin-top:15px; font-weight:bold;">I love you more than words can code.</p>
+            <p style="margin-top:10px; font-family:'Silkscreen'; font-size:12px;">— CJ</p>
         </div>
-        <button class="btn" style="margin-top:20px;" onclick="location.reload()">REPLAY ❤️</button>
+        <button class="btn" style="margin-top:30px;" onclick="location.reload()">REPLAY ❤️</button>
     </div>
 </div>
 
+<audio id="bg-music" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
+
 <script>
-    const triviaList = ["LDR Love Language: FaceTiming until we fall asleep. 💤", "Who yaps more? Definitely one of us. 🎤", "Time zones can't keep us apart! ⏰", "CJ + Lexi = The Ultimate Duo. 🍓", "Syncing braincells in 3... 2... 1...", "Did you know CJ loves you more than iced coffee?", "Distance is just a number, but you are my only #1."];
-    const quizData = [{q: "What’s our official LDR love language?", a: ["Virtual movie marathons", "Sending TikToks", "Phone sleepovers", "Yapp sessions", "All of the above"]},{q: "Who yaps more during calls?", a: ["CJ", "Lexi", "Both fight", "The Dog"]},{q: "Ideal stay-home date?", a: ["Gaming", "Cooking", "Cuddling", "All!"]},{q: "Who is the 'Princess'?", a: ["Me", "You", "Rotate", "Both"]},{q: "Who is more likely to cry at a movie?", a: ["CJ", "Lexi", "Both together", "Neither"]},{q: "Our favorite way to spend $0?", a: ["Deep talks", "Staring at each other", "Window shopping", "All of these"]},{q: "Who is the 'Morning Person'?", a: ["Me", "You", "Neither (Zombies)", "Both"]},{q: "First thing we do when we meet?", a: ["Big hug", "Cry", "Eat", "All of it!"]},{q: "Best memory so far?", a: ["First call", "First photo", "First I love you", "Every moment & lablab"]},{q: "Final check: Lexi + CJ?", a: ["Forever", "Endgame", "Infinite", "Yes!"]}];
+    let state = { qIdx: 0, loading: 0 };
+    const music = document.getElementById('bg-music');
 
-    let state = { lives: 9, deathCount: 0, stage: 'load', active: false, score: 0, pX: 225, pY: 700, bullets: [], enemies: [], bossHP: 100, invinc: 0, speed: 5, qIdx: 0, dy: 0, isReviving: false, sq: 0 };
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    function initGame() {
+        showScreen('scr-load');
+        music.play();
+        loadLogic();
+    }
 
-    window.onload = () => {
-        let p = 0;
+    function loadLogic() {
+        const trivia = ["Distance means nothing. ✈️", "Lexi is the prettiest. ✨", "CJ ❤️ Lexi Forever.", "Loading braincell sync..."];
         const itv = setInterval(() => {
-            p++; document.getElementById('percent-text').innerText = p + "%";
-            document.getElementById('load-bar-fill').style.width = p + "%";
-            if(p % 14 === 0) document.getElementById('trivia-box').innerText = triviaList[Math.floor(p/14)%7];
-            if(p >= 100) { clearInterval(itv); showScreen('scr-title'); }
-        }, 35);
-    };
-
-    function startQuiz() { showScreen('scr-quiz'); renderQuiz(); }
-    function renderQuiz() {
-        if(state.qIdx >= 10) return startStage('harvest');
-        const d = quizData[state.qIdx];
-        document.getElementById('quiz-count').innerText = `SYNCING: ${state.qIdx+1}/10`;
-        document.getElementById('quiz-q').innerText = d.q;
-        const cont = document.getElementById('quiz-options'); cont.innerHTML = '';
-        d.a.forEach(opt => {
-            const b = document.createElement('button'); b.className = 'btn'; b.innerText = opt;
-            b.onclick = () => { state.qIdx++; renderQuiz(); };
-            cont.appendChild(b);
-        });
+            state.loading++;
+            document.getElementById('percent-text').innerText = state.loading + "%";
+            document.getElementById('load-bar-fill').style.width = state.loading + "%";
+            if(state.loading % 25 === 0) document.getElementById('trivia-box').innerText = trivia[state.loading/25-1];
+            if(state.loading >= 100) { clearInterval(itv); showScreen('scr-gate'); initNoButton(); }
+        }, 40);
     }
 
-    function startStage(s) {
-        state.stage = s; state.active = false; state.score = 0; state.enemies = []; state.bullets = []; state.bossHP = 100; state.speed = 5;
-        showScreen('ready-overlay');
-        const cfg = { harvest: ["STAGE 4: THE HARVEST", "Collect 10 💖. Dodge 👾!"], obby: ["STAGE 5: THE LEAP", "Score 500! Tap to Jump 🧺"], memory: ["STAGE 6: HEART SNAP", "Match all the 🧩 pairs!"], boss: ["FINAL BOSS: DISTANCE", "Shoot 🌰 Seeds! Dodge ⚡ Bolts!"] };
-        document.getElementById('ready-title').innerText = cfg[s][0];
-        document.getElementById('ready-instr').innerText = cfg[s][1];
-        let c = 3; document.getElementById('countdown').innerText = c;
-        const itv = setInterval(() => {
-            c--; document.getElementById('countdown').innerText = c;
-            if(c <= 0) { clearInterval(itv); document.getElementById('ready-overlay').classList.add('hidden'); state.active = true; initLogic(s); }
-        }, 1000);
-    }
-
-    function initLogic(s) {
-        document.getElementById('stats-bar').style.display = 'flex';
-        if(s === 'memory') { showScreen('scr-memory'); setupMemory(); }
-        else { canvas.style.display = 'block'; state.pY = 700; requestAnimationFrame(engine); }
-    }
-
-    function engine() {
-        if(!state.active || state.isReviving) return;
-        ctx.clearRect(0,0,450,850); updateLivesUI();
-        if(state.lives <= 0) return triggerDeath();
-        if(state.stage === 'harvest') {
-            if(Math.random()<0.05) state.enemies.push({x: Math.random()*400, y: -50, t: Math.random()>0.3?'💖':'👾'});
-            state.enemies.forEach((it, i) => {
-                it.y += state.speed + (state.score*0.2); ctx.font = "40px Arial"; ctx.fillText(it.t, it.x, it.y);
-                if(Math.hypot(it.x - state.pX, it.y - state.pY) < 50) { if(it.t === '💖') state.score++; else hit(); state.enemies.splice(i,1); }
-            }); drawP("🍓"); if(state.score >= 10) startStage('obby');
-        }
-        if(state.stage === 'obby') {
-            state.dy += 0.8; state.pY += state.dy;
-            if(state.pY > 700) { if(state.dy > 5) state.sq=10; state.pY=700; state.dy=0; }
-            if(Math.random()<0.02) state.enemies.push({x: 500, y: 700, t: '🚧'});
-            state.enemies.forEach((it, i) => {
-                it.x -= state.speed; ctx.fillText(it.t, it.x, it.y);
-                if(it.x < 80 && it.x > 20 && state.pY > 650) { hit(); state.enemies.splice(i,1); }
-            }); drawP("🧺"); state.score++; if(state.score >= 500) startStage('memory');
-        }
-        if(state.stage === 'boss') {
-            let bx = 225 + Math.sin(Date.now()/500)*120 - 30;
-            ctx.font = "60px Arial"; ctx.fillText("👾", bx, 150);
-            if(Date.now()%200<20) state.bullets.push({x: state.pX, y: state.pY-20});
-            state.bullets.forEach((b,i) => {
-                b.y-=12; ctx.fillText("🌰", b.x-10, b.y);
-                if(b.y<180 && Math.abs(b.x-(bx+30))<50) { state.bossHP-=2; state.bullets.splice(i,1); }
-            });
-            if(Math.random()<0.06) state.enemies.push({x: Math.random()*400, y: 150});
-            state.enemies.forEach((e,i)=>{ e.y+=8; ctx.fillText("⚡", e.x, e.y); if(Math.hypot(e.x-state.pX, e.y-state.pY)<40) { hit(); state.enemies.splice(i,1); } });
-            drawBossUI(); drawP("🍓"); if(state.bossHP<=0) winBoss();
-        }
-        requestAnimationFrame(engine);
-    }
-
-    function drawP(e) {
-        ctx.save(); let sY = state.sq > 0 ? 0.7 : 1; if(state.sq > 0) state.sq--;
-        if(state.invinc>0) { ctx.globalAlpha = Math.sin(Date.now()/50)>0?0.2:0.8; state.invinc--; }
-        ctx.translate(state.pX, state.pY); ctx.scale(1, sY); ctx.font = "50px Arial"; ctx.fillText(e, -25, 25); ctx.restore();
-    }
-
-    function hit() { if(state.invinc>0) return; state.lives--; state.invinc=90; document.getElementById('game-container').classList.add('shake'); setTimeout(()=>document.getElementById('game-container').classList.remove('shake'), 200); }
-    function updateLivesUI() { document.getElementById('lives-ui').innerText = "❤️".repeat(Math.max(0, Math.floor(state.lives))); }
-    function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
-    function drawBossUI() { ctx.fillStyle="#333"; ctx.fillRect(125,40,200,15); ctx.fillStyle="#ff4d6d"; ctx.fillRect(125,40,state.bossHP*2,15); }
-
-    async function initMic() {
-        try {
-            const s = await navigator.mediaDevices.getUserMedia({audio:true});
-            const ctxA = new (window.AudioContext || window.webkitAudioContext)();
-            const an = ctxA.createAnalyser(); ctxA.createMediaStreamSource(s).connect(an); an.fftSize = 256;
-            const data = new Uint8Array(an.frequencyBinCount);
-            document.getElementById('revive-btn').style.display='none'; state.isReviving = true;
-            const check = () => {
-                an.getByteFrequencyData(data); if(data.reduce((a,b)=>a+b) > 4000) { state.lives += 0.25; renderFill(); }
-                if(state.lives >= 9) { state.lives=9; state.isReviving=false; document.getElementById('death-screen').style.display='none'; state.active=true; engine(); }
-                else requestAnimationFrame(check);
-            }; check();
-        } catch(e) { alert("Mic required!"); }
-    }
-    function renderFill() { document.getElementById('fill-ui').innerText = "❤️".repeat(Math.floor(state.lives)); }
-    function triggerDeath() { state.active=false; state.deathCount++; document.getElementById('death-screen').style.display='flex'; document.getElementById('revive-btn').style.display='block'; renderFill(); }
-
-    function setupMemory() {
-        const g = document.getElementById('memory-grid'); const icons = ['🍓','🍓','💖','💖','✈️','✈️','📱','📱','💍','💍','💑','💑'].sort(()=>Math.random()-0.5);
-        g.innerHTML = ''; let f = [];
-        icons.forEach(i => {
-            const c = document.createElement('div'); c.className='card'; c.innerText=i;
-            c.onclick = () => {
-                if(f.length<2 && !c.classList.contains('flipped')) {
-                    c.classList.add('flipped'); f.push(c);
-                    if(f.length==2) { if(f[0].innerText!=f[1].innerText) setTimeout(()=>{ f.forEach(x=>x.classList.remove('flipped')); f=[]; }, 800); else f=[]; }
-                    if(document.querySelectorAll('.flipped').length==12) setTimeout(()=>startStage('boss'), 1000);
-                }
-            }; g.appendChild(c);
-        });
-    }
-
-    function winBoss() {
-        state.active=false; canvas.style.display='none'; showScreen('scr-bottle');
-        if(state.deathCount === 0) { 
-            document.getElementById('vic-header').innerText = "FLAWLESS RUN! 🍾";
-            document.getElementById('final-status').innerText = "FLAWLESS VICTORY ⭐";
-            document.getElementById('final-status').classList.add('gold-text');
-            document.getElementById('final-card').classList.add('flawless-gold');
-            document.getElementById('marquee-box').style.background = "#fff9c4";
-            document.getElementById('marquee-text').classList.add('gold-text');
-            document.getElementById('marquee-text').innerText = "LEXI, YOU ARE A GAMER QUEEN! PERFECT RUN ACHIEVED. CJ LOVES YOU FOREVER! 🍓🏆";
-            document.getElementById('final-icon').innerText = "🏆";
-        }
-        document.getElementById('drop-gift').classList.remove('hidden');
-        let rub = 0; const bot = document.getElementById('bottle');
-        window.onmousemove = window.ontouchmove = (e) => {
-            if(state.stage === 'boss') { rub += 1; bot.style.transform = `scale(${1+rub/100}) rotate(${Math.sin(rub)*5}deg)`; if(rub>100) { window.onmousemove=null; showScreen('scr-final'); } }
-            const x = e.touches ? e.touches[0].clientX : e.clientX; state.pX = x - (window.innerWidth - 450)/2;
-            if(state.stage === 'obby' && state.pY==700) state.dy = -18;
-            if(e.cancelable) e.preventDefault();
+    function initNoButton() {
+        const no = document.getElementById('no-run');
+        const moveNo = () => {
+            const x = Math.random() * 60 + 20;
+            const y = Math.random() * 60 + 20;
+            no.style.left = `${x}%`;
+            no.style.top = `${y}%`;
         };
+        no.addEventListener('touchstart', (e) => { e.preventDefault(); moveNo(); });
+        no.addEventListener('mouseover', moveNo);
     }
 
-    window.onmousemove = window.ontouchmove = (e) => {
-        const x = e.touches ? e.touches[0].clientX : e.clientX; state.pX = x - (window.innerWidth - 450)/2;
-        if(state.stage === 'obby' && state.pY==700) state.dy = -18;
-    };
+    const questions = [
+        {q: "Who is CJ's favorite person?", a: ["Lexi", "Lexi", "Lexi", "All of the above"]},
+        {q: "Are we endgame?", a: ["Yes", "Definitely", "Absolutely", "💍"]}
+    ];
+
+    function startQuiz() {
+        showScreen('scr-quiz');
+        renderQuiz();
+    }
+
+    function renderQuiz() {
+        if(state.qIdx >= questions.length) return showScreen('scr-final');
+        const q = questions[state.qIdx];
+        document.getElementById('quiz-q').innerText = q.q;
+        const opts = document.getElementById('quiz-options');
+        opts.innerHTML = '';
+        q.a.forEach(txt => {
+            const b = document.createElement('button');
+            b.className = 'btn';
+            b.innerText = txt;
+            b.onclick = () => { state.qIdx++; renderQuiz(); };
+            opts.appendChild(b);
+        });
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+    }
 </script>
 </body>
 </html>
