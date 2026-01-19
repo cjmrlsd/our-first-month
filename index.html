@@ -20,49 +20,42 @@
             border: 4px solid white; box-shadow: 0 0 50px rgba(255, 77, 109, 0.4); 
         }
 
-        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; z-index: 10; background: var(--cream); }
+        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 15px; z-index: 10; background: var(--cream); }
         .hidden { display: none !important; }
 
         h1, h2 { font-family: 'Silkscreen', cursive; color: var(--hot-pink); text-shadow: 2px 2px 0 white; margin: 4px 0; line-height: 1.1; }
-        p { margin: 2px 0; font-size: 13px; color: var(--berry); font-weight: 700; }
+        p { margin: 5px 0; font-size: 14px; color: var(--berry); font-weight: 700; }
 
-        /* Tight UI Button Styles */
+        /* Tight UI Buttons */
         .btn-container { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 8px; }
         .btn { 
             background: linear-gradient(180deg, var(--hot-pink) 0%, #e63958 100%); 
-            color: white; border: none; 
-            padding: 10px 18px; /* Tighter padding */
-            border-radius: 50px; 
-            font-family: 'Silkscreen'; font-size: 11px; 
-            box-shadow: 0 4px 0 #8a263a; 
-            width: fit-content; /* Only as wide as the text */
-            min-width: 120px; /* Ensures a clickable base */
-            max-width: 85%;
-            cursor: pointer; transition: 0.1s; 
+            color: white; border: none; padding: 8px 16px; border-radius: 50px; 
+            font-family: 'Silkscreen'; font-size: 10px; box-shadow: 0 4px 0 #8a263a; 
+            width: fit-content; min-width: 140px; cursor: pointer; transition: 0.1s; 
         }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #8a263a; }
 
-        /* The specific Runaway No button styling */
-        #runaway-no {
-            position: absolute;
-            padding: 8px 15px;
-            min-width: 60px;
-            font-size: 10px;
-            z-index: 50;
-        }
+        /* Loading & Trivia UI */
+        #bar-outer { width: 75%; height: 20px; background: #331111; border-radius: 10px; border: 2px solid white; overflow: hidden; margin: 15px 0; }
+        #bar-inner { width: 0%; height: 100%; background: var(--hot-pink); }
+        #percent-text { font-family: 'Silkscreen'; font-size: 12px; color: var(--hot-pink); margin-top: -10px; }
+        #trivia-box { min-height: 50px; width: 85%; font-weight: 800; color: var(--berry); font-size: 12px; line-height: 1.3; padding: 0 10px; }
+
+        /* Instruction Overlays */
+        #ready-overlay { position: absolute; inset: 0; background: rgba(255, 245, 245, 0.98); z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        #count-num { font-family: 'Silkscreen'; font-size: 60px; color: var(--hot-pink); margin-top: 10px; }
 
         #stats-bar { position: absolute; top: 15px; width: 100%; display: none; justify-content: space-around; font-family: 'Silkscreen'; color: var(--hot-pink); z-index: 100; pointer-events: none; }
-        #bar-outer { width: 70%; height: 16px; background: #331111; border-radius: 10px; border: 2px solid white; overflow: hidden; margin: 10px; }
-        #bar-inner { width: 0%; height: 100%; background: var(--hot-pink); }
-
         canvas { display: none; width: 100%; height: 100%; background: #fffaf0; }
 
-        #puzzle-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 80%; margin-top: 10px; }
-        .tile { aspect-ratio: 1; background: white; border: 2px solid var(--pink); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: 'Silkscreen'; font-size: 16px; }
-        .tile.active { background: var(--hot-pink); color: white; transform: scale(1.05); }
+        #photo-frame { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--hot-pink); background: #ffe4e9; margin: 10px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
 
-        #polaroid { background: white; padding: 10px 10px 25px 10px; border-radius: 2px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); width: 80%; transform: rotate(-1deg); }
-        #marquee-box { background: #ffeff2; padding: 3px; font-family: 'Silkscreen'; font-size: 9px; margin-top: 8px; overflow: hidden; white-space: nowrap; }
+        #puzzle-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 85%; margin-top: 15px; }
+        .tile { aspect-ratio: 1; background: white; border: 2px solid var(--pink); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Silkscreen'; font-size: 18px; }
+        .tile.active { background: var(--hot-pink); color: white; }
+
+        #marquee-box { background: #ffeff2; padding: 4px; font-family: 'Silkscreen'; font-size: 10px; margin-top: 10px; overflow: hidden; white-space: nowrap; }
         @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
     </style>
 </head>
@@ -70,20 +63,26 @@
 
 <div id="game-container">
     <div id="yt-player" style="position:absolute; top:-1000px; opacity:0;"></div>
-    <div id="stats-bar"><span id="lives-ui">❤️❤️❤️</span><span id="timer-ui">45s</span></div>
+    
+    <div id="ready-overlay">
+        <h2 id="ready-title">GET READY!</h2>
+        <p id="ready-instr" style="padding: 0 40px; font-size: 13px;"></p>
+        <div id="count-num">3</div>
+    </div>
+
+    <div id="stats-bar"><span id="lives-ui">❤️❤️❤️</span><span id="timer-ui">20s</span></div>
 
     <div id="scr-load" class="screen">
-        <div style="font-size: 40px;">🍓</div>
+        <div style="font-size: 50px;">🍓</div>
         <h2>SYNCING HEARTS...</h2>
-        <div id="trivia-box" style="height: 35px; font-weight: bold; font-size: 11px; padding: 0 15px;"></div>
         <div id="bar-outer"><div id="bar-inner"></div></div>
+        <div id="percent-text">0%</div>
+        <div id="trivia-box">Preparing the multiverse...</div>
     </div>
 
     <div id="scr-title" class="screen hidden">
         <h1>STRAWBERRY MULTIVERSE</h1>
-        <div style="width:130px; height:130px; border-radius:50%; border:4px solid var(--hot-pink); overflow:hidden; margin: 8px;">
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Lexi" style="width:100%">
-        </div>
+        <div id="photo-frame">✨</div>
         <p>FOR MY GIRL, LEXI</p>
         <button class="btn" onclick="startStage('gate1')">ENTER THE PATCH ✨</button>
     </div>
@@ -97,16 +96,16 @@
     </div>
 
     <div id="scr-gate2" class="screen hidden">
-        <h2 style="margin-bottom: 20px;">DO YOU REALLY LOVE ME?</h2>
+        <h2>DO YOU REALLY LOVE ME?</h2>
         <div id="runaway-area" style="width:100%; height:300px; position:relative;">
             <button class="btn" onclick="startStage('quiz')" style="position:absolute; top:20%; left:50%; transform:translate(-50%, -50%);">YES! ✨</button>
-            <button class="btn" id="runaway-no" style="top:60%; left:50%; transform:translate(-50%, -50%);">NO</button>
+            <button class="btn" id="runaway-no" style="position:absolute; top:60%; left:50%; transform:translate(-50%, -50%); padding: 8px 15px; min-width:60px; font-size:10px;">NO</button>
         </div>
     </div>
 
     <div id="scr-quiz" class="screen hidden">
-        <h2 id="quiz-count" style="font-size: 14px;">THE SYNC: 1/15</h2>
-        <p id="quiz-q" style="min-height: 50px; padding: 5px; font-size: 14px;"></p>
+        <h2 id="quiz-count" style="font-size: 12px;">THE SYNC: 1/10</h2>
+        <p id="quiz-q" style="min-height: 50px; font-size: 14px; margin-bottom: 10px;"></p>
         <div id="quiz-options" class="btn-container"></div>
     </div>
 
@@ -114,43 +113,56 @@
 
     <div id="scr-puzzle" class="screen hidden">
         <h2>WORD SNAP 🧩</h2>
+        <p>Spell "I LOVE YOU"</p>
         <div id="puzzle-grid"></div>
     </div>
 
     <div id="scr-bottle" class="screen hidden">
         <h2>RUB TO POP! 🍾</h2>
-        <div id="bottle" style="font-size: 80px; margin: 15px; cursor: pointer;">🍾</div>
-        <div id="bar-outer" style="height:10px;"><div id="rub-inner" style="width:0%; height:100%; background:var(--hot-pink);"></div></div>
+        <div id="bottle" style="font-size: 100px; cursor: pointer; margin: 10px;">🍾</div>
+        <div id="bar-outer" style="height:12px;"><div id="rub-inner" style="width:0%; height:100%; background:var(--hot-pink);"></div></div>
     </div>
 
     <div id="scr-final" class="screen hidden" style="background:var(--pink)">
-        <div id="polaroid">
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Couple" style="width:100%; background:#fcfcfc;">
-            <h2 style="font-size:12px; margin: 8px 0;">VIBE CHECK: PASSED ✅</h2>
+        <div style="background:white; padding:15px; width:85%; border-radius:4px;">
+            <div style="width:100%; aspect-ratio:1; background:#ffeef0; display:flex; align-items:center; justify-content:center; font-size:50px;">🍓</div>
+            <h2>VIBE CHECK: PASSED ✅</h2>
             <div id="marquee-box"><div style="display:inline-block; animation: scroll 10s linear infinite; color:var(--hot-pink);">I LOVE YOU LEXI! YOU ARE MY FAVORITE MULTIVERSE. FOREVER YOURS, CJ. 🍓</div></div>
         </div>
-        <button class="btn" style="margin-top:15px;" onclick="location.reload()">PLAY AGAIN ❤️</button>
+        <button class="btn" style="margin-top:20px;" onclick="location.reload()">PLAY AGAIN ❤️</button>
     </div>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
+    const triviaList = [
+        "LDR Love Language: FaceTiming until we fall asleep. 💤",
+        "Who yaps more? Definitely one of us. 🎤",
+        "Time zones can't keep us apart! ⏰",
+        "CJ + Lexi = The Ultimate Duo. 🍓",
+        "Syncing braincells in 3... 2... 1...",
+        "Did you know CJ loves you more than iced coffee?",
+        "Distance is just a number, but you are my only #1."
+    ];
+    
     const quizData = [
-        {q: "What’s our official LDR love language?", a: ["FaceTime marathons", "Sending TikToks", "Phone sleepovers", "All of the above"]},
+        {q: "What’s our official LDR love language?", a: ["Virtual movie marathons", "Sending TikToks", "Phone sleepovers", "Yapp sessions", "All of the above"]},
         {q: "Who yaps more during calls?", a: ["CJ", "Lexi", "Both fight", "The Dog"]},
         {q: "Ideal stay-home date?", a: ["Gaming", "Cooking", "Cuddling", "All!"]},
         {q: "Who is the 'Princess'?", a: ["Me", "You", "Rotate", "Both"]},
-        {q: "I love you...", a: ["To the moon", "More than coffee", "Distance Slayer", "Always"]}
-    ]; // Add more if needed
+        {q: "Who is more likely to cry at a movie?", a: ["CJ", "Lexi", "Both together", "Neither"]},
+        {q: "Our favorite way to spend $0?", a: ["Deep talks", "Staring at each other", "Window shopping", "All of these"]},
+        {q: "Who is the 'Morning Person'?", a: ["Me", "You", "Neither (Zombies)", "Both"]},
+        {q: "First thing we do when we meet?", a: ["Big hug", "Cry", "Eat", "All of it!"]},
+        {q: "Best memory so far?", a: ["First call", "First photo", "First I love you", "Every moment & lablab"]},
+        {q: "Final check: Lexi + CJ?", a: ["Forever", "Endgame", "Infinite", "Yes!"]}
+    ];
 
-    let state = { stage: 'load', qIdx: 0, lives: 3, timer: 45, score: 0, items: [], rub: 0, pX: 225, pY: 700, dy: 0, jumping: false, speed: 5 };
-    let player, timerId;
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 450; canvas.height = 850;
+    let state = { stage: 'load', qIdx: 0, lives: 3, timer: 20, score: 0, items: [], rub: 0, pX: 225, pY: 700, dy: 0, jumping: false, speed: 6 };
+    let ytPlayer, timerId;
 
     function onYouTubeIframeAPIReady() {
-        player = new YT.Player('yt-player', { videoId: 'Uj93hicGDNc', events: { onReady: boot } });
+        ytPlayer = new YT.Player('yt-player', { videoId: 'Uj93hicGDNc', events: { onReady: boot } });
     }
 
     function boot() {
@@ -158,35 +170,38 @@
         const interval = setInterval(() => {
             p++;
             document.getElementById('bar-inner').style.width = p + "%";
+            document.getElementById('percent-text').innerText = p + "%";
+            // Update trivia every ~14% to cycle through all 7
+            if(p % 14 === 0) {
+                const idx = Math.min(Math.floor(p/14), triviaList.length - 1);
+                document.getElementById('trivia-box').innerText = triviaList[idx];
+            }
             if(p >= 100) { clearInterval(interval); startStage('title'); }
-        }, 30);
+        }, 50);
     }
 
     function startStage(s) {
         document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
-        canvas.style.display = 'none';
-        document.getElementById('stats-bar').style.display = 'none';
+        document.getElementById('gameCanvas').style.display = 'none';
         
         if(s === 'title') document.getElementById('scr-title').classList.remove('hidden');
-        if(s === 'gate1') { player.playVideo(); document.getElementById('scr-gate1').classList.remove('hidden'); }
+        if(s === 'gate1') { ytPlayer.playVideo(); document.getElementById('scr-gate1').classList.remove('hidden'); }
         if(s === 'gate2') {
             document.getElementById('scr-gate2').classList.remove('hidden');
             const no = document.getElementById('runaway-no');
             const area = document.getElementById('runaway-area');
-            no.onmouseover = no.ontouchstart = () => {
-                const maxX = area.clientWidth - no.clientWidth;
-                const maxY = area.clientHeight - no.clientHeight;
-                no.style.left = Math.random() * maxX + "px";
-                no.style.top = Math.random() * maxY + "px";
-                no.style.transform = "none"; // Remove initial translate
+            no.onmouseover = no.ontouchstart = (e) => {
+                e.preventDefault();
+                no.style.left = Math.random() * (area.clientWidth - 70) + "px";
+                no.style.top = Math.random() * (area.clientHeight - 40) + "px";
+                no.style.transform = "none";
             };
         }
         if(s === 'quiz') renderQuiz();
     }
 
     function renderQuiz() {
-        if(state.qIdx >= quizData.length) return startHarvest();
-        document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
+        if(state.qIdx >= quizData.length) return startMiniGame('harvest');
         document.getElementById('scr-quiz').classList.remove('hidden');
         const data = quizData[state.qIdx];
         document.getElementById('quiz-count').innerText = `THE SYNC: ${state.qIdx + 1}/${quizData.length}`;
@@ -201,74 +216,114 @@
         });
     }
 
-    function startHarvest() {
+    function startMiniGame(type) {
+        const overlay = document.getElementById('ready-overlay');
+        const title = document.getElementById('ready-title');
+        const instr = document.getElementById('ready-instr');
+        const count = document.getElementById('count-num');
+        
+        document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
+        overlay.style.display = 'flex';
+        
+        if(type === 'harvest') {
+            title.innerText = "BERRY HARVEST";
+            instr.innerText = "Drag the STRAWBERRY to catch HEARTS! Avoid monsters.";
+        } else {
+            title.innerText = "BASKET RUN";
+            instr.innerText = "TAP to JUMP over hurdles! Don't trip!";
+        }
+
+        let c = 3;
+        count.innerText = c;
+        const cd = setInterval(() => {
+            c--;
+            count.innerText = c;
+            if(c <= 0) {
+                clearInterval(cd);
+                overlay.style.display = 'none';
+                if(type === 'harvest') initHarvest(); else initObby();
+            }
+        }, 1000);
+    }
+
+    function initHarvest() {
         state.stage = 'harvest';
-        canvas.style.display = 'block';
+        document.getElementById('gameCanvas').style.display = 'block';
         document.getElementById('stats-bar').style.display = 'flex';
+        state.score = 0; state.items = []; state.timer = 20;
         timerId = setInterval(() => {
             state.timer--;
             document.getElementById('timer-ui').innerText = state.timer + "s";
-            if(state.timer <= 0) startObby();
+            if(state.timer <= 0) startMiniGame('obby');
         }, 1000);
-        requestAnimationFrame(update);
+        runGame();
     }
 
-    function startObby() { clearInterval(timerId); state.stage = 'obby'; state.score = 0; state.items = []; }
+    function initObby() {
+        clearInterval(timerId);
+        state.stage = 'obby';
+        state.score = 0; state.items = []; state.pY = 700;
+        document.getElementById('timer-ui').innerText = "GO!";
+    }
 
-    function update() {
+    function runGame() {
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
         ctx.clearRect(0,0,450,850);
         document.getElementById('lives-ui').innerText = "❤️".repeat(state.lives);
+
         if(state.stage === 'harvest') {
-            if(Math.random() < 0.05) state.items.push({x: Math.random()*400, y: -50, t: Math.random()>0.2?'💖':'👾'});
+            if(Math.random() < 0.06) state.items.push({x: Math.random()*400, y: -50, t: Math.random()>0.2?'💖':'👾'});
             state.items.forEach((it, i) => {
-                it.y += 5; ctx.font = "30px Arial"; ctx.fillText(it.t, it.x, it.y);
-                if(Math.hypot(it.x - state.pX, it.y - state.pY) < 40) {
+                it.y += 6; ctx.font = "35px Arial"; ctx.fillText(it.t, it.x, it.y);
+                if(Math.hypot(it.x - state.pX, it.y - state.pY) < 45) {
                     if(it.t === '💖') state.score++; else state.lives--;
                     state.items.splice(i, 1);
                 }
             });
-            ctx.fillText("🍓", state.pX-15, state.pY+15);
-            if(state.score >= 10) startObby();
+            ctx.font = "40px Arial"; ctx.fillText("🍓", state.pX-20, state.pY+20);
         }
+
         if(state.stage === 'obby') {
             state.dy += 0.8; state.pY += state.dy;
             if(state.pY > 700) { state.pY = 700; state.dy = 0; state.jumping = false; }
             if(Math.random() < 0.03) state.items.push({x: 500, y: 700, t: '🚧'});
             state.items.forEach((it, i) => {
-                it.x -= state.speed; ctx.fillText(it.t, it.x, it.y);
-                if(it.x < 60 && it.x > 10 && state.pY > 650) state.lives--;
+                it.x -= state.speed; ctx.font = "40px Arial"; ctx.fillText(it.t, it.x, it.y);
+                if(it.x < 70 && it.x > 10 && state.pY > 640) { state.lives--; state.items.splice(i,1); }
             });
             ctx.fillText("🧺", 40, state.pY+20);
-            state.score++; if(state.score > 300) startPuzzle();
+            state.score++;
+            if(state.score > 400) { state.stage = 'puzzle'; startPuzzle(); }
         }
+
         if(state.lives <= 0) location.reload();
-        if(state.stage !== 'puzzle') requestAnimationFrame(update);
+        if(state.stage !== 'puzzle') requestAnimationFrame(runGame);
     }
 
     function startPuzzle() {
-        state.stage = 'puzzle';
-        document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
-        document.getElementById('scr-puzzle').classList.remove('hidden');
-        canvas.style.display = 'none';
+        document.getElementById('gameCanvas').style.display = 'none';
         document.getElementById('stats-bar').style.display = 'none';
+        document.getElementById('scr-puzzle').classList.remove('hidden');
         const grid = document.getElementById('puzzle-grid');
         grid.innerHTML = '';
         "ILOVEYOU".split('').forEach(l => {
             const t = document.createElement('div');
             t.className = 'tile'; t.innerText = l;
-            t.onclick = () => { t.classList.add('active'); if(document.querySelectorAll('.active').length === 8) {
-                document.getElementById('scr-puzzle').classList.add('hidden');
-                document.getElementById('scr-bottle').classList.remove('hidden');
-                initBottle();
-            }};
+            t.onclick = () => { t.classList.add('active'); if(document.querySelectorAll('.active').length === 8) startBottle(); };
             grid.appendChild(t);
         });
     }
 
-    function initBottle() {
+    function startBottle() {
+        document.getElementById('scr-puzzle').classList.add('hidden');
+        document.getElementById('scr-bottle').classList.remove('hidden');
         const b = document.getElementById('bottle');
-        b.onmousemove = b.ontouchmove = () => {
-            state.rub += 1.5; document.getElementById('rub-inner').style.width = state.rub + "%";
+        const progress = document.getElementById('rub-inner');
+        b.onmousemove = b.ontouchmove = (e) => {
+            e.preventDefault();
+            state.rub += 1.5;
+            progress.style.width = state.rub + "%";
             if(state.rub >= 100) {
                 document.getElementById('scr-bottle').classList.add('hidden');
                 document.getElementById('scr-final').classList.remove('hidden');
@@ -279,7 +334,7 @@
     window.onmousemove = window.ontouchmove = (e) => {
         const x = e.touches ? e.touches[0].clientX : e.clientX;
         state.pX = x - (window.innerWidth - 450)/2;
-        if(state.stage === 'obby' && !state.jumping) { state.dy = -15; state.jumping = true; }
+        if(state.stage === 'obby' && !state.jumping) { state.dy = -16; state.jumping = true; }
     };
 </script>
 </body>
