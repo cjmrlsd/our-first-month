@@ -61,7 +61,7 @@
         /* Buttons Optimized for Mobile Hit-Area */
         .btn {
             background: var(--hot-pink); color: white;
-            border: none; padding: 20px 30px; /* Increased padding */
+            border: none; padding: 20px 30px; 
             border-radius: 12px;
             font-family: 'Press Start 2P', cursive;
             font-size: 12px; cursor: pointer;
@@ -73,7 +73,7 @@
         #no-btn {
             position: absolute; z-index: 1000;
             top: 65%; left: 50%; transform: translateX(-50%);
-            transition: all 0.15s ease-out;
+            transition: all 0.1s ease-out; /* Faster jump */
         }
 
         /* Level 2 Landscape Warning */
@@ -130,7 +130,7 @@
     <div id="scr-love2" class="screen hidden">
         <h1>Do you REALLY<br>love me?</h1>
         <button class="btn" onclick="nextLevel()">YES</button>
-        <button class="btn" id="no-btn" onmouseover="dodge()" onclick="dodge()" ontouchstart="dodge(event)">NO</button>
+        <button class="btn" id="no-btn" onmouseover="dodge(event)" onclick="dodge(event)" ontouchstart="dodge(event)">NO</button>
     </div>
 
     <div id="scr-quiz" class="screen hidden">
@@ -153,8 +153,24 @@
     const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
     
-    // --- UTILS ---
-    function dodge(e) { if(e) e.preventDefault(); const b = document.getElementById('no-btn'); b.style.left = Math.random()*70+15+'%'; b.style.top = Math.random()*70+15+'%'; b.style.transform = 'none'; }
+    // --- UPDATED ULTRA-DODGE ---
+    function dodge(e) { 
+        if(e) e.preventDefault(); 
+        const b = document.getElementById('no-btn');
+        const container = document.getElementById('game-container');
+        
+        // Calculate random coordinates inside the container
+        const maxX = container.clientWidth - b.clientWidth;
+        const maxY = container.clientHeight - b.clientHeight;
+        
+        const randomX = Math.floor(Math.random() * maxX);
+        const randomY = Math.floor(Math.random() * maxY);
+
+        b.style.left = randomX + 'px';
+        b.style.top = randomY + 'px';
+        b.style.transform = 'none'; 
+    }
+
     function goToStep(s) { document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden')); if(s===1) document.getElementById('scr-love1').classList.remove('hidden'); if(s===2) document.getElementById('scr-love2').classList.remove('hidden'); }
 
     function updateHearts() { document.getElementById('heart-bar').innerText = "❤️".repeat(state.hearts); }
@@ -170,7 +186,7 @@
         
         const instructions = {
             1: { title: "LVL 1: Connection Quiz", text: "10 questions to test our digital chemistry. Tap the heart-answers!" },
-            2: { title: "LVL 2: Strawberry Impact", text: "DRAG TO MOVE. SHOOTING IS AUTOMATIC! Destroy Clocks and Flags. Good luck, baby!" }
+            2: { title: "LVL 2: Strawberry Impact", text: "RAPID FIRE MODE! Triple seeds fire every 200ms. DRAG TO MOVE and destroy the distance!" }
         };
 
         const ins = instructions[state.level];
@@ -230,22 +246,25 @@
         });
     }
 
-    // --- LEVEL 2: STRAWBERRY IMPACT (Auto-Shoot) ---
+    // --- LEVEL 2: STRAWBERRY IMPACT (Rapid Triple-Shoot) ---
     function startStrawberryImpact() {
         canvas.style.display = 'block';
         canvas.width = 375; canvas.height = 667;
-        let ship = { x: 50, y: 300 }, seeds = [], enemies = [], frames = 0;
+        let ship = { x: 50, y: 330 }, seeds = [], enemies = [], frames = 0;
 
-        // Auto-shoot timer
+        // RAPID FIRE: 200ms with triple spread
         const shootInterval = setInterval(() => {
-            if(state.level === 2 && !state.isPaused) seeds.push({x: ship.x + 25, y: ship.y});
-        }, 400);
+            if(state.level === 2 && !state.isPaused) {
+                seeds.push({x: ship.x + 25, y: ship.y, vy: 0});   // Center
+                seeds.push({x: ship.x + 25, y: ship.y, vy: -1.5}); // Up Angle
+                seeds.push({x: ship.x + 25, y: ship.y, vy: 1.5});  // Down Angle
+            }
+        }, 200);
 
-        // Move Logic
         const move = (e) => {
             const touchY = e.touches ? e.touches[0].clientY : e.clientY;
             const rect = canvas.getBoundingClientRect();
-            ship.y = touchY - rect.top;
+            ship.y = Math.min(Math.max(touchY - rect.top, 50), 610);
         };
         canvas.addEventListener('mousemove', move);
         canvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e); }, {passive: false});
@@ -254,18 +273,17 @@
             if(state.level !== 2 || state.isPaused) { clearInterval(shootInterval); return; }
             ctx.clearRect(0,0,canvas.width, canvas.height);
             
-            // Ship & Ghost Guide
             ctx.font = "30px Arial"; ctx.fillText("🍓", ship.x, ship.y + 10);
             if(frames < 100) { ctx.font = "10px 'Press Start 2P'"; ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.fillText("DRAG ME!", ship.x - 20, ship.y - 30); }
 
-            // Seeds (Auto)
             seeds.forEach((s, i) => {
-                s.x += 8; ctx.fillText("🌱", s.x, s.y + 10);
+                s.x += 12; // High speed
+                s.y += s.vy; 
+                ctx.fillText("🌱", s.x, s.y + 10);
                 if(s.x > canvas.width) seeds.splice(i,1);
             });
 
-            // Enemies
-            if(frames % 40 === 0) enemies.push({x: 400, y: Math.random()*600 + 30, t: Math.random()>0.5?"⏰":"🚩"});
+            if(frames % 35 === 0) enemies.push({x: 400, y: Math.random()*580 + 40, t: Math.random()>0.5?"⏰":"🚩"});
             enemies.forEach((en, i) => {
                 en.x -= 4; ctx.fillText(en.t, en.x, en.y);
                 seeds.forEach((sd, si) => {
@@ -275,7 +293,12 @@
             });
 
             frames++;
-            if(frames > 800) { canvas.style.display='none'; nextLevel(); return; }
+            if(frames > 900) { 
+                canvas.style.display='none'; 
+                clearInterval(shootInterval);
+                nextLevel(); 
+                return; 
+            }
             requestAnimationFrame(loop);
         }
         loop();
@@ -287,7 +310,7 @@
         document.getElementById('emergency-next').classList.add('hidden');
         setInterval(() => {
             const diff = (new Date().setMonth(new Date().getMonth()+1)) - new Date();
-            document.getElementById('timer').innerText = Math.floor(diff/86400000) + "d to month 2";
+            document.getElementById('timer').innerText = Math.floor(diff/86400000) + "d to next monthsary";
         }, 1000);
     }
 </script>
