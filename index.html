@@ -14,7 +14,7 @@
             --cream: #fff5f5;
         }
 
-        * { touch-action: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { touch-action: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -29,22 +29,11 @@
             background: var(--cream);
             position: relative; overflow: hidden;
             border: 4px solid white;
-            box-shadow: 0 0 20px rgba(138, 38, 58, 0.5);
+            box-shadow: 0 0 30px rgba(255, 77, 109, 0.3);
         }
 
-        /* The Player must be visible but 1px to work on all browsers */
-        #youtube-player { 
-            position: absolute; top: 0; left: 0; 
-            width: 1px; height: 1px; opacity: 0.01; 
-        }
-
-        #music-toggle {
-            position: absolute; top: 20px; right: 20px;
-            z-index: 1000; background: white; border: 2px solid var(--hot-pink);
-            border-radius: 50%; width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 20px; box-shadow: 0 4px 0 var(--pink);
-        }
+        /* Hidden but active YT player */
+        #youtube-player { position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; pointer-events: none; }
 
         .screen {
             position: absolute; inset: 0;
@@ -52,132 +41,140 @@
             align-items: center; justify-content: center;
             text-align: center; padding: 20px; z-index: 10;
             background: var(--cream);
+            transition: opacity 0.4s ease;
         }
 
-        .hidden { display: none !important; }
+        .hidden { display: none !important; opacity: 0; }
+
+        /* Rapid Loading Bar */
+        #loader-container { width: 80%; text-align: center; margin-top: 20px; }
+        #loader-wrapper {
+            width: 100%; height: 35px;
+            background: white; border-radius: 10px;
+            position: relative; overflow: hidden;
+            border: 3px solid var(--dark-pink);
+        }
+
+        #loader-bar {
+            width: 0%; height: 100%;
+            background: repeating-linear-gradient(45deg, var(--hot-pink), var(--hot-pink) 10px, #ff85a1 10px, #ff85a1 20px);
+            transition: width 0.1s linear;
+        }
+
+        #percent-text { margin-top: 10px; font-size: 18px; color: var(--dark-pink); }
 
         .btn {
             background: var(--hot-pink); color: white;
-            border: none; padding: 15px 10px; border-radius: 50px;
-            font-family: 'Silkscreen', cursive; font-size: 13px;
-            cursor: pointer; box-shadow: 0 5px 0 var(--dark-pink);
-            margin: 8px 0; width: 90%; transition: 0.1s;
+            border: none; padding: 18px; border-radius: 50px;
+            font-family: 'Silkscreen', cursive; font-size: 15px;
+            cursor: pointer; box-shadow: 0 6px 0 var(--dark-pink);
+            width: 85%; transition: 0.1s;
         }
 
-        .btn:disabled { background: #ccc; box-shadow: none; cursor: wait; }
-
-        #no-btn { position: absolute; z-index: 9999; width: auto !important; padding: 10px 20px; background: #ff85a1; }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--dark-pink); }
+        #no-btn { position: absolute; z-index: 9999; padding: 10px 20px; background: #ff85a1; }
         canvas { display: none; width: 100%; height: 100%; background: #fff0f3; }
-        #letter-overlay {
-            position: absolute; inset: 5%; background: #fffafa;
-            border: 4px solid var(--hot-pink); border-radius: 20px;
-            padding: 20px; z-index: 5000; overflow-y: auto;
-            display: none; flex-direction: column;
-        }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     <div id="youtube-player"></div>
-    <div id="music-toggle" onclick="toggleMusic()">🎵</div>
-
-    <div id="ui-layer" style="position:absolute; top:20px; left:20px; display:none; z-index:100; pointer-events: none;">
-        <div id="heart-bar" style="font-size: 20px;">❤️❤️❤️❤️❤️</div>
-    </div>
 
     <div id="scr-intro" class="screen">
-        <div style="font-size: 60px;">🍓</div>
-        <h1>STRAWBERRY<br>MULTIVERSE</h1>
-        <p id="loading-text" style="font-size: 10px;">Tuning the radio...</p>
-        <button id="start-btn" class="btn" onclick="startAdventure()" disabled>LOADING...</button>
+        <div style="font-size: 70px; margin-bottom: 10px; animation: bounce 1s infinite alternate;">🍓</div>
+        <h1 style="font-size: 26px; line-height: 1.2;">STRAWBERRY<br>MULTIVERSE</h1>
+        
+        <div id="loader-container">
+            <div id="loader-wrapper">
+                <div id="loader-bar"></div>
+            </div>
+            <div id="percent-text">0%</div>
+        </div>
+
+        <button id="start-btn" class="btn hidden" onclick="startAdventure()">START ADVENTURE</button>
     </div>
 
     <div id="scr-love2" class="screen hidden">
-        <h1>DO YOU REALLY<br>LOVE ME?</h1>
+        <h1 style="font-size: 22px;">DO YOU REALLY<br>LOVE ME?</h1>
         <button class="btn" onclick="nextLevel()">YES!</button>
         <button id="no-btn" class="btn">NO</button>
     </div>
 
     <div id="instruction-screen" class="screen hidden">
         <h2 id="ins-title"></h2>
-        <p id="ins-text"></p>
-        <button class="btn" onclick="startActualLvl()">I'M READY!</button>
+        <p id="ins-text" style="font-family: sans-serif; font-weight: bold;"></p>
+        <button class="btn" onclick="startActualLvl()">LET'S GO!</button>
     </div>
 
     <div id="scr-quiz" class="screen hidden">
-        <h2 id="q-num"></h2>
-        <p id="q-text"></p>
-        <div id="quiz-options"></div>
+        <h2 id="q-num" style="font-size: 14px;"></h2>
+        <p id="q-text" style="font-size: 18px; margin: 20px 0;"></p>
+        <div id="quiz-options" style="width: 100%;"></div>
     </div>
 
     <canvas id="mainCanvas"></canvas>
 
     <div id="scr-final" class="screen hidden">
-        <h1>VICTORY!</h1>
-        <div style="font-size: 60px;">🍓✨</div>
-        <button class="btn" onclick="openLetter()">READ MY LETTER 💌</button>
+        <h1 style="font-size: 28px;">VICTORY!</h1>
+        <div style="font-size: 70px; margin: 20px;">🍓✨</div>
+        <button class="btn" onclick="document.getElementById('letter-overlay').style.display='flex'">READ MY LETTER 💌</button>
     </div>
 
-    <div id="letter-overlay">
-        <h2>Happy 1st Month Aliii! 🍓</h2>
-        <div style="text-align: left; line-height: 1.6; font-family: sans-serif;">
+    <div id="letter-overlay" style="position:absolute; inset:5%; background:white; border:4px solid var(--hot-pink); border-radius:20px; padding:20px; z-index:100; display:none; flex-direction:column; overflow-y:auto;">
+        <h2 style="font-size: 16px;">Happy 1st Month Aliii! 🍓</h2>
+        <p style="text-align: left; line-height: 1.6; font-family: sans-serif; color: var(--dark-pink);">
             Dear Lexi Merindo,<br><br>
-            They say the first month is just the beginning, but with you, it feels like I've found my favorite person in the entire multiverse. Even across the distance, every video call makes me fall for you all over again.<br><br>
-            I love you more than all the strawberries in the world.<br><br>
+            They say the first month is just the beginning, but with you, it feels like I've found my favorite person in the entire multiverse. I love you more than all the strawberries in the world.<br><br>
             Yours Forever,<br>Cj Morales
-        </div>
-        <button class="btn" onclick="closeLetter()">CLOSE</button>
+        </p>
+        <button class="btn" onclick="this.parentElement.style.display='none'">CLOSE</button>
     </div>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
     let player;
-    let isMusicReady = false;
-    const state = { 
-        level: 0, hearts: 5, score: 0, quizIndex: 0, 
-        frames: 0, objects: [], isPaused: true,
-        player: { x: 200, targetX: 200 }
-    };
+    let progress = 0;
+    const state = { level: 0, hearts: 5, score: 0, quizIndex: 0, frames: 0, objects: [], isPaused: true, player: { x: 200, targetX: 200 } };
 
-    // 1. Setup YouTube Player
+    // 1. High-Speed Loading Animation
+    function fastLoad() {
+        let speed = 2; // Fast increment
+        let interval = setInterval(() => {
+            progress += speed;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                showStartButton();
+            }
+            document.getElementById('loader-bar').style.width = progress + '%';
+            document.getElementById('percent-text').innerText = Math.floor(progress) + '%';
+        }, 30);
+    }
+
+    function showStartButton() {
+        document.getElementById('loader-container').style.display = 'none';
+        document.getElementById('start-btn').classList.remove('hidden');
+    }
+
+    // 2. YouTube Music Immediate Play Logic
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('youtube-player', {
-            height: '1', width: '1',
-            videoId: 'Uj93hicGDNc',
-            playerVars: { 
-                'autoplay': 0, 
-                'controls': 0, 
-                'loop': 1, 
-                'playlist': 'Uj93hicGDNc',
-                'origin': window.location.origin 
-            },
+            height: '1', width: '1', videoId: 'Uj93hicGDNc',
+            playerVars: { 'autoplay': 1, 'controls': 0, 'loop': 1, 'playlist': 'Uj93hicGDNc', 'mute': 1 },
             events: { 
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
+                'onReady': (e) => {
+                    e.target.playVideo(); // Pre-load audio
+                    fastLoad(); // Start visual loading
+                }
             }
         });
     }
 
-    function onPlayerReady(event) {
-        isMusicReady = true;
-        const btn = document.getElementById('start-btn');
-        btn.disabled = false;
-        btn.innerText = "START ADVENTURE";
-        document.getElementById('loading-text').innerText = "Music Ready! 🎵";
-    }
-
-    function onPlayerStateChange(event) {
-        // Ensure it loops
-        if (event.data === YT.PlayerState.ENDED) {
-            player.playVideo();
-        }
-    }
-
-    // 2. Interaction triggers play
     function startAdventure() {
         if (player) {
+            player.unMute();
             player.setVolume(100);
             player.playVideo();
         }
@@ -185,35 +182,16 @@
         document.getElementById('scr-love2').classList.remove('hidden');
     }
 
-    function toggleMusic() {
-        if (!player) return;
-        if (player.getPlayerState() === 1) {
-            player.pauseVideo();
-            document.getElementById('music-toggle').innerText = "🔇";
-        } else {
-            player.playVideo();
-            document.getElementById('music-toggle').innerText = "🎵";
-        }
-    }
-
-    // 3. Game Logic (Simplified for stability)
+    // Navigation & Game Logic
     function nextLevel() {
         state.level++;
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
         document.getElementById('mainCanvas').style.display = 'none';
         state.isPaused = true;
 
-        if(state.level === 3) {
-            document.getElementById('scr-final').classList.remove('hidden');
-            return;
-        }
-
-        const data = [
-            null,
-            {t: "LVL 1: SYNC", d: "Answer 10 questions to sync our hearts!"},
-            {t: "LVL 2: HARVEST", d: "Catch 15 strawberries! Drag to move."}
-        ][state.level];
-
+        if(state.level === 3) { document.getElementById('scr-final').classList.remove('hidden'); return; }
+        
+        const data = [null, {t: "LVL 1: SYNC", d: "Answer the questions to sync our hearts!"}, {t: "LVL 2: HARVEST", d: "Catch 15 Strawberries! Avoid the 💔!"}][state.level];
         const ins = document.getElementById('instruction-screen');
         ins.classList.remove('hidden');
         document.getElementById('ins-title').innerText = data.t;
@@ -222,40 +200,26 @@
 
     function startActualLvl() {
         document.getElementById('instruction-screen').classList.add('hidden');
-        document.getElementById('ui-layer').style.display = 'block';
         state.isPaused = false;
         if (state.level === 1) startQuiz();
-        else {
-            document.getElementById('mainCanvas').style.display = 'block';
-            runGameLoop();
-        }
+        else { document.getElementById('mainCanvas').style.display = 'block'; runGameLoop(); }
     }
 
     function startQuiz() {
-        const scr = document.getElementById('scr-quiz');
-        scr.classList.remove('hidden');
+        const scr = document.getElementById('scr-quiz'); scr.classList.remove('hidden');
         const quizData = [
-            { q: "Airport Hug Crier?", options: ["Me", "You", "Both"] },
-            { q: "Biggest Yapper?", options: ["You", "Me", "Both"] },
-            { q: "Ready to be mine?", options: ["Yes!", "Yes (No cap)", "Endgame"] }
-            // Add more here if needed!
+            { q: "Who is more likely to cry during our first airport hug?", options: ["Me", "You", "Both"] },
+            { q: "Who yaps the most during our late-night Video calls?", options: ["Me", "You", "Both"] },
+            { q: "Ready for our multiverse adventure?", options: ["Yes (Real)", "Yes (No Cap)", "Endgame"] }
         ];
-
-        const currentQ = quizData[state.quizIndex] || quizData[quizData.length-1];
-        document.getElementById('q-num').innerText = `Q${state.quizIndex + 1}`;
+        const currentQ = quizData[state.quizIndex];
+        document.getElementById('q-num').innerText = `SYNC Q${state.quizIndex + 1}`;
         document.getElementById('q-text').innerText = currentQ.q;
         const optContainer = document.getElementById('quiz-options');
         optContainer.innerHTML = '';
-
         currentQ.options.forEach(opt => {
-            const b = document.createElement('button');
-            b.className = 'btn';
-            b.innerText = opt;
-            b.onclick = () => {
-                state.quizIndex++;
-                if (state.quizIndex < quizData.length) startQuiz();
-                else nextLevel();
-            };
+            const b = document.createElement('button'); b.className = 'btn'; b.innerText = opt;
+            b.onclick = () => { state.quizIndex++; if (state.quizIndex < quizData.length) startQuiz(); else nextLevel(); };
             optContainer.appendChild(b);
         });
     }
@@ -266,36 +230,34 @@
         if(state.isPaused) return;
         ctx.clearRect(0,0,canvas.width,canvas.height);
         state.player.x += (state.player.targetX - state.player.x) * 0.2;
-        
-        if(state.frames % 40 === 0) state.objects.push({x: Math.random()*canvas.width, y: -50, t: Math.random()>0.2?'🍓':'💔'});
-        
+        if(state.frames % 35 === 0) state.objects.push({x: Math.random()*(canvas.width-30), y: -50, t: Math.random()>0.2?'🍓':'💔'});
         state.objects.forEach((o, i) => {
-            o.y += 5;
-            ctx.font = "30px Arial"; ctx.fillText(o.t, o.x, o.y);
-            if(o.y > canvas.height - 100 && Math.abs(o.x - state.player.x) < 40) {
+            o.y += 6; ctx.font = "30px Arial"; ctx.fillText(o.t, o.x, o.y);
+            if(o.y > canvas.height - 100 && Math.abs(o.x - state.player.x) < 50) {
                 if(o.t === '🍓') state.score++;
-                else state.hearts--;
                 state.objects.splice(i, 1);
-                document.getElementById('heart-bar').innerText = "❤️".repeat(Math.max(0, state.hearts));
             }
         });
-        
-        ctx.font = "50px Arial"; ctx.fillText("🧺", state.player.x - 25, canvas.height - 40);
+        ctx.font = "60px Arial"; ctx.fillText("🧺", state.player.x - 30, canvas.height - 50);
         state.frames++;
         if(state.score >= 15) nextLevel();
         else requestAnimationFrame(runGameLoop);
     }
 
-    canvas.addEventListener('mousemove', (e) => state.player.targetX = e.clientX - canvas.getBoundingClientRect().left);
-    canvas.addEventListener('touchmove', (e) => state.player.targetX = e.touches[0].clientX - canvas.getBoundingClientRect().left);
-    
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        state.player.targetX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+    }, {passive: false});
+
     const noBtn = document.getElementById('no-btn');
     noBtn.addEventListener('mouseover', () => { noBtn.style.left = Math.random()*70+'%'; noBtn.style.top = Math.random()*70+'%'; });
 
-    function openLetter() { document.getElementById('letter-overlay').style.display = 'flex'; }
-    function closeLetter() { document.getElementById('letter-overlay').style.display = 'none'; }
     function resize() { canvas.width = 450; canvas.height = 850; }
     resize();
 </script>
+
+<style>
+    @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+</style>
 </body>
 </html>
