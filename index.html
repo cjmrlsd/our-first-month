@@ -34,7 +34,7 @@
         }
 
         /* Hidden YouTube Player */
-        #youtube-player { position: absolute; visibility: hidden; width: 1px; height: 1px; }
+        #youtube-player { position: absolute; visibility: hidden; width: 1px; height: 1px; pointer-events: none; }
 
         #music-toggle {
             position: absolute; top: 20px; right: 20px;
@@ -146,28 +146,168 @@
         player: { x: 200, y: 400, targetX: 200, targetY: 400 }
     };
 
-    // Initialize YouTube Player
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('youtube-player', {
             height: '0', width: '0',
             videoId: 'Uj93hicGDNc',
+            playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': 'Uj93hicGDNc' },
             events: { 'onReady': onPlayerReady }
         });
     }
 
     function onPlayerReady(event) {
-        // Player is ready but won't play until startAdventure()
+        console.log("Music Player Ready");
     }
 
     function startAdventure() {
-        if (player && player.playVideo) player.playVideo();
-        goToStep(1);
+        if (player && player.playVideo) {
+            player.playVideo();
+        }
+        document.getElementById('scr-intro').classList.add('hidden');
+        document.getElementById('scr-love2').classList.remove('hidden');
     }
 
     function toggleMusic() {
+        if (!player) return;
         const status = player.getPlayerState();
-        if (status === 1) { // Playing
+        if (status === 1) { 
             player.pauseVideo();
             document.getElementById('music-toggle').innerText = "🔇";
         } else {
             player.playVideo();
+            document.getElementById('music-toggle').innerText = "🎵";
+        }
+    }
+
+    function nextLevel() {
+        state.level++;
+        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+        document.getElementById('mainCanvas').style.display = 'none';
+        state.isPaused = true;
+
+        const data = [
+            null,
+            {t: "LVL 1: SYNC", d: "Answer 10 questions to sync our hearts!"},
+            {t: "LVL 2: HARVEST", d: "Catch the strawberries but avoid the heartbreaks! Drag to move."},
+            {t: "FINAL: ADVENTURE", d: "Read the final message."}
+        ][state.level];
+
+        if(state.level === 3) {
+            document.getElementById('scr-final').classList.remove('hidden');
+        } else {
+            const ins = document.getElementById('instruction-screen');
+            ins.classList.remove('hidden');
+            document.getElementById('ins-title').innerText = data.t;
+            document.getElementById('ins-text').innerText = data.d;
+        }
+    }
+
+    function startActualLvl() {
+        document.getElementById('instruction-screen').classList.add('hidden');
+        document.getElementById('ui-layer').style.display = 'block';
+        state.isPaused = false;
+        state.frames = 0; 
+        state.objects = [];
+
+        if (state.level === 1) {
+            startQuiz();
+        } else if (state.level === 2) {
+            document.getElementById('mainCanvas').style.display = 'block';
+            runGameLoop();
+        }
+    }
+
+    function startQuiz() {
+        const scr = document.getElementById('scr-quiz');
+        scr.classList.remove('hidden');
+
+        const quizData = [
+            { q: "Who is more likely to cry during our first airport hug?", options: ["Me (I'm a baby)", "You (Emotional support human)", "Both (Total sob fest)"] },
+            { q: "Who yaps the most during our late-night Video calls?", options: ["The Yapper-in-Chief (You)", "The Nonchalant Listener (Me)", "We both never shut up tbh"] },
+            { q: "Who usually sends the first 'Good Morning' text?", options: ["The early bird (Me)", "The 'sleepyhead' (You)", "Whoever wakes up first"] },
+            { q: "Who is the master of sending the cutest reels/TikToks?", options: ["The Content Curator (Me)", "The Doomscroller (You)", "My algorithm is just you"] },
+            { q: "Who is more likely to fall asleep first while on call?", options: ["The Sleepy Princess (Me)", "The Midnight Owl (You)", "FaceTime sleep hits diff"] },
+            { q: "Who fell in love first (even through the screen)?", options: ["Me (I folded immediately)", "You (Keeping it lowkey)", "It was a mutual serve"] },
+            { q: "Who is most excited for our very first 'real life' date?", options: ["Me (Counting the seconds)", "You (Main character energy)", "Both vibrating with joy"] },
+            { q: "Who gives the best digital comfort when distance is hard?", options: ["Me (Virtual hug specialist)", "You (The calm to my storm)", "Our Wi-Fi love language"] },
+            { q: "Who is the most stubborn when it's time to hang up?", options: ["'No, you hang up first!' (Me)", "'I'm staying on' (You)", "We just sleep on call"] },
+            { q: "Are you ready to be my favorite person in every universe?", options: ["Yes (Real)", "Yes (No cap)", "Yes (Endgame)"] }
+        ];
+
+        const currentQ = quizData[state.quizIndex];
+        document.getElementById('q-num').innerText = `SYNC Q${state.quizIndex + 1}`;
+        document.getElementById('q-text').innerText = currentQ.q;
+
+        const optContainer = document.getElementById('quiz-options');
+        optContainer.innerHTML = '';
+
+        currentQ.options.forEach(optionText => {
+            const b = document.createElement('button');
+            b.className = 'btn';
+            b.innerText = optionText;
+            b.onclick = () => {
+                state.quizIndex++;
+                if (state.quizIndex < quizData.length) startQuiz();
+                else { 
+                    scr.classList.add('hidden'); 
+                    nextLevel(); 
+                }
+            };
+            optContainer.appendChild(b);
+        });
+    }
+
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function runGameLoop() {
+        if(state.isPaused) return;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        state.player.x += (state.player.targetX - state.player.x) * 0.15;
+
+        if(state.frames % 30 === 0) state.objects.push({x: Math.random()*(canvas.width-30), y: -50, t: Math.random()>0.2?'🍓':'💔'});
+        
+        state.objects.forEach((o, i) => {
+            o.y += 5;
+            ctx.font = "30px Arial"; ctx.fillText(o.t, o.x, o.y);
+            if(o.y > canvas.height - 80 && Math.abs(o.x - state.player.x) < 40) {
+                if(o.t === '💔') state.hearts--;
+                state.objects.splice(i, 1);
+                document.getElementById('heart-bar').innerText = "❤️".repeat(Math.max(0, state.hearts));
+            }
+        });
+        
+        ctx.font = "50px Arial"; ctx.fillText("🧺", state.player.x - 25, canvas.height - 40);
+        state.frames++;
+        
+        if(state.frames > 600) nextLevel();
+        else requestAnimationFrame(runGameLoop);
+    }
+
+    canvas.addEventListener('mousemove', (e) => state.player.targetX = e.clientX - canvas.getBoundingClientRect().left);
+    canvas.addEventListener('touchmove', (e) => {
+        state.player.targetX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+    }, {passive: true});
+
+    const noBtn = document.getElementById('no-btn');
+    noBtn.addEventListener('mouseover', () => { 
+        noBtn.style.left = Math.random()*70+'%'; 
+        noBtn.style.top = Math.random()*70+'%'; 
+    });
+    noBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        noBtn.style.left = Math.random()*70+'%'; 
+        noBtn.style.top = Math.random()*70+'%'; 
+    });
+
+    function openLetter() { document.getElementById('letter-overlay').style.display = 'flex'; }
+    function closeLetter() { document.getElementById('letter-overlay').style.display = 'none'; }
+    function resize() { 
+        canvas.width = document.getElementById('game-container').clientWidth; 
+        canvas.height = document.getElementById('game-container').clientHeight; 
+    }
+    resize();
+    window.addEventListener('resize', resize);
+</script>
+</body>
+</html>
