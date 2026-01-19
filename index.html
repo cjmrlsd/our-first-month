@@ -2,235 +2,264 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Strawberry Universe 🍓</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Strawberry Multiverse 🍓</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
         :root {
-            --pastel-pink: #ffdee9;
-            --strawberry-red: #ff5e78;
-            --soft-green: #b5ead7;
-            --text-color: #7a4a4a;
+            --pink: #ffb7c5;
+            --hot-pink: #ff4d6d;
+            --cream: #fff5f5;
+            --green: #a7c957;
         }
 
         body, html {
             margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: var(--pink);
             font-family: 'Press Start 2P', cursive;
-            background-color: var(--pastel-pink);
-            color: var(--text-color);
             overflow: hidden;
             display: flex; justify-content: center; align-items: center;
-            height: 100vh;
         }
 
         #game-container {
-            width: 100%; max-width: 500px;
-            height: 90vh;
-            background: #fff;
-            border: 8px solid var(--strawberry-red);
+            width: 375px; height: 667px; /* Mobile aspect ratio for Canva */
+            background: var(--cream);
+            border: 6px solid white;
             border-radius: 20px;
             position: relative;
-            box-shadow: 0 10px 0 #fbafbc;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        /* Minecraft Love Bar */
+        /* Minecraft Health Bar */
         #ui-layer {
-            position: absolute; top: 20px; left: 0; width: 100%;
-            display: flex; justify-content: center; gap: 5px;
-            z-index: 100;
+            position: absolute; top: 10px; left: 10px; right: 10px;
+            z-index: 100; display: none; justify-content: space-between;
+            pointer-events: none;
         }
-        .heart {
-            width: 25px; height: 25px;
-            background: var(--strawberry-red);
-            clip-path: polygon(50% 15%, 80% 0%, 100% 20%, 100% 50%, 50% 100%, 0% 50%, 0% 20%, 20% 0%);
-            transition: transform 0.3s;
-        }
+        .heart-bar { display: flex; gap: 2px; }
+        .heart { color: var(--hot-pink); font-size: 12px; }
 
-        /* Screen States */
+        /* General Screen Styles */
         .screen {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            text-align: center;
-            padding: 20px;
+            position: absolute; width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; padding: 20px; box-sizing: border-box;
         }
-        .active { display: flex; }
+        .hidden { display: none !important; }
 
-        button {
-            background: var(--strawberry-red);
-            color: white;
-            border: none;
-            padding: 15px 25px;
+        h1 { font-size: 18px; color: var(--hot-pink); line-height: 1.5; }
+        p { font-size: 10px; color: #555; }
+
+        .btn {
+            background: var(--hot-pink); color: white;
+            border: none; padding: 15px; border-radius: 10px;
             font-family: 'Press Start 2P', cursive;
-            font-size: 12px;
-            cursor: pointer;
-            margin: 10px;
-            border-radius: 5px;
-            box-shadow: 0 5px 0 #d13d55;
+            font-size: 10px; cursor: pointer; margin: 10px;
+            box-shadow: 0 4px 0 #c9184a;
         }
-        button:active { transform: translateY(3px); box-shadow: 0 2px 0 #d13d55; }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
 
-        #no-button { position: absolute; transition: 0.1s ease; }
+        #no-btn { position: absolute; }
 
-        /* Level Specifics */
-        canvas { background: #fffcf2; border-top: 4px solid var(--strawberry-red); }
-        .quiz-option { width: 80%; margin: 5px; font-size: 10px; }
-        
+        /* Level 2: Space Impact */
+        #game-canvas { background: #000; width: 100%; height: 100%; display: none; }
+
+        /* Final Screen */
         .polaroid {
             background: white; padding: 10px 10px 30px 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transform: rotate(-3deg);
-            width: 200px; margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: rotate(-2deg); margin-top: 20px;
         }
-        .photo-placeholder { background: #eee; width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; }
+        .polaroid img { width: 200px; height: 200px; background: #eee; object-fit: cover; }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <div id="ui-layer">
-            <div class="heart"></div><div class="heart"></div><div class="heart"></div>
-            <div class="heart"></div><div class="heart"></div><div class="heart"></div>
-            <div class="heart"></div><div class="heart"></div><div class="heart"></div>
-            <div class="heart"></div>
-        </div>
-
-        <div id="screen-start" class="screen active">
-            <h1 style="font-size: 18px;">STRAWBERRY ADVENTURE</h1>
-            <p style="font-size: 10px;">Our 1st Month</p>
-            <button onclick="nextScreen('screen-love1')">START ADVENTURE</button>
-        </div>
-
-        <div id="screen-love1" class="screen">
-            <h2>Do you love me?</h2>
-            <button onclick="nextScreen('screen-love2')">YES</button>
-            <button onclick="nextScreen('screen-love2')">YES</button>
-        </div>
-
-        <div id="screen-love2" class="screen">
-            <h2>Do you love me?</h2>
-            <button onclick="nextLevel()">YES</button>
-            <button id="no-button" onmouseover="dodge()">NO</button>
-        </div>
-
-        <div id="screen-quiz" class="screen">
-            <h3 id="quiz-question" style="font-size: 14px;"></h3>
-            <div id="quiz-options"></div>
-        </div>
-
-        <div id="screen-flappy" class="screen">
-            <canvas id="flappyCanvas" width="400" height="500"></canvas>
-            <p style="font-size: 8px; margin-top: 10px;">Tap to fly over distances!</p>
-        </div>
-
-        <div id="screen-final" class="screen">
-            <div class="polaroid">
-                <div class="photo-placeholder">🍓</div>
-            </div>
-            <h3>Happy 1 Month!</h3>
-            <p id="countdown" style="font-size: 10px;"></p>
-            <button onclick="location.reload()">REPLAY</button>
-        </div>
+<div id="game-container">
+    <div id="ui-layer">
+        <div class="heart-bar" id="heart-bar"></div>
+        <div id="lvl-display" style="font-size: 8px;">LVL: 1</div>
     </div>
 
-    <script>
-        let currentLevel = 0;
-        
-        // --- Navigation Logic ---
-        function nextScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
+    <div id="scr-intro" class="screen">
+        <div style="font-size: 50px;">🍓</div>
+        <h1>Strawberry Multiverse</h1>
+        <p>A special 1-Month Adventure</p>
+        <button class="btn" onclick="goToStep(1)">START ADVENTURE</button>
+    </div>
 
-        function dodge() {
-            const btn = document.getElementById('no-button');
-            const x = Math.random() * (window.innerWidth - 100);
-            const y = Math.random() * (window.innerHeight - 100);
-            btn.style.left = x + 'px';
-            btn.style.top = y + 'px';
-        }
+    <div id="scr-love1" class="screen hidden">
+        <h1>Do you love me?</h1>
+        <button class="btn" onclick="goToStep(2)">YES</button>
+        <button class="btn" onclick="goToStep(2)">YES</button>
+    </div>
 
-        // --- Level Controller ---
-        function nextLevel() {
-            currentLevel++;
-            if (currentLevel === 1) startQuiz();
-            if (currentLevel === 2) startFlappy();
-            if (currentLevel === 3) nextScreen('screen-final'); // Skipping to final for demo length
-        }
+    <div id="scr-love2" class="screen hidden">
+        <h1>Do you REALLY love me?</h1>
+        <button class="btn" onclick="nextLevel()">YES</button>
+        <button class="btn" id="no-btn" onmouseover="dodge()">NO</button>
+    </div>
 
-        // --- Level 1: Quiz ---
-        const quizData = [
-            { q: "Best way to spend 3 AM?", a: ["FaceTime Sleep", "Watching Netflix", "Gaming"], c: 0 },
-            { q: "Our LDR superpower?", a: ["Patience", "High Phone Battery", "Cute Selfies"], c: 1 }
-        ];
-        let qIndex = 0;
+    <div id="scr-quiz" class="screen hidden">
+        <h1 id="q-num">Q1</h1>
+        <p id="q-text">Loading...</p>
+        <div id="quiz-options"></div>
+    </div>
 
-        function startQuiz() {
-            nextScreen('screen-quiz');
-            showQuestion();
-        }
+    <canvas id="mainCanvas"></canvas>
 
-        function showQuestion() {
-            if(qIndex >= quizData.length) return nextLevel();
-            const data = quizData[qIndex];
-            document.getElementById('quiz-question').innerText = data.q;
-            const container = document.getElementById('quiz-options');
-            container.innerHTML = '';
-            data.a.forEach((opt, i) => {
-                const btn = document.createElement('button');
-                btn.className = 'quiz-option';
-                btn.innerText = opt;
-                btn.onclick = () => { qIndex++; showQuestion(); };
-                container.appendChild(btn);
-            });
-        }
+    <div id="scr-final" class="screen hidden">
+        <h1>Happy 1st Month!</h1>
+        <div class="polaroid">
+            <img src="https://via.placeholder.com/200" id="us-photo">
+            <p style="color:black">Me & You 🍓</p>
+        </div>
+        <p>Until next month:</p>
+        <div id="timer" style="font-size: 12px; color: var(--hot-pink);">00:00:00</div>
+    </div>
+</div>
 
-        // --- Level 3: Flappy Strawberry ---
-        function startFlappy() {
-            nextScreen('screen-flappy');
-            const canvas = document.getElementById('flappyCanvas');
-            const ctx = canvas.getContext('2d');
-            let birdY = 250, velocity = 0, pipes = [], frames = 0;
+<script>
+    const state = {
+        step: 0,
+        level: 0,
+        hearts: 10,
+        quizIndex: 0
+    };
 
-            function draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                velocity += 0.3; birdY += velocity;
-                ctx.fillStyle = "red";
-                ctx.fillRect(50, birdY, 30, 30); // The Strawberry
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 375;
+    canvas.height = 667;
 
-                if (frames % 100 === 0) pipes.push({ x: 400, h: Math.random() * 200 + 50 });
-                pipes.forEach((p, i) => {
-                    p.x -= 2;
-                    ctx.fillStyle = "var(--soft-green)";
-                    ctx.fillRect(p.x, 0, 50, p.h);
-                    ctx.fillRect(p.x, p.h + 120, 50, canvas.height);
-                    if(p.x < -50) pipes.splice(i, 1);
-                    // Minimal collision check
-                    if(50 > p.x && 50 < p.x + 50 && (birdY < p.h || birdY > p.h + 90)) birdY = 250; 
-                    if(frames > 500 && p.x < 0) { nextLevel(); frames = -10000; } // Win condition
-                });
+    // --- NAVIGATION ---
+    function goToStep(s) {
+        document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
+        if(s === 1) document.getElementById('scr-love1').classList.remove('hidden');
+        if(s === 2) document.getElementById('scr-love2').classList.remove('hidden');
+    }
 
-                frames++;
-                if(frames > 0) requestAnimationFrame(draw);
+    function dodge() {
+        const btn = document.getElementById('no-btn');
+        btn.style.top = Math.random() * 80 + '%';
+        btn.style.left = Math.random() * 80 + '%';
+    }
+
+    function updateHearts() {
+        const bar = document.getElementById('heart-bar');
+        bar.innerHTML = '🍓'.repeat(state.hearts);
+    }
+
+    function nextLevel() {
+        state.level++;
+        document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
+        document.getElementById('ui-layer').style.display = 'flex';
+        document.getElementById('lvl-display').innerText = "LVL: " + state.level;
+        updateHearts();
+
+        if(state.level === 1) startQuiz();
+        if(state.level === 2) startSpaceImpact();
+        if(state.level >= 10) showFinal();
+    }
+
+    // --- LEVEL 1: QUIZ ---
+    const quizData = [
+        { q: "Who yaps more on the phone?", a: ["Me", "You"] },
+        { q: "Who fell first?", a: ["Me", "You"] },
+        { q: "First date idea?", a: ["Picnic", "Arcade"] },
+        { q: "Who is the 'softest'?", a: ["Me", "You"] },
+        { q: "Favorite thing about us?", a: ["Vibe", "Everything"] },
+        { q: "Who gives more princess treatment?", a: ["Me", "You"] },
+        { q: "Morning or Night person?", a: ["Sun", "Moon"] },
+        { q: "Coffee or Tea dates?", a: ["Coffee", "Tea"] },
+        { q: "Who is more clingy?", a: ["Me", "You"] },
+        { q: "Ready for Level 2?", a: ["YES", "YES!"] }
+    ];
+
+    function startQuiz() {
+        document.getElementById('scr-quiz').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const data = quizData[state.quizIndex];
+        document.getElementById('q-num').innerText = "Q" + (state.quizIndex + 1);
+        document.getElementById('q-text').innerText = data.q;
+        const options = document.getElementById('quiz-options');
+        options.innerHTML = '';
+        data.a.forEach(choice => {
+            const b = document.createElement('button');
+            b.className = 'btn';
+            b.innerText = choice;
+            b.onclick = () => {
+                state.quizIndex++;
+                if(state.quizIndex < quizData.length) showQuestion();
+                else nextLevel();
+            };
+            options.appendChild(b);
+        });
+    }
+
+    // --- LEVEL 2: SPACE IMPACT ---
+    function startSpaceImpact() {
+        canvas.style.display = 'block';
+        let shipY = 300;
+        let enemies = [];
+        let frames = 0;
+
+        function loop() {
+            if(state.level !== 2) return;
+            ctx.fillStyle = '#fff5f5';
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+            
+            // Draw Ship (Strawberry)
+            ctx.font = "30px Arial";
+            ctx.fillText("🍓", 50, shipY);
+
+            // Spawn Clock/Flag enemies
+            if(frames % 60 === 0) {
+                enemies.push({ x: 400, y: Math.random() * 600, t: Math.random() > 0.5 ? "⏰" : "🚩" });
             }
-            canvas.onclick = () => velocity = -6;
-            draw();
+
+            enemies.forEach((en, i) => {
+                en.x -= 3;
+                ctx.fillText(en.t, en.x, en.y);
+                // Collision
+                if(en.x < 80 && en.x > 30 && Math.abs(en.y - shipY) < 30) {
+                    state.hearts--;
+                    updateHearts();
+                    enemies.splice(i, 1);
+                }
+            });
+
+            frames++;
+            if(frames > 500) { canvas.style.display='none'; nextLevel(); return; }
+            requestAnimationFrame(loop);
         }
 
-        // --- Final Screen Countdown ---
-        function updateCountdown() {
-            const nextDate = new Date();
-            nextDate.setMonth(nextDate.getMonth() + 1);
+        window.onmousemove = (e) => { shipY = e.clientY - 100; };
+        loop();
+    }
+
+    // --- FINAL SCREEN ---
+    function showFinal() {
+        document.getElementById('scr-final').classList.remove('hidden');
+        // Countdown to next month
+        const nextMonth = new Date();
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        setInterval(() => {
             const now = new Date();
-            const diff = nextDate - now;
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            document.getElementById('countdown').innerText = `Next Date in: ${days} Days`;
-        }
-        updateCountdown();
-
-    </script>
+            const diff = nextMonth - now;
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            document.getElementById('timer').innerText = `${h}h ${m}m ${s}s`;
+        }, 1000);
+    }
+</script>
 </body>
 </html>
