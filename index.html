@@ -21,7 +21,16 @@
         
         #stats-bar { position: absolute; top: 20px; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; color: var(--hot-pink); }
         #death-screen { position: absolute; inset: 0; background: rgba(26, 5, 8, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        canvas { background: #fff5f5; width: 100%; height: 100%; display: none; }
+        
+        /* FIX: Canvas Scale & Visibility */
+        canvas { 
+            background: #fff5f5; 
+            width: 100%; 
+            height: 100%; 
+            display: none; 
+            object-fit: contain; /* Ensures the game world fits the screen without zooming */
+        }
+        
         #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
         .card { width: 70px; height: 70px; background: var(--hot-pink); border-radius: 8px; font-size: 30px; display: flex; align-items: center; justify-content: center; color: transparent; }
         .card.flipped { background: white; color: initial; transform: rotateY(180deg); transition: 0.3s; pointer-events: none; }
@@ -37,7 +46,7 @@
         <div style="font-size:60px; animation: pulse 1s infinite;">🍓</div>
         <div id="percent-text" style="font-family:'Silkscreen'; color:var(--hot-pink);">0%</div>
         <div id="load-bar-container"><div id="load-bar-fill"></div></div>
-        <div id="trivia-box" style="height:60px; font-size:12px; font-weight:bold; padding:0 20px; color:var(--berry);">Initializing Heart...</div>
+        <div id="trivia-box" style="height:60px; font-size:12px; font-weight:bold; padding:0 20px;">Initializing Heart...</div>
     </div>
 
     <div id="scr-title" class="screen hidden">
@@ -94,10 +103,10 @@
 </div>
 
 <script>
-    const triviaList = ["LDR Love Language: Videocalls until we fall asleep. 💤", "Who yaps more? Definitely one of us. 🎤", "Time zones can't keep us apart! ⏰", "CJ + Lexi = The Ultimate Duo. 🍓", "Syncing braincells in 3... 2... 1...", "Did you know CJ loves you more than iced coffee?", "Distance is just a number."];
+    const triviaList = ["LDR Love Language: FaceTiming until we fall asleep. 💤", "Who yaps more? Definitely one of us. 🎤", "Time zones can't keep us apart! ⏰", "CJ + Lexi = The Ultimate Duo. 🍓", "Syncing braincells in 3... 2... 1...", "Did you know CJ loves you more than iced coffee?", "Distance is just a number."];
     
     const quizData = [
-        {q: "What’s our official LDR love language?", a: ["virtual movie marathons.", "Sending TikToks I’ve already seen.", "Falling asleep on the phone together.", "All of the above (We’re obsessed)."]},
+        {q: "What’s our official LDR love language?", a: ["4-hour FaceTime marathons.", "Sending TikToks I’ve already seen.", "Falling asleep on the phone together.", "All of the above (We’re obsessed)."]},
         {q: "The most flirty thing you can say to me right now is...", a: ["'I booked a flight.'", "'Check your door, I sent food.'", "'I'm wearing that shirt you like.'", "None (It's actually 'I bought you a Squishmallow')."]},
         {q: "Who is the designated 'Yap-Master' during calls?", a: ["You (and it's adorable).", "Me (sorry for the 20-minute rant).", "We both fight for the mic.", "The dog that won't stop barking."]},
         {q: "What’s my favorite 'view' whilst we’re apart?", a: ["Your morning selfies.", "Your message or call notifications.", "The countdown app on my home screen.", "All (but mostly your face)."]},
@@ -112,6 +121,10 @@
     let state = { lives: 9, deaths: 0, stage: 'load', active: false, score: 0, pX: 225, pY: 700, bullets: [], enemies: [], bossHP: 100, invinc: 0, qIdx: 0, isReviving: false, sq: 0, dy: 0 };
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    
+    // Internal Canvas Resolution (Fixed to prevent stretching)
+    canvas.width = 450;
+    canvas.height = 800;
 
     window.onload = () => {
         let p = 0; const itv = setInterval(() => {
@@ -167,19 +180,27 @@
 
     function engine() {
         if(!state.active || state.isReviving) return;
-        ctx.clearRect(0,0,450,850); updateUI();
+        ctx.clearRect(0,0,450,800); updateUI();
         if(state.lives <= 0) return triggerDeath();
 
+        // FIXED HARVEST LOGIC
         if(state.stage === 'harvest') {
-            if(Math.random()<0.05) state.enemies.push({x: Math.random()*400, y: -50, t: Math.random()>0.3?'💖':'👾'});
+            if(Math.random()<0.05) state.enemies.push({x: Math.random()*400 + 25, y: -50, t: Math.random()>0.3?'💖':'👾'});
             state.enemies.forEach((it, i) => {
-                it.y += 6; ctx.font = "40px Arial"; ctx.fillText(it.t, it.x, it.y);
-                if(Math.hypot(it.x - state.pX, it.y - state.pY) < 50) {
+                it.y += 6; 
+                ctx.font = "40px Arial"; 
+                ctx.fillText(it.t, it.x - 20, it.y);
+                
+                // Collision check (Y limited to Bucket area)
+                if(it.y > 640 && it.y < 740 && Math.abs(it.x - state.pX) < 45) {
                     if(it.t === '💖') state.score++; else hit();
                     state.enemies.splice(i,1);
                 }
+                if(it.y > 850) state.enemies.splice(i,1);
             });
-            drawP("🧺"); if(state.score >= 10) startStage('obby');
+            // Draw Bucket at fixed Y to ensure it's always visible
+            drawP("🧺", 700); 
+            if(state.score >= 10) startStage('obby');
         }
 
         if(state.stage === 'obby') {
@@ -191,7 +212,7 @@
                 if(it.x<80 && it.x>20 && state.pY>650) { hit(); state.enemies.splice(i,1); }
             });
             ctx.fillText("👧", 40, state.pY); 
-            ctx.fillText("👧", 400, 700); // CJ waiting
+            ctx.fillText("👧", 400, 700);
             state.score++; if(state.score > 400) startStage('memory');
         }
 
@@ -208,15 +229,19 @@
                 e.y+=8; ctx.fillText("⚡", e.x, e.y);
                 if(Math.hypot(e.x-state.pX, e.y-state.pY)<40) { hit(); state.enemies.splice(i,1); }
             });
-            drawBossUI(); drawP("🍓"); if(state.bossHP<=0) winBoss();
+            drawBossUI(); drawP("🍓", 700); if(state.bossHP<=0) winBoss();
         }
         requestAnimationFrame(engine);
     }
 
-    function drawP(e) {
-        ctx.save(); if(state.sq>0) { ctx.scale(1, 0.7); state.sq--; }
+    function drawP(e, fixedY) {
+        ctx.save(); 
+        let currentY = fixedY || state.pY;
+        if(state.sq>0) { ctx.scale(1, 0.7); state.sq--; }
         if(state.invinc>0) { ctx.globalAlpha = Math.sin(Date.now()/50)>0?0.2:0.8; state.invinc--; }
-        ctx.font = "50px Arial"; ctx.fillText(e, state.pX-25, state.pY); ctx.restore();
+        ctx.font = "50px Arial"; 
+        ctx.fillText(e, state.pX-25, currentY); 
+        ctx.restore();
     }
 
     function hit() { if(state.invinc>0) return; state.lives--; state.invinc=90; }
@@ -286,7 +311,8 @@
 
     window.onmousemove = window.ontouchmove = (e) => {
         const x = e.touches ? e.touches[0].clientX : e.clientX;
-        state.pX = x - (window.innerWidth - 450)/2;
+        const rect = gameCanvas.getBoundingClientRect();
+        state.pX = (x - rect.left) * (canvas.width / rect.width);
         if(state.stage === 'obby' && state.pY==700) state.dy = -18;
     };
 
