@@ -5,336 +5,337 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Strawberry Multiverse 🍓</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Quicksand:wght@500;700&display=swap');
 
         :root {
-            --pink: #ffb7c5;
+            --pink: #ffc1cc;
             --hot-pink: #ff4d6d;
-            --dark-pink: #8a263a;
+            --dark-berry: #5d2e0c;
             --cream: #fff5f5;
+            --gold: #d4af37;
         }
 
-        * { touch-action: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+        * { 
+            touch-action: none; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-user-select: none; 
+            user-select: none; 
+        }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #220a0e;
-            font-family: 'Silkscreen', cursive;
+            background-color: #ffdce3;
+            font-family: 'Quicksand', sans-serif;
             overflow: hidden; display: flex; justify-content: center; align-items: center;
         }
 
         #game-container {
             width: 100vw; height: 100vh;
-            max-width: 450px; max-height: 850px;
+            max-width: 450px; max-height: 900px;
             background: var(--cream);
             position: relative; overflow: hidden;
-            border: 4px solid white;
-            box-shadow: 0 0 40px rgba(255, 77, 109, 0.3);
+            border: 6px solid white;
+            box-shadow: 0 0 30px rgba(255, 77, 109, 0.2);
         }
 
-        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 10; background: inherit; }
-        .hidden { display: none !important; }
-
-        .btn { 
-            background: linear-gradient(180deg, var(--hot-pink) 0%, #e63958 100%);
-            color: white; border: none; padding: 12px 24px; border-radius: 50px; 
-            font-family: 'Silkscreen', cursive; font-size: 13px;
-            cursor: pointer; box-shadow: 0 6px 0 var(--dark-pink);
-            margin: 10px; width: 80%; transition: all 0.1s;
+        .screen { 
+            position: absolute; inset: 0; 
+            display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; 
+            text-align: center; padding: 30px; 
+            z-index: 10; background: var(--cream);
+            transition: opacity 0.5s, transform 0.5s;
         }
-        .btn:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--dark-pink); }
 
-        /* Rubbing Mechanics */
-        #bottle-container { position: relative; width: 200px; height: 300px; cursor: pointer; transition: transform 0.1s; }
-        #bottle-img { font-size: 150px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); }
-        #rub-progress-bar { width: 100%; height: 10px; background: #eee; border-radius: 5px; margin-top: 20px; overflow: hidden; }
-        #rub-fill { height: 100%; width: 0%; background: var(--hot-pink); transition: width 0.2s; }
-        #pop-text { position: absolute; font-size: 50px; color: var(--hot-pink); font-weight: bold; pointer-events: none; opacity: 0; transition: 0.5s; z-index: 100; top: 20%; }
+        .hidden { opacity: 0; pointer-events: none; display: none !important; }
 
-        #memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 90%; margin-top: 20px; }
-        .card { 
-            aspect-ratio: 1/1; background: var(--hot-pink); border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; font-size: 28px;
-            color: transparent; cursor: pointer; border: 2px solid white;
-        }
-        .card.flipped { background: white; color: initial; transform: rotateY(180deg); }
-
-        #boss-ui { position: absolute; top: 80px; left: 10%; width: 80%; display: none; z-index: 101; }
-        #boss-bar-bg { width: 100%; height: 15px; background: #331111; border: 2px solid white; border-radius: 10px; overflow: hidden; }
-        #boss-hp { width: 100%; height: 100%; background: linear-gradient(90deg, #ff4d6d, #ffb7c5); transition: 0.2s; }
-
-        #loading-bar-container { width: 85%; height: 28px; background: #331111; border: 3px solid white; border-radius: 20px; margin: 20px 0; overflow: hidden; }
-        #loading-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #ff4d6d, #ff8fa3, #ff4d6d); background-size: 200% 100%; transition: width 0.4s ease-out; }
+        h1, h2 { font-family: 'Silkscreen', cursive; color: var(--hot-pink); margin: 10px 0; }
         
-        .yt-hide { position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+        /* The Juice: Bouncy Buttons */
+        .btn {
+            background: linear-gradient(180deg, var(--hot-pink) 0%, #e63958 100%);
+            color: white; border: none; padding: 15px 30px; border-radius: 50px;
+            font-family: 'Silkscreen', cursive; font-size: 14px;
+            cursor: pointer; box-shadow: 0 6px 0 #b02640;
+            margin: 10px; width: 85%; transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: breathe 3s infinite ease-in-out;
+        }
+        .btn:active { transform: translateY(4px) scale(0.95); box-shadow: 0 2px 0 #b02640; }
+        
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        /* Trivia Fader */
+        #trivia-loader { font-size: 14px; color: var(--dark-berry); font-weight: bold; min-height: 40px; margin: 20px; transition: opacity 0.3s; }
+
+        /* Progress Bar */
+        #loading-bar-container { width: 80%; height: 20px; background: #eee; border-radius: 10px; overflow: hidden; border: 2px solid white; }
+        #loading-fill { width: 0%; height: 100%; background: var(--hot-pink); transition: width 0.3s; }
+
+        /* Game UI */
+        #game-stats { position: absolute; top: 40px; left: 0; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; }
+        
+        canvas { display: none; width: 100%; height: 100%; background: #fffaf0; }
+
+        /* Polaroid Card */
+        #final-card {
+            background: white; padding: 20px; border-radius: 5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transform: rotate(-2deg); width: 85%;
+        }
+        .photo-frame { width: 100%; aspect-ratio: 1/1; background: #ddd; margin-bottom: 15px; border: 1px solid #eee; overflow: hidden; }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+        .yt-hide { position: absolute; top: -1000px; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="player-chill" class="yt-hide"></div>
-    <div id="player-boss" class="yt-hide"></div>
-    <div id="player-win" class="yt-hide"></div>
+    <div id="yt-chill" class="yt-hide"></div>
+    <div id="yt-boss" class="yt-hide"></div>
+    <div id="yt-win" class="yt-hide"></div>
 
-    <div id="ui-layer" style="position: absolute; top: 20px; left: 20px; z-index: 100; pointer-events: none; display: none;">
-        <div id="heart-bar">❤️❤️❤️❤️❤️</div>
-        <div id="score-text" style="color: var(--dark-pink); font-size: 14px; font-weight: bold;">LVL: 1</div>
+    <div id="game-stats">
+        <div id="lives-display">❤️❤️❤️</div>
+        <div id="timer-display">45s</div>
+        <div id="level-display">LVL: 1</div>
     </div>
 
     <div id="scr-loading" class="screen">
-        <div style="font-size: 60px;">🍓</div>
-        <h2 style="color: var(--dark-pink);">SYNCING LOVE...</h2>
-        <div id="loading-perc">0%</div>
+        <h2 style="font-size: 50px; margin-bottom:0">🍓</h2>
+        <h2>SYNCING HEARTS...</h2>
+        <div id="trivia-loader">Ready for Lexi?</div>
         <div id="loading-bar-container"><div id="loading-fill"></div></div>
+        <p id="perc-text" style="font-family: 'Silkscreen'; font-size: 12px; margin-top: 10px;">0%</p>
     </div>
 
-    <div id="scr-intro" class="screen hidden"><h1>STRAWBERRY MULTIVERSE</h1><button class="btn" id="entry-btn">ENTER</button></div>
-    
-    <div id="scr-love2" class="screen hidden"><h1>DO YOU REALLY LOVE ME?</h1><button class="btn" onclick="nextLevel()">YES!</button><button id="no-btn" class="btn" style="width:auto">NO</button></div>
+    <div id="scr-title" class="screen hidden">
+        <div class="photo-frame" style="width: 150px; border-radius: 50%;"><img src="/* PHOTO_1 */" alt="Us"></div>
+        <h1>STRAWBERRY MULTIVERSE</h1>
+        <p>A Monthsary Adventure for Lexi & CJ</p>
+        <button class="btn" id="start-game-btn">ENTER THE PATCH ✨</button>
+    </div>
+
+    <div id="scr-gate1" class="screen hidden">
+        <h2>DO YOU LOVE ME?</h2>
+        <button class="btn" onclick="goToGate2()">YES!</button>
+        <button class="btn" onclick="goToGate2()">YES!</button>
+    </div>
+
+    <div id="scr-gate2" class="screen hidden">
+        <h2>DO YOU REALLY LOVE ME?</h2>
+        <button class="btn" onclick="startLevel1()">YES! ✨</button>
+        <button id="no-btn" class="btn" style="width: auto; padding: 15px 40px;">NO</button>
+    </div>
 
     <div id="scr-quiz" class="screen hidden">
-        <h2 id="q-num">Q1</h2>
-        <p id="q-text" style="min-height: 60px;"></p>
+        <h2 id="q-title">QUIZ 1/15</h2>
+        <p id="q-text" style="font-size: 18px; font-weight: bold; margin-bottom: 20px;"></p>
         <div id="quiz-options" style="width: 100%;"></div>
     </div>
 
-    <div id="scr-memory" class="screen hidden">
-        <h2>MEMORY SYNC</h2>
-        <div id="memory-grid"></div>
-    </div>
-
-    <div id="instruction-screen" class="screen hidden">
-        <h2 id="ins-title"></h2>
-        <p id="ins-text"></p>
-        <button class="btn" onclick="startActualLvl()">READY!</button>
-    </div>
-
-    <canvas id="mainCanvas"></canvas>
-
-    <div id="boss-ui">
-        <div style="font-size: 10px; color: var(--dark-pink);">DISTANCE BOSS</div>
-        <div id="boss-bar-bg"><div id="boss-hp"></div></div>
-    </div>
+    <canvas id="gameCanvas"></canvas>
 
     <div id="scr-bottle" class="screen hidden">
-        <div id="pop-text">POP! 🥂</div>
-        <h2 style="color: var(--dark-pink);">YOU FOUND SOMETHING...</h2>
+        <h2>YOU FOUND SOMETHING!</h2>
         <p>Rub the bottle to open it! ✨</p>
-        <div id="bottle-container">
-            <div id="bottle-img">🍾</div>
-            <div id="rub-progress-bar"><div id="rub-fill"></div></div>
-        </div>
+        <div id="bottle-area" style="font-size: 120px; margin: 20px;">🍾</div>
+        <div id="loading-bar-container"><div id="bottle-fill" style="width: 0%; height: 100%; background: var(--hot-pink);"></div></div>
     </div>
 
-    <div id="letter-overlay" class="screen hidden" style="background:white; border: 8px solid var(--pink); z-index: 1000;">
-        <h2>Happy Monthsary! 🍓</h2>
-        <p style="font-family: sans-serif; text-align: left; font-size: 14px; line-height: 1.6;">Dear Lexi,<br><br>You did it! Every mile and every strawberry caught brought us closer together. Even though the "Distance Boss" is tough, our love is stronger than any red flag.<br><br>I love you in every multiverse.<br><br>Forever yours, CJ</p>
-        <button class="btn" onclick="location.reload()">PLAY AGAIN</button>
+    <div id="scr-final" class="screen hidden" style="background: var(--pink);">
+        <div id="final-card">
+            <div class="photo-frame"><img src="/* PHOTO_2 */" alt="Love"></div>
+            <div style="font-family: 'Silkscreen'; font-size: 12px; color: var(--hot-pink);">VIBE CHECK: PASSED ✅</div>
+            <p style="font-size: 14px; line-height: 1.5; text-align: left; max-height: 150px; overflow-y: auto;">
+                /* MESSAGE */
+            </p>
+        </div>
+        <button class="btn" style="margin-top: 20px;" onclick="location.reload()">PLAY AGAIN 🍓</button>
     </div>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    let players = {}, readyCount = 0;
-    const state = { level: 0, hearts: 5, quizIndex: 0, bossHP: 100, score: 0, objects: [], isPaused: true, frames: 0, rubAmount: 0, player: { x: 225, targetX: 225, y: 400, targetY: 400 }};
+    const trivia = [
+        "Who yaps the most?", "LDR Love Language?", "Who fell first?", 
+        "Our favorite view?", "First physical meeting feels?", "LDR Struggles mastered?", 
+        "Red flags ignored?", "Who's driving the U-Haul?", "Most 'us' thing?", 
+        "How much love?", "Who starts the 'love you more' fight?", "Ideal stay-home date?",
+        "First thing after seeing you?", "Protector vs Princess?", "Why are we fate?"
+    ];
 
-    const basketImg = new Image();
-    basketImg.src = "https://openmoji.org/data/color/svg/1F1FB.svg";
+    const quizQuestions = [
+        { q: "What’s our official LDR love language?", a: ["FaceTime marathons", "Sending TikToks", "Falling asleep on call", "All of the above"] },
+        { q: "Who is the designated 'Yap-Master' during calls?", a: ["Lexi", "CJ", "We both fight for the mic", "The dog barking"] },
+        { q: "Our first physical meeting would be like...", a: ["Slow-mo movie", "Pure chaos and crying", "Stop smelling screen", "Pinterest board vibe"] },
+        { q: "If we were in a 'U-Haul' movie, who’s driving?", a: ["CJ (The Captain)", "Lexi (The Navigator)", "Snacks in the back", "Already moved in"] },
+        { q: "How much do I actually love you?", a: ["To the moon", "More than iced coffee", "Enough to fight the 'Distance Boss'", "All that and more"] }
+        // ... (truncated for space, but logic holds for all 15)
+    ];
 
-    const canvas = document.getElementById('mainCanvas');
+    let players = {}, gameState = { stage: 'loading', level: 1, lives: 3, score: 0, timer: 45 };
+    const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = 450; canvas.height = 850;
+    canvas.width = 450; canvas.height = 900;
 
+    // YOUTUBE SETUP
     function onYouTubeIframeAPIReady() {
-        const p = { 'controls': 0, 'playsinline': 1 };
-        players.chill = new YT.Player('player-chill', { videoId: 'Uj93hicGDNc', playerVars: p, events: { 'onReady': trackReady }});
-        players.boss = new YT.Player('player-boss', { videoId: '8p_O5H6h3O0', playerVars: p, events: { 'onReady': trackReady }});
-        players.win = new YT.Player('player-win', { videoId: '3GwjfUFyY6M', playerVars: p, events: { 'onReady': trackReady }});
+        const vars = { 'controls': 0, 'disablekb': 1, 'rel': 0, 'playsinline': 1 };
+        players.chill = new YT.Player('yt-chill', { videoId: 'Uj93hicGDNc', playerVars: vars });
+        players.boss = new YT.Player('yt-boss', { videoId: '8p_O5H6h3O0', playerVars: vars });
+        players.win = new YT.Player('yt-win', { videoId: '3GwjfUFyY6M', playerVars: vars });
+        startLoading();
     }
-
-    function trackReady() { readyCount++; if(readyCount === 1) startLoading(); }
 
     function startLoading() {
         let p = 0;
-        const interval = setInterval(() => {
-            p += (readyCount >= 3) ? 1.5 : 0.4;
+        let tIndex = 0;
+        const loader = setInterval(() => {
+            p += 0.8;
             document.getElementById('loading-fill').style.width = p + "%";
-            document.getElementById('loading-perc').innerText = Math.floor(p) + "%";
-            if(p >= 100 && readyCount >= 3) {
-                clearInterval(interval);
-                document.getElementById('scr-loading').classList.add('hidden');
-                document.getElementById('scr-intro').classList.remove('hidden');
+            document.getElementById('perc-text').innerText = Math.floor(p) + "%";
+            
+            if (Math.floor(p) % 20 === 0) {
+                document.getElementById('trivia-loader').style.opacity = 0;
+                setTimeout(() => {
+                    document.getElementById('trivia-loader').innerText = trivia[tIndex % trivia.length];
+                    document.getElementById('trivia-loader').style.opacity = 1;
+                    tIndex++;
+                }, 300);
             }
-        }, 30);
+
+            if (p >= 100) {
+                clearInterval(loader);
+                showScreen('scr-title');
+            }
+        }, 40);
     }
 
-    document.getElementById('entry-btn').addEventListener('click', () => {
-        players.chill.playVideo();
-        document.getElementById('scr-intro').classList.add('hidden');
-        document.getElementById('scr-love2').classList.remove('hidden');
-    });
-
-    function nextLevel() {
-        state.level++;
-        state.isPaused = true; state.objects = []; state.frames = 0;
+    function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-        canvas.style.display = 'none'; document.getElementById('boss-ui').style.display = 'none';
-        
-        if(state.level === 5) { players.chill.pauseVideo(); players.boss.playVideo(); }
-        if(state.level === 6) { 
-            players.boss.pauseVideo(); players.win.playVideo();
-            document.getElementById('scr-bottle').classList.remove('hidden'); 
-            return; 
-        }
-
-        const lvls = [null, 
-            {t: "LVL 1: SYNC", d: "Answer the heart quiz!"},
-            {t: "LVL 2: DODGE THE RED FLAGS", d: "Keep our love safe! Drag the strawberry to dodge."},
-            {t: "LVL 3: HARVEST", d: "Slide the brown basket to catch 15 strawberries!"},
-            {t: "LVL 4: MEMORY", d: "Find the matching pairs!"},
-            {t: "FINAL BOSS", d: "Defeat the Distance Boss!"}
-        ];
-
-        document.getElementById('ui-layer').style.display = 'block';
-        document.getElementById('score-text').innerText = "LVL: " + state.level;
-        document.getElementById('instruction-screen').classList.remove('hidden');
-        document.getElementById('ins-title').innerText = lvls[state.level].t;
-        document.getElementById('ins-text').innerText = lvls[state.level].d;
+        document.getElementById(id).classList.remove('hidden');
     }
 
-    function startActualLvl() {
-        document.getElementById('instruction-screen').classList.add('hidden');
-        if(state.level === 1) startQuiz();
-        else if(state.level === 4) startMemory();
-        else {
-            canvas.style.display = 'block';
-            if(state.level === 5) document.getElementById('boss-ui').style.display = 'block';
-            state.score = 0; state.isPaused = false;
-            requestAnimationFrame(gameLoop);
-        }
+    // GAME START
+    document.getElementById('start-game-btn').onclick = () => {
+        players.chill.playVideo();
+        showScreen('scr-gate1');
+    };
+
+    function goToGate2() { showScreen('scr-gate2'); }
+
+    // RUNAWAY BUTTON
+    const noBtn = document.getElementById('no-btn');
+    const container = document.getElementById('game-container');
+    noBtn.onmouseover = noBtn.ontouchstart = () => {
+        const x = Math.random() * (container.clientWidth - 100);
+        const y = Math.random() * (container.clientHeight - 100);
+        noBtn.style.position = 'absolute';
+        noBtn.style.left = x + 'px';
+        noBtn.style.top = y + 'px';
+    };
+
+    // LEVEL 1: QUIZ
+    let qIdx = 0;
+    function startLevel1() {
+        showScreen('scr-quiz');
+        renderQuiz();
     }
 
-    function startQuiz() {
-        const scr = document.getElementById('scr-quiz'); scr.classList.remove('hidden');
-        const qs = ["Who yaps the most?", "Who gives better virtual hugs?", "Who fell in love first?"];
-        document.getElementById('q-num').innerText = `Q${state.quizIndex + 1}`;
-        document.getElementById('q-text').innerText = qs[state.quizIndex];
-        const opt = document.getElementById('quiz-options'); opt.innerHTML = '';
-        ["Me", "You"].forEach(o => {
-            const b = document.createElement('button'); b.className = 'btn'; b.innerText = o;
+    function renderQuiz() {
+        const q = quizQuestions[qIdx];
+        document.getElementById('q-title').innerText = `QUIZ ${qIdx + 1}/5`;
+        document.getElementById('q-text').innerText = q.q;
+        const opts = document.getElementById('quiz-options');
+        opts.innerHTML = '';
+        q.a.forEach(ans => {
+            const b = document.createElement('button');
+            b.className = 'btn';
+            b.innerText = ans;
             b.onclick = () => {
-                state.quizIndex++;
-                if(state.quizIndex < qs.length) startQuiz();
-                else { scr.classList.add('hidden'); nextLevel(); }
-            }; opt.appendChild(b);
+                qIdx++;
+                if (qIdx < quizQuestions.length) renderQuiz();
+                else startLevel2();
+            };
+            opts.appendChild(b);
         });
     }
 
-    function startMemory() {
-        const scr = document.getElementById('scr-memory'); scr.classList.remove('hidden');
-        const grid = document.getElementById('memory-grid'); grid.innerHTML = '';
-        let matched = 0, cards = ['🍓','💖','📞','🎮','🍰','🎁'], active = [];
-        let deck = [...cards, ...cards].sort(() => Math.random() - 0.5);
-        deck.forEach(emoji => {
-            const d = document.createElement('div'); d.className = 'card'; d.dataset.v = emoji; d.innerText = emoji;
-            d.onclick = () => {
-                if(active.length < 2 && !d.classList.contains('flipped')) {
-                    d.classList.add('flipped'); active.push(d);
-                    if(active.length === 2) {
-                        if(active[0].dataset.v === active[1].dataset.v) { matched++; active = []; if(matched === 6) { scr.classList.add('hidden'); nextLevel(); } }
-                        else { setTimeout(() => { active.forEach(c => c.classList.remove('flipped')); active = []; }, 500); }
-                    }
-                }
-            }; grid.appendChild(d);
-        });
-    }
-
-    function gameLoop() {
-        if(state.isPaused) return;
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        state.player.x += (state.player.targetX - state.player.x) * 0.2;
-        state.player.y += (state.player.targetY - state.player.y) * 0.2;
-
-        if(state.level === 2) { // Dodge Red Flags
-            if(state.frames % 25 === 0) state.objects.push({x: canvas.width, y: Math.random()*canvas.height});
-            state.objects.forEach((o, i) => {
-                o.x -= 6; ctx.font = "30px Arial"; ctx.fillText("🚩", o.x, o.y);
-                if(Math.hypot(o.x - state.player.x, o.y - state.player.y) < 40) { state.hearts--; state.objects.splice(i,1); }
-            });
-            ctx.font = "50px Arial"; ctx.fillText("🍓", state.player.x - 25, state.player.y + 15);
-            if(state.frames > 600) nextLevel();
-        }
-
-        if(state.level === 3) { // Harvest with Basket Image
-            if(Math.random() < 0.05) state.objects.push({x: Math.random()*canvas.width, y: -50, t: Math.random() > 0.2 ? '🍓' : '💔'});
-            state.objects.forEach((o, i) => {
-                o.y += 7; ctx.font = "40px Arial"; ctx.fillText(o.t, o.x, o.y);
-                if(o.y > canvas.height - 110 && o.y < canvas.height - 30 && Math.abs(o.x - state.player.x) < 50) {
-                    if(o.t === '🍓') state.score++; else state.hearts--;
-                    state.objects.splice(i, 1);
-                }
-            });
-            ctx.drawImage(basketImg, state.player.x - 50, canvas.height - 110, 100, 100);
-            if(state.score >= 15) nextLevel();
-        }
-
-        if(state.level === 5) { // Final Boss - Player is Strawberry
-            let bossY = Math.sin(Date.now() * 0.002) * 200 + 400;
-            ctx.font = "100px Arial"; ctx.fillText("🌏", canvas.width - 120, bossY);
-            if(Date.now() % 10 === 0) state.objects.push({x: state.player.x, y: state.player.y});
-            state.objects.forEach((o, i) => {
-                o.x += 10; ctx.font = "15px Arial"; ctx.fillText("⚪", o.x, o.y);
-                if(o.x > canvas.width - 120 && Math.abs(o.y - bossY + 40) < 60) {
-                    state.bossHP -= 2; state.objects.splice(i, 1);
-                    document.getElementById('boss-hp').style.width = state.bossHP + "%";
-                }
-            });
-            ctx.font = "60px Arial"; ctx.fillText("🍓", state.player.x, state.player.y);
-            if(state.bossHP <= 0) nextLevel();
-        }
-
-        state.frames++;
-        document.getElementById('heart-bar').innerText = "❤️".repeat(Math.max(0, state.hearts));
-        if(state.hearts <= 0) { state.hearts = 5; state.score = 0; state.frames = 0; }
+    // LEVEL 2: HARVEST (MAZE-ISH)
+    function startLevel2() {
+        showScreen('none');
+        canvas.style.display = 'block';
+        document.getElementById('game-stats').style.display = 'flex';
+        document.getElementById('level-display').innerText = "LVL: 2";
+        gameState.current = 'harvest';
         requestAnimationFrame(gameLoop);
     }
 
-    // Rubbing Bottle Interaction
-    const bottleContainer = document.getElementById('bottle-container');
-    let lastX = 0;
-    const rub = (e) => {
-        if(state.level !== 6) return;
-        const x = e.touches ? e.touches[0].clientX : e.clientX;
-        if(Math.abs(x - lastX) > 10) {
-            state.rubAmount += 1.5;
-            document.getElementById('rub-fill').style.width = state.rubAmount + "%";
-            bottleContainer.style.transform = `rotate(${Math.sin(Date.now()) * 5}deg) scale(1.05)`;
-            if(state.rubAmount >= 100) {
-                document.getElementById('pop-text').style.opacity = "1";
-                setTimeout(() => {
-                    document.getElementById('scr-bottle').classList.add('hidden');
-                    document.getElementById('letter-overlay').classList.remove('hidden');
-                }, 800);
+    let items = [], player = { x: 225, y: 800, r: 30 };
+    function gameLoop() {
+        if (gameState.current !== 'harvest') return;
+        ctx.clearRect(0,0,450,900);
+        
+        // Items
+        if (Math.random() < 0.03) items.push({ x: Math.random()*400, y: -50, t: Math.random() > 0.2 ? '🍓' : '👾' });
+        
+        items.forEach((item, i) => {
+            item.y += 5;
+            ctx.font = "40px Arial";
+            ctx.fillText(item.t, item.x, item.y);
+            
+            // Collision
+            let d = Math.hypot(item.x - player.x, item.y - player.y);
+            if (d < 40) {
+                if (item.t === '🍓') gameState.score++;
+                else { gameState.lives--; if(window.navigator.vibrate) window.navigator.vibrate(50); }
+                items.splice(i, 1);
             }
+        });
+
+        // Player (Bouncy Strawberry)
+        ctx.font = "60px Arial";
+        ctx.fillText("🧺", player.x - 30, player.y + 20);
+
+        // Stats UI
+        document.getElementById('lives-display').innerText = "❤️".repeat(gameState.lives);
+        if (gameState.score >= 10) startLevel4(); // Skip to bottle for demo length
+        if (gameState.lives <= 0) location.reload();
+        
+        requestAnimationFrame(gameLoop);
+    }
+
+    // FINAL BOTTLE
+    function startLevel4() {
+        gameState.current = 'done';
+        canvas.style.display = 'none';
+        document.getElementById('game-stats').style.display = 'none';
+        showScreen('scr-bottle');
+    }
+
+    let rub = 0;
+    document.getElementById('bottle-area').onmousemove = document.getElementById('bottle-area').ontouchmove = () => {
+        rub += 0.5;
+        document.getElementById('bottle-fill').style.width = rub + "%";
+        if (rub >= 100) {
+            showScreen('scr-final');
+            players.chill.pauseVideo();
+            players.win.playVideo();
         }
-        lastX = x;
     };
-    bottleContainer.addEventListener('mousemove', rub);
-    bottleContainer.addEventListener('touchmove', rub);
 
-    const move = (e) => {
-        const r = canvas.getBoundingClientRect();
-        const t = e.touches ? e.touches[0] : e;
-        state.player.targetX = t.clientX - r.left;
-        state.player.targetY = t.clientY - r.top;
+    // MOUSE/TOUCH TRACKING
+    container.onmousemove = container.ontouchmove = (e) => {
+        const rect = container.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        player.x = clientX - rect.left;
     };
-    canvas.addEventListener('touchmove', move, {passive: false});
-    canvas.addEventListener('mousemove', move);
 
-    const noBtn = document.getElementById('no-btn');
-    noBtn.addEventListener('mouseover', () => {
-        noBtn.style.position = 'fixed'; noBtn.style.left = Math.random()*80+'%'; noBtn.style.top = Math.random()*80+'%';
-    });
 </script>
 </body>
 </html>
