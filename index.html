@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Strawberry Multiverse 🍓</title>
     <style>
-        /* Using Silkscreen as the closest high-quality 'Bubbly' Arcade Pixel Font */
         @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap');
 
         :root {
             --pink: #ffb7c5;
             --hot-pink: #ff4d6d;
-            --arcade-pink: #ff85a1; /* Brighter arcade pink for text */
+            --arcade-pink: #ff85a1;
             --cream: #fff5f5;
         }
 
@@ -36,7 +35,6 @@
             border-radius: 20px;
         }
 
-        /* Pink Arcade Text Styling */
         h1, h2, p, #q-num, #lvl-display, #timer {
             color: var(--hot-pink);
             text-shadow: 2px 2px 0px rgba(255, 255, 255, 1);
@@ -59,11 +57,10 @@
 
         .hidden { display: none !important; }
 
-        /* Bubbly Arcade Buttons */
         .btn {
             background: var(--hot-pink); color: white;
             border: none; padding: 15px 20px; 
-            border-radius: 50px; /* Bubbly shape */
+            border-radius: 50px;
             font-family: 'Silkscreen', cursive;
             font-size: 10px; cursor: pointer;
             box-shadow: 0 6px 0 #c9184a;
@@ -73,46 +70,73 @@
             width: 85%;
         }
 
-        .btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #c9184a;
-        }
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #c9184a; }
 
-        #no-btn {
-            position: absolute; z-index: 1000;
-            top: 65%; left: 50%; transform: translateX(-50%);
-            width: auto;
-            background: #ff85a1; /* Slightly different pink for the 'trick' button */
-        }
+        #no-btn { position: absolute; z-index: 1000; width: auto; background: #ff85a1; }
 
         canvas { display: none; width: 100%; height: 100%; background: #fff0f3; }
 
-        .instruction-overlay {
-            position: absolute; inset: 0;
-            background: rgba(255, 245, 245, 0.95);
-            z-index: 2000; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; padding: 30px;
+        /* Memory Grid */
+        #memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 20px; width: 90%; }
+        .card { aspect-ratio: 1/1; background: var(--hot-pink); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: transparent; cursor: pointer; box-shadow: 0 4px 0 #c9184a; }
+        .card.flipped { background: white; color: initial; box-shadow: 0 4px 0 #ddd; }
+        .card.matched { background: #aaccff; visibility: hidden; }
+
+        /* Boss Bar */
+        #boss-ui { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 80%; display: none; flex-direction: column; align-items: center; }
+        #boss-bar-bg { width: 100%; height: 10px; background: #eee; border: 2px solid #333; }
+        #boss-hp { width: 100%; height: 100%; background: var(--hot-pink); transition: width 0.2s; }
+
+        /* Letter Overlay */
+        #letter-overlay {
+            position: absolute; inset: 20px;
+            background: #fffafa; border: 4px solid var(--hot-pink);
+            border-radius: 15px; padding: 20px;
+            z-index: 5000; overflow-y: auto;
+            display: none; flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
         }
+
+        .instruction-overlay { position: absolute; inset: 0; background: rgba(255, 245, 245, 0.98); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
+    <div id="letter-overlay">
+        <h2 style="font-size: 16px;">A Special Letter 💌</h2>
+        <div style="font-family: sans-serif; font-size: 14px; line-height: 1.6; color: #444; text-align: left; margin: 15px 0;">
+            Dear [Her Name],<br><br>
+            Happy 1st Month! 🍓<br><br>
+            I can't believe it's already been a month. Thank you for making every day so much better just by being in it. Defeating the "Distance Boss" in this game was fun, but honestly, having you by my side makes any challenge feel easy.<br><br>
+            I'm so lucky to have you, and I'm excited for all the months (and years!) ahead of us. Thank you for being you.<br><br>
+            I love you so much!<br><br>
+            Yours always,<br>
+            [Your Name]
+        </div>
+        <button class="btn" style="width: auto;" onclick="closeLetter()">CLOSE</button>
+    </div>
+
     <div id="ui-layer">
         <div id="heart-bar">❤️</div>
         <div id="lvl-display" style="font-size: 10px;">LVL: 1</div>
     </div>
 
+    <div id="boss-ui">
+        <div style="font-size: 8px; color: #333; margin-bottom: 5px;">THE DISTANCE</div>
+        <div id="boss-bar-bg"><div id="boss-hp"></div></div>
+    </div>
+
     <div id="instruction-screen" class="instruction-overlay hidden">
         <h2 id="ins-title"></h2>
-        <p id="ins-text" style="font-size: 11px;"></p>
+        <p id="ins-text" style="font-size: 11px; margin: 20px 0;"></p>
         <div id="countdown" style="font-size: 30px; color: var(--hot-pink); margin-bottom: 10px;"></div>
         <button id="start-lvl-btn" class="btn" style="width: auto;" onclick="initLevelTimer()">START</button>
     </div>
 
     <div id="scr-intro" class="screen">
-        <div style="font-size: 50px; margin-bottom: 20px; filter: drop-shadow(2px 2px 0 white);">🍓</div>
-        <h1 style="font-size: 22px;">Strawberry<br>Multiverse</h1>
+        <div style="font-size: 50px; margin-bottom: 20px;">🍓</div>
+        <h1 style="font-size: 20px;">Strawberry<br>Multiverse</h1>
         <button class="btn" style="width: auto; padding: 20px 40px;" onclick="goToStep(1)">PLAY!</button>
     </div>
 
@@ -125,7 +149,7 @@
     <div id="scr-love2" class="screen hidden">
         <h1>Do you REALLY<br>love me?</h1>
         <button class="btn" style="width: auto;" onclick="nextLevel()">YES!</button>
-        <button class="btn" id="no-btn" onmouseover="dodge(event)" onclick="dodge(event)" ontouchstart="dodge(event)">NO</button>
+        <button id="no-btn" class="btn" onmouseover="dodge(event)" onclick="dodge(event)" ontouchstart="dodge(event)">NO</button>
     </div>
 
     <div id="scr-quiz" class="screen hidden">
@@ -134,175 +158,114 @@
         <div id="quiz-options" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
     </div>
 
+    <div id="scr-memory" class="screen hidden">
+        <h2 style="font-size: 14px; margin-bottom: 10px;">Match the Pairs!</h2>
+        <div id="memory-grid"></div>
+    </div>
+
     <canvas id="mainCanvas"></canvas>
 
     <div id="scr-final" class="screen hidden">
-        <h1>Level Clear!</h1>
-        <div style="font-size: 60px; margin: 20px;">👩‍❤️‍💋‍👩</div>
-        <p style="font-size: 10px;">Happy 1st Month, Baby!</p>
-        <div id="timer" style="font-size: 12px; margin-top: 10px;"></div>
+        <h1>VICTORY!</h1>
+        <div style="font-size: 60px; margin: 10px;">👩‍❤️‍💋‍👩</div>
+        <p style="font-size: 10px; margin-bottom: 5px;">Happy 1st Month, Baby!</p>
+        <button class="btn" style="width: auto;" onclick="openLetter()">READ MY LETTER 💌</button>
+        <div id="timer" style="font-size: 10px; margin-top: 10px; color: #999;"></div>
     </div>
 </div>
 
 <script>
-    const state = { level: 0, hearts: 10, quizIndex: 0, isPaused: true };
+    const state = { level: 0, hearts: 10, quizIndex: 0, isPaused: true, memoryPairs: 0, bossHP: 100 };
     const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
     
-    // --- NO BUTTON DODGE ---
-    function dodge(e) { 
-        if(e) e.preventDefault(); 
-        const b = document.getElementById('no-btn');
-        const container = document.getElementById('game-container');
-        const maxX = container.clientWidth - b.clientWidth;
-        const maxY = container.clientHeight - b.clientHeight;
-        b.style.left = Math.floor(Math.random() * maxX) + 'px';
-        b.style.top = Math.floor(Math.random() * maxY) + 'px';
-        b.style.transform = 'none'; 
-    }
-
-    function goToStep(s) { 
-        document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden')); 
-        if(s===1) document.getElementById('scr-love1').classList.remove('hidden'); 
-        if(s===2) document.getElementById('scr-love2').classList.remove('hidden'); 
-    }
-
-    function updateHearts() { document.getElementById('heart-bar').innerText = "❤️".repeat(state.hearts); }
+    function dodge(e) { if(e) e.preventDefault(); const b = document.getElementById('no-btn'); const container = document.getElementById('game-container'); b.style.left = Math.floor(Math.random() * (container.clientWidth - 80)) + 'px'; b.style.top = Math.floor(Math.random() * (container.clientHeight - 50)) + 'px'; }
+    function goToStep(s) { document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden')); if(s===1) document.getElementById('scr-love1').classList.remove('hidden'); if(s===2) document.getElementById('scr-love2').classList.remove('hidden'); }
+    function updateHearts() { document.getElementById('heart-bar').innerText = "❤️".repeat(Math.max(0, state.hearts)); }
+    function openLetter() { document.getElementById('letter-overlay').style.display = 'flex'; }
+    function closeLetter() { document.getElementById('letter-overlay').style.display = 'none'; }
 
     function nextLevel() {
-        state.level++;
+        state.level++; state.isPaused = true;
         document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
+        canvas.style.display = 'none'; document.getElementById('boss-ui').style.display = 'none';
         document.getElementById('ui-layer').style.display = 'flex';
         document.getElementById('lvl-display').innerText = "LVL: " + state.level;
         updateHearts();
-        
         const instructions = {
             1: { title: "LVL 1: Connection", text: "Answer 10 questions to sync our hearts!" },
-            2: { title: "LVL 2: Impact", text: "RAPID FIRE MODE! Drag 🍓 to shoot 🌱 and clear the path!" }
+            2: { title: "LVL 2: Impact", text: "RAPID FIRE! Drag 🍓 to shoot 🌱 and clear the path!" },
+            3: { title: "LVL 3: Harvest", text: "CATCH the 🍓. AVOID the 💔. Drag to move the basket!" },
+            4: { title: "LVL 4: Memories", text: "Find all the matching emojis to win!" },
+            5: { title: "FINAL BOSS", text: "DEFEAT THE DISTANCE! Drag anywhere to move. Shoot the 🌏!" }
         };
-
         const ins = instructions[state.level];
         if(ins) {
-            document.getElementById('ins-title').innerText = ins.title;
-            document.getElementById('ins-text').innerText = ins.text;
-            document.getElementById('instruction-screen').classList.remove('hidden');
-            document.getElementById('start-lvl-btn').classList.remove('hidden');
+            document.getElementById('ins-title').innerText = ins.title; document.getElementById('ins-text').innerText = ins.text;
+            document.getElementById('instruction-screen').classList.remove('hidden'); document.getElementById('start-lvl-btn').classList.remove('hidden');
             document.getElementById('countdown').innerText = "";
         } else { showFinal(); }
     }
 
     function initLevelTimer() {
         document.getElementById('start-lvl-btn').classList.add('hidden');
-        let count = 3;
-        const cd = document.getElementById('countdown');
-        const timer = setInterval(() => {
-            cd.innerText = count > 0 ? count : "GO!";
-            count--;
-            if(count < -1) { clearInterval(timer); startLevelAfterInstructions(); }
-        }, 800);
+        let count = 3; const cd = document.getElementById('countdown');
+        const timer = setInterval(() => { cd.innerText = count > 0 ? count : "GO!"; count--; if(count < -1) { clearInterval(timer); startLevelAfterInstructions(); } }, 800);
     }
 
     function startLevelAfterInstructions() {
-        document.getElementById('instruction-screen').classList.add('hidden');
-        state.isPaused = false;
-        if(state.level === 1) startQuiz();
-        if(state.level === 2) startStrawberryImpact();
+        document.getElementById('instruction-screen').classList.add('hidden'); state.isPaused = false;
+        if(state.level === 1) startQuiz(); if(state.level === 2) startImpact(); if(state.level === 3) startHarvest(); if(state.level === 4) startMemory(); if(state.level === 5) startBoss();
     }
 
-    const quizData = [
-        { q: "Who yaps more on the phone?", a: ["Definitely Me", "100% You"] },
-        { q: "Who is the first to fall asleep?", a: ["Me (the sleepyhead)", "You (the koala)"] },
-        { q: "Who is more likely to cry during a movie?", a: ["Me", "You"] },
-        { q: "Who gives the best digital hugs?", a: ["Me", "You"] },
-        { q: "Who is the most stubborn?", a: ["Me", "You"] },
-        { q: "Our favorite thing to do?", a: ["Gaming together", "Virtual dates", "Just talking"] },
-        { q: "Who is the morning person?", a: ["Me", "You"] },
-        { q: "Who is the protective one?", a: ["Me", "You"] },
-        { q: "Who fell in love first?", a: ["Me", "You"] },
-        { q: "Ready to fight the distance?", a: ["YES!", "Lez get it on!"] }
-    ];
-
-    function startQuiz() {
-        document.getElementById('scr-quiz').classList.remove('hidden');
-        showQuestion();
-    }
-
+    // --- LVL 1 ---
+    const quizData = [{ q: "Who yaps more on the phone?", a: ["Me", "You"] },{ q: "Who is the first to fall asleep?", a: ["Me", "You"] },{ q: "Who is more likely to cry at movies?", a: ["Me", "You"] },{ q: "Who gives the best digital hugs?", a: ["Me", "You"] },{ q: "Who is the most stubborn?", a: ["Me", "You"] },{ q: "Our favorite thing to do?", a: ["Gaming", "FaceTime", "Talking"] },{ q: "Who is the morning person?", a: ["Me", "You"] },{ q: "Who is more protective?", a: ["Me", "You"] },{ q: "Who fell in love first?", a: ["Me", "You"] },{ q: "Ready to fight the distance?", a: ["YES!", "100%"] }];
+    function startQuiz() { document.getElementById('scr-quiz').classList.remove('hidden'); showQuestion(); }
     function showQuestion() {
-        const data = quizData[state.quizIndex];
-        document.getElementById('q-num').innerText = "Q" + (state.quizIndex + 1);
-        document.getElementById('q-text').innerText = data.q;
-        const options = document.getElementById('quiz-options');
-        options.innerHTML = '';
-        data.a.forEach(choice => {
-            const b = document.createElement('button'); b.className = 'btn'; b.innerText = choice;
-            b.onclick = () => { state.quizIndex++; if(state.quizIndex < quizData.length) showQuestion(); else nextLevel(); };
-            options.appendChild(b);
-        });
+        const data = quizData[state.quizIndex]; document.getElementById('q-num').innerText = "Q" + (state.quizIndex + 1); document.getElementById('q-text').innerText = data.q;
+        const opts = document.getElementById('quiz-options'); opts.innerHTML = '';
+        data.a.forEach(choice => { const b = document.createElement('button'); b.className = 'btn'; b.innerText = choice; b.onclick = () => { state.quizIndex++; if(state.quizIndex < quizData.length) showQuestion(); else nextLevel(); }; opts.appendChild(b); });
     }
 
-    // --- LVL 2: RAPID FIRE (200ms) ---
-    function startStrawberryImpact() {
-        canvas.style.display = 'block';
-        canvas.width = 375; canvas.height = 667;
+    // --- LVL 2 & 3 ---
+    function startImpact() {
+        canvas.style.display = 'block'; canvas.width = 375; canvas.height = 667;
         let ship = { x: 50, y: 330 }, seeds = [], enemies = [], frames = 0;
+        const shootInt = setInterval(() => { if(!state.isPaused && state.level === 2) seeds.push({x: ship.x+20, y: ship.y, vy: 0}, {x: ship.x+20, y: ship.y, vy: -1.5}, {x: ship.x+20, y: ship.y, vy: 1.5}); }, 200);
+        const move = (e) => { const y = (e.touches ? e.touches[0].clientY : e.clientY) - canvas.getBoundingClientRect().top; ship.y = Math.max(50, Math.min(y, 600)); };
+        canvas.onmousemove = move; canvas.ontouchmove = (e) => { e.preventDefault(); move(e); };
+        function loop() { if(state.level !== 2 || state.isPaused) { clearInterval(shootInt); return; } ctx.clearRect(0,0,375,667); ctx.font = "30px Arial"; ctx.fillText("🍓", ship.x, ship.y+10); seeds.forEach((s, i) => { s.x += 10; s.y += s.vy; ctx.font="16px Arial"; ctx.fillText("🌱", s.x, s.y+10); if(s.x > 375) seeds.splice(i,1); }); if(frames % 40 === 0) enemies.push({x: 400, y: Math.random()*500+50, t: "🚩"}); enemies.forEach((en, i) => { en.x -= 4; ctx.fillText(en.t, en.x, en.y); seeds.forEach((sd, si) => { if(Math.abs(sd.x-en.x)<25 && Math.abs(sd.y-en.y)<25) { enemies.splice(i,1); seeds.splice(si,1); } }); if(en.x < 70 && Math.abs(en.y-ship.y)<30) { state.hearts--; updateHearts(); enemies.splice(i,1); } }); frames++; if(frames > 600) { nextLevel(); return; } requestAnimationFrame(loop); } loop();
+    }
+    function startHarvest() {
+        canvas.style.display = 'block'; let basket = { x: 150, y: 580, w: 70 }, items = [], frames = 0;
+        const move = (e) => { const x = (e.touches ? e.touches[0].clientX : e.clientX) - canvas.getBoundingClientRect().left - 35; basket.x = Math.max(0, Math.min(x, 300)); };
+        canvas.onmousemove = move; canvas.ontouchmove = (e) => { e.preventDefault(); move(e); };
+        function loop() { if(state.level !== 3 || state.isPaused) return; ctx.clearRect(0,0,375,667); ctx.font = "50px Arial"; ctx.fillText("🧺", basket.x, basket.y); if(frames % 35 === 0) items.push({x: Math.random()*340, y: -50, t: Math.random()>0.3?"🍓":"💔"}); items.forEach((it, i) => { it.y += 6; ctx.font="30px Arial"; ctx.fillText(it.t, it.x, it.y); if(it.y > 540 && it.y < 600 && it.x > basket.x-20 && it.x < basket.x+60) { if(it.t === "💔") { state.hearts--; updateHearts(); } items.splice(i,1); } if(it.y > 667) items.splice(i,1); }); frames++; if(frames > 700) { nextLevel(); return; } requestAnimationFrame(loop); } loop();
+    }
 
-        const shootInterval = setInterval(() => {
-            if(state.level === 2 && !state.isPaused) {
-                // Triple shot pattern
-                seeds.push({x: ship.x + 25, y: ship.y, vy: 0});
-                seeds.push({x: ship.x + 25, y: ship.y, vy: -1.8});
-                seeds.push({x: ship.x + 25, y: ship.y, vy: 1.8});
-            }
-        }, 200);
+    // --- LVL 4 ---
+    function startMemory() {
+        document.getElementById('scr-memory').classList.remove('hidden'); const grid = document.getElementById('memory-grid'); grid.innerHTML = ''; state.memoryPairs = 0;
+        let emojis = ['🎮', '💖', '📞', '🍓', '🎁', '🍰']; let cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5); let flipped = [];
+        cards.forEach((emoji) => { const card = document.createElement('div'); card.className = 'card'; card.dataset.emoji = emoji; card.innerText = emoji; card.onclick = () => { if(flipped.length < 2 && !card.classList.contains('flipped')) { card.classList.add('flipped'); flipped.push(card); if(flipped.length === 2) { if(flipped[0].dataset.emoji === flipped[1].dataset.emoji) { setTimeout(() => { flipped.forEach(c => c.classList.add('matched')); flipped = []; state.memoryPairs++; if(state.memoryPairs === 6) nextLevel(); }, 500); } else { setTimeout(() => { flipped.forEach(c => c.classList.remove('flipped')); flipped = []; }, 1000); } } } }; grid.appendChild(card); });
+    }
 
-        const move = (e) => {
-            const touchY = e.touches ? e.touches[0].clientY : e.clientY;
-            const rect = canvas.getBoundingClientRect();
-            ship.y = Math.min(Math.max(touchY - rect.top, 50), 610);
-        };
-        canvas.addEventListener('mousemove', move);
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e); }, {passive: false});
-
+    // --- LVL 5 ---
+    function startBoss() {
+        canvas.style.display = 'block'; document.getElementById('boss-ui').style.display = 'flex'; state.bossHP = 100; document.getElementById('boss-hp').style.width = '100%';
+        let ship = { x: 50, y: 330 }, boss = { x: 250, y: 300, dir: 1 }, seeds = [], projectiles = [], frames = 0;
+        const shootInt = setInterval(() => { if(!state.isPaused && state.level === 5) seeds.push({x: ship.x+20, y: ship.y, vy: 0}, {x: ship.x+20, y: ship.y, vy: -2}, {x: ship.x+20, y: ship.y, vy: 2}); }, 200);
+        const move = (e) => { const r = canvas.getBoundingClientRect(); const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left; const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top; ship.x = x; ship.y = y; };
+        canvas.onmousemove = move; canvas.ontouchmove = (e) => { e.preventDefault(); move(e); };
         function loop() {
-            if(state.level !== 2 || state.isPaused) { clearInterval(shootInterval); return; }
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            ctx.font = "30px Arial"; ctx.fillText("🍓", ship.x, ship.y + 10);
-            
-            seeds.forEach((s, i) => {
-                s.x += 12; s.y += s.vy; 
-                ctx.font = "16px Arial"; ctx.fillText("🌱", s.x, s.y + 10);
-                if(s.x > canvas.width) seeds.splice(i,1);
-            });
-
-            if(frames % 35 === 0) enemies.push({x: 400, y: Math.random()*580 + 40, t: Math.random()>0.5?"⏰":"🚩"});
-            enemies.forEach((en, i) => {
-                en.x -= 4; ctx.font = "24px Arial"; ctx.fillText(en.t, en.x, en.y);
-                seeds.forEach((sd, si) => {
-                    if(Math.abs(sd.x - en.x) < 30 && Math.abs(sd.y - en.y) < 30) { enemies.splice(i,1); seeds.splice(si,1); }
-                });
-                if(en.x < 80 && en.x > 20 && Math.abs(en.y - ship.y) < 30) { state.hearts--; updateHearts(); enemies.splice(i,1); }
-            });
-
-            frames++;
-            if(frames > 900) { 
-                canvas.style.display='none'; 
-                clearInterval(shootInterval);
-                nextLevel(); 
-                return; 
-            }
-            requestAnimationFrame(loop);
-        }
-        loop();
+            if(state.level !== 5 || state.isPaused) { clearInterval(shootInt); return; } ctx.clearRect(0,0,375,667); boss.y += 3 * boss.dir; if(boss.y > 500 || boss.y < 50) boss.dir *= -1; ctx.font = "80px Arial"; ctx.fillText("🌏", boss.x, boss.y + 40); ctx.font = "30px Arial"; ctx.fillText("🍓", ship.x - 15, ship.y + 10);
+            seeds.forEach((s, i) => { s.x += 12; s.y += s.vy; ctx.font="16px Arial"; ctx.fillText("🌱", s.x, s.y); if(Math.abs(s.x - boss.x - 40) < 50 && Math.abs(s.y - boss.y - 20) < 50) { state.bossHP -= 1; document.getElementById('boss-hp').style.width = state.bossHP + '%'; seeds.splice(i,1); } if(s.x > 375) seeds.splice(i,1); });
+            if(frames % 40 === 0) projectiles.push({x: boss.x, y: boss.y + 40, vx: -5}); projectiles.forEach((p, i) => { p.x += p.vx; ctx.font="20px Arial"; ctx.fillText("✈️", p.x, p.y); if(Math.abs(p.x - ship.x) < 25 && Math.abs(p.y - ship.y) < 25) { state.hearts--; updateHearts(); projectiles.splice(i,1); } if(p.x < -20) projectiles.splice(i,1); });
+            frames++; if(state.bossHP <= 0) { clearInterval(shootInt); nextLevel(); return; } requestAnimationFrame(loop);
+        } loop();
     }
 
-    function showFinal() {
-        document.getElementById('scr-final').classList.remove('hidden');
-        document.getElementById('ui-layer').style.display = 'none';
-        setInterval(() => {
-            const diff = (new Date().setMonth(new Date().getMonth()+1)) - new Date();
-            document.getElementById('timer').innerText = Math.floor(diff/86400000) + " Days to month 2!";
-        }, 1000);
-    }
+    function showFinal() { document.getElementById('scr-final').classList.remove('hidden'); document.getElementById('ui-layer').style.display = 'none'; document.getElementById('timer').innerText = "Month 1 Complete! ❤️"; }
 </script>
 </body>
 </html>
