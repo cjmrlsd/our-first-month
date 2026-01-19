@@ -3,261 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Strawberry Patch 🍓</title>
+    <title>Our Strawberry Universe 🍓</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
-            --soft-pink: #ffdae0;
+            --pastel-pink: #ffdee9;
             --strawberry-red: #ff5e78;
-            --pastel-green: #c1e1c1;
-            --cream: #fff9f9;
+            --soft-green: #b5ead7;
+            --text-color: #7a4a4a;
         }
 
-        body {
-            background-color: var(--soft-pink);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Press Start 2P', cursive;
+            background-color: var(--pastel-pink);
+            color: var(--text-color);
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
             height: 100vh;
-            color: #4a4a4a;
+        }
+
+        #game-container {
+            width: 100%; max-width: 500px;
+            height: 90vh;
+            background: #fff;
+            border: 8px solid var(--strawberry-red);
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 10px 0 #fbafbc;
             overflow: hidden;
         }
 
-        #game-window {
-            background: var(--cream);
-            width: 360px;
-            min-height: 500px;
-            border-radius: 30px;
-            border: 6px solid white;
-            box-shadow: 0px 10px 25px rgba(255, 94, 120, 0.3);
-            position: relative;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        /* Minecraft Love Bar */
+        #ui-layer {
+            position: absolute; top: 20px; left: 0; width: 100%;
+            display: flex; justify-content: center; gap: 5px;
+            z-index: 100;
+        }
+        .heart {
+            width: 25px; height: 25px;
+            background: var(--strawberry-red);
+            clip-path: polygon(50% 15%, 80% 0%, 100% 20%, 100% 50%, 50% 100%, 0% 50%, 0% 20%, 20% 0%);
+            transition: transform 0.3s;
         }
 
-        /* Retro Strawberry Border Decoration */
-        .berry-decor { position: absolute; font-size: 24px; opacity: 0.6; }
-        .top-l { top: 10px; left: 10px; }
-        .top-r { top: 10px; right: 10px; }
+        /* Screen States */
+        .screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            padding: 20px;
+        }
+        .active { display: flex; }
 
-        h1, h2 { color: var(--strawberry-red); margin-bottom: 10px; }
-
-        .btn {
+        button {
             background: var(--strawberry-red);
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-weight: bold;
+            padding: 15px 25px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
             cursor: pointer;
-            box-shadow: 0 4px 0 #d43f56;
-            transition: all 0.2s;
             margin: 10px;
-            font-size: 16px;
+            border-radius: 5px;
+            box-shadow: 0 5px 0 #d13d55;
         }
+        button:active { transform: translateY(3px); box-shadow: 0 2px 0 #d13d55; }
 
-        .btn:active { transform: translateY(4px); box-shadow: none; }
+        #no-button { position: absolute; transition: 0.1s ease; }
 
-        .hidden { display: none; }
-
-        /* OBBY STYLES */
-        #game-stage {
-            width: 300px;
-            height: 200px;
-            background: #ffffff;
-            border: 3px dashed var(--soft-pink);
-            position: relative;
-            overflow: hidden;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-
-        #player {
-            position: absolute;
-            bottom: 10px;
-            left: 30px;
-            font-size: 30px;
-            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .obstacle {
-            position: absolute;
-            bottom: 10px;
-            right: -50px;
-            font-size: 25px;
-        }
-
-        /* COUNTDOWN STYLES */
-        #countdown {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .time-block {
-            background: white;
-            padding: 10px;
-            border-radius: 10px;
-            border: 2px solid var(--soft-pink);
-            min-width: 50px;
-        }
-        .time-val { display: block; font-size: 18px; font-weight: bold; color: var(--strawberry-red); }
-        .time-lab { font-size: 10px; text-transform: uppercase; }
-
+        /* Level Specifics */
+        canvas { background: #fffcf2; border-top: 4px solid var(--strawberry-red); }
+        .quiz-option { width: 80%; margin: 5px; font-size: 10px; }
+        
         .polaroid {
-            background: white;
-            padding: 15px 15px 40px 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transform: rotate(-2deg);
-            margin-bottom: 20px;
+            background: white; padding: 10px 10px 30px 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transform: rotate(-3deg);
+            width: 200px; margin-bottom: 20px;
         }
+        .photo-placeholder { background: #eee; width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <div id="game-window">
-        <div class="berry-decor top-l">🍓</div>
-        <div class="berry-decor top-r">🍓</div>
-
-        <div id="scr-0">
-            <h1>Hi My Love!</h1>
-            <p>1 Month Down, Forever to go.</p>
-            <p>I made this mini-game for you to celebrate us. Are you ready?</p>
-            <button class="btn" onclick="start()">Start Adventure</button>
+    <div id="game-container">
+        <div id="ui-layer">
+            <div class="heart"></div><div class="heart"></div><div class="heart"></div>
+            <div class="heart"></div><div class="heart"></div><div class="heart"></div>
+            <div class="heart"></div><div class="heart"></div><div class="heart"></div>
+            <div class="heart"></div>
         </div>
 
-        <div id="scr-quiz" class="hidden">
-            <h2 id="level-title">Level 1</h2>
-            <p id="question-text"></p>
-            <div id="quiz-options">
-                <button class="btn" onclick="nextAction()">Me</button>
-                <button class="btn" onclick="nextAction()">You</button>
-            </div>
+        <div id="screen-start" class="screen active">
+            <h1 style="font-size: 18px;">STRAWBERRY ADVENTURE</h1>
+            <p style="font-size: 10px;">Our 1st Month</p>
+            <button onclick="nextScreen('screen-love1')">START ADVENTURE</button>
         </div>
 
-        <div id="scr-obby" class="hidden">
-            <h2 id="obby-title">Level 6</h2>
-            <p>Tap to jump over the "Plane Tickets"!</p>
-            <div id="game-stage" onclick="jump()">
-                <div id="player">🍓</div>
-            </div>
+        <div id="screen-love1" class="screen">
+            <h2>Do you love me?</h2>
+            <button onclick="nextScreen('screen-love2')">YES</button>
+            <button onclick="nextScreen('screen-love2')">YES</button>
         </div>
 
-        <div id="scr-final" class="hidden">
+        <div id="screen-love2" class="screen">
+            <h2>Do you love me?</h2>
+            <button onclick="nextLevel()">YES</button>
+            <button id="no-button" onmouseover="dodge()">NO</button>
+        </div>
+
+        <div id="screen-quiz" class="screen">
+            <h3 id="quiz-question" style="font-size: 14px;"></h3>
+            <div id="quiz-options"></div>
+        </div>
+
+        <div id="screen-flappy" class="screen">
+            <canvas id="flappyCanvas" width="400" height="500"></canvas>
+            <p style="font-size: 8px; margin-top: 10px;">Tap to fly over distances!</p>
+        </div>
+
+        <div id="screen-final" class="screen">
             <div class="polaroid">
-                <img src="https://via.placeholder.com/200" id="final-pic" style="width:200px; height:200px; object-fit:cover; border: 1px solid #eee;">
+                <div class="photo-placeholder">🍓</div>
             </div>
-            <h2>Happy Monthsary!</h2>
-            <p>I love you more than all the miles between us.</p>
-            
-            <p style="font-size: 12px; margin-top: 20px;">Time until our next monthsary:</p>
-            <div id="countdown">
-                <div class="time-block"><span class="time-val" id="days">--</span><span class="time-lab">Days</span></div>
-                <div class="time-block"><span class="time-val" id="hours">--</span><span class="time-lab">Hrs</span></div>
-                <div class="time-block"><span class="time-val" id="mins">--</span><span class="time-lab">Mins</span></div>
-            </div>
+            <h3>Happy 1 Month!</h3>
+            <p id="countdown" style="font-size: 10px;"></p>
+            <button onclick="location.reload()">REPLAY</button>
         </div>
     </div>
 
-<script>
-    let currentLvl = 0;
-    let isJumping = false;
-    
-    const questions = [
-        "",
-        "Who is the biggest yapper on FaceTime?",
-        "Who falls asleep first during movies?",
-        "Who is the most clingy (in a cute way)?",
-        "Who is the most excited for us to finally meet?",
-        "Who is the 'Softest' for the other?"
-    ];
-
-    function start() {
-        currentLvl = 1;
-        updateUI();
-    }
-
-    function updateUI() {
-        // Hide all screens
-        document.getElementById('scr-0').classList.add('hidden');
-        document.getElementById('scr-quiz').classList.add('hidden');
-        document.getElementById('scr-obby').classList.add('hidden');
-        document.getElementById('scr-final').classList.add('hidden');
-
-        if(currentLvl <= 5) {
-            document.getElementById('scr-quiz').classList.remove('hidden');
-            document.getElementById('level-title').innerText = "Level " + currentLvl;
-            document.getElementById('question-text').innerText = questions[currentLvl];
-        } else if (currentLvl <= 9) {
-            document.getElementById('scr-obby').classList.remove('hidden');
-            document.getElementById('obby-title').innerText = "Level " + currentLvl;
-            spawnObstacle();
-        } else {
-            document.getElementById('scr-final').classList.remove('hidden');
-            startCountdown();
+    <script>
+        let currentLevel = 0;
+        
+        // --- Navigation Logic ---
+        function nextScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
-    }
 
-    function nextAction() {
-        currentLvl++;
-        updateUI();
-    }
+        function dodge() {
+            const btn = document.getElementById('no-button');
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 100);
+            btn.style.left = x + 'px';
+            btn.style.top = y + 'px';
+        }
 
-    // OBBY JUMP LOGIC
-    function jump() {
-        if(isJumping) return;
-        isJumping = true;
-        const player = document.getElementById('player');
-        player.style.bottom = "100px";
-        setTimeout(() => {
-            player.style.bottom = "10px";
-            isJumping = false;
-        }, 400);
-    }
+        // --- Level Controller ---
+        function nextLevel() {
+            currentLevel++;
+            if (currentLevel === 1) startQuiz();
+            if (currentLevel === 2) startFlappy();
+            if (currentLevel === 3) nextScreen('screen-final'); // Skipping to final for demo length
+        }
 
-    function spawnObstacle() {
-        const stage = document.getElementById('game-stage');
-        const obs = document.createElement('div');
-        obs.className = 'obstacle';
-        obs.innerHTML = "✈️";
-        stage.appendChild(obs);
+        // --- Level 1: Quiz ---
+        const quizData = [
+            { q: "Best way to spend 3 AM?", a: ["FaceTime Sleep", "Watching Netflix", "Gaming"], c: 0 },
+            { q: "Our LDR superpower?", a: ["Patience", "High Phone Battery", "Cute Selfies"], c: 1 }
+        ];
+        let qIndex = 0;
 
-        let pos = -50;
-        const moveInterval = setInterval(() => {
-            pos += 4;
-            obs.style.right = pos + "px";
+        function startQuiz() {
+            nextScreen('screen-quiz');
+            showQuestion();
+        }
 
-            // Collision check (simplified)
-            if(pos > 230 && pos < 260 && !isJumping) {
-                pos = -50; // Reset obstacle if hit
+        function showQuestion() {
+            if(qIndex >= quizData.length) return nextLevel();
+            const data = quizData[qIndex];
+            document.getElementById('quiz-question').innerText = data.q;
+            const container = document.getElementById('quiz-options');
+            container.innerHTML = '';
+            data.a.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                btn.innerText = opt;
+                btn.onclick = () => { qIndex++; showQuestion(); };
+                container.appendChild(btn);
+            });
+        }
+
+        // --- Level 3: Flappy Strawberry ---
+        function startFlappy() {
+            nextScreen('screen-flappy');
+            const canvas = document.getElementById('flappyCanvas');
+            const ctx = canvas.getContext('2d');
+            let birdY = 250, velocity = 0, pipes = [], frames = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                velocity += 0.3; birdY += velocity;
+                ctx.fillStyle = "red";
+                ctx.fillRect(50, birdY, 30, 30); // The Strawberry
+
+                if (frames % 100 === 0) pipes.push({ x: 400, h: Math.random() * 200 + 50 });
+                pipes.forEach((p, i) => {
+                    p.x -= 2;
+                    ctx.fillStyle = "var(--soft-green)";
+                    ctx.fillRect(p.x, 0, 50, p.h);
+                    ctx.fillRect(p.x, p.h + 120, 50, canvas.height);
+                    if(p.x < -50) pipes.splice(i, 1);
+                    // Minimal collision check
+                    if(50 > p.x && 50 < p.x + 50 && (birdY < p.h || birdY > p.h + 90)) birdY = 250; 
+                    if(frames > 500 && p.x < 0) { nextLevel(); frames = -10000; } // Win condition
+                });
+
+                frames++;
+                if(frames > 0) requestAnimationFrame(draw);
             }
+            canvas.onclick = () => velocity = -6;
+            draw();
+        }
 
-            if(pos > 350) {
-                clearInterval(moveInterval);
-                obs.remove();
-                nextAction();
-            }
-        }, 20);
-    }
+        // --- Final Screen Countdown ---
+        function updateCountdown() {
+            const nextDate = new Date();
+            nextDate.setMonth(nextDate.getMonth() + 1);
+            const now = new Date();
+            const diff = nextDate - now;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            document.getElementById('countdown').innerText = `Next Date in: ${days} Days`;
+        }
+        updateCountdown();
 
-    // COUNTDOWN LOGIC
-    function startCountdown() {
-        // Sets next monthsary to 1 month from now
-        const nextMonth = new Date();
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-
-        setInterval(() => {
-            const now = new Date().getTime();
-            const diff = nextMonth - now;
-
-            document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
-            document.getElementById('hours').innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            document.getElementById('mins').innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        }, 1000);
-    }
-</script>
+    </script>
 </body>
 </html>
