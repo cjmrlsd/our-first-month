@@ -59,7 +59,7 @@
     <div id="scr-gate2" class="screen hidden"><h2>DO YOU REALLY LOVE ME?</h2><div id="gate-area-logic" style="width:100%; height:300px; position:relative; display:flex; gap:10px; align-items:center; justify-content:center;"><button id="yes-btn-3" class="btn tight-btn" onclick="handleYesSequence()">YES!</button><button id="no-run" class="btn tight-btn" onmouseover="teleportNo()" ontouchstart="teleportNo()" onclick="handleNoClick()">NO</button></div></div>
 
     <div id="scr-quiz" class="screen hidden"><h2 id="quiz-count" style="font-size:11px; color:var(--deep-berry);">SYNCING...</h2><p id="quiz-q" style="min-height:50px; font-weight:bold; font-size:16px; font-family: 'Fredoka One';"></p><div id="quiz-options" style="display:flex; flex-direction:column; align-items:center; width:100%; gap:8px;"></div></div>
-
+    
     <div id="scr-memory" class="screen hidden"><h2 style="font-family:'Fredoka One'; color: var(--deep-berry);">✨ HEART SNAP ✨</h2><div id="matches-text" style="font-family:'Silkscreen'; margin-bottom: 10px;">Matches: 0 / 6</div><div id="memory-grid"></div></div>
 
     <div id="scr-boss" class="screen hidden" style="padding:0;">
@@ -84,14 +84,12 @@
 </div>
 
 <script>
-    // --- YOUTUBE API (RETAINED) ---
     let ytPlayer, musicReady = false;
     const tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
     function onYouTubeIframeAPIReady() { ytPlayer = new YT.Player('player', { height: '1', width: '1', videoId: 'Uj93hicGDNc', playerVars: { 'autoplay': 1, 'controls': 0, 'modestbranding': 1, 'loop': 1, 'playlist': 'Uj93hicGDNc', 'origin': window.location.origin }, events: { 'onReady': (e) => { e.target.mute(); e.target.playVideo(); }, 'onStateChange': (e) => { if (e.data == 1) musicReady = true; } } }); }
 
-    // --- DATA (RETAINED) ---
-    const triviaList = ["LDR Love Language: FaceTiming until we fall asleep. 💤", "Who yaps more? Definitely one of us. 🎤", "Time zones can't keep us apart! ⏰", "CJ + Lexi = The Ultimate Duo. 🍓", "Syncing braincells in 3... 2... 1...", "Did you know CJ loves you more than iced coffee?", "Distance is just a number."];
+    const triviaList = ["LDR Love Language: Videocalls until we fall asleep. 💤", "Who yaps more? Definitely one of us. 🎤", "Time zones can't keep us apart! ⏰", "CJ + Lexi = The Ultimate Duo. 🍓", "Syncing braincells in 3... 2... 1...", "Did you know CJ loves you more than iced coffee?", "Distance is just a number."];
     const quizData = [{q: "What’s our official LDR love language?", a: ["Virtual movie marathons.", "Yapping sessions", "Sending TikToks I’ve already seen.", "Falling asleep on the phone together.", "Lablab", "All of the above (We’re obsessed)."]}, {q: "The most flirty thing you can say to me right now is...", a: ["'I booked a flight.'", "'Check your door, I sent food.'", "I'm wearing that shirt you like.'", "Aliiiiiiiii~ <3", "None (It's actually 'I bought you a Squishmallow')."]}, {q: "Who is the designated 'Yap-Master' during calls?", a: ["You (and it's adorable).", "Me (sorry for the 20-minute rant).", "We both fight for the mic.", "The dog that won't stop barking."]}, {q: "What’s my favorite 'view' whilst we’re apart?", a: ["Your morning selfies.", "Your message or call notifications.", "The countdown app on my home screen.", "All (but mostly your face)."]}, {q: "Our first physical meeting would be like...", a: ["A slow-mo movie scene.", "Pure chaos and crying.", "'Finally, I can stop smelling my screen.'", "A Pinterest board coming to life."]}, {q: "What is the ultimate 'LDR struggle' we’ve mastered?", a: ["Bad Wi-Fi during the best part.", "Time zone math (mathematician vibes).", "The 'I miss you' loop every 5 mins.", "The grumpy mode kapag gutom", "All of the above."]}, {q: "Which red flag I’d actually ignore for you?", a: ["You leave me on read for 2 mins.", "Your music taste is interesting.", "You’re a miles-away-princess.", "None (You're a green flag with glitter)."]}, {q: "If we were in a 'U-Haul' movie, who’s driving?", a: ["You (The Captain).", "Me (The Navigator).", "We’re both in the back with snacks.", "We aren't driving, we're already moved in."]}, {q: "The most 'us' thing we do is...", a: ["Virtual date nights with same movie.", "TikTok shares 50x a day.", "Competitive flirting.", "All of the above."]}, {q: "How much do I actually love you?", a: ["To the moon and back.", "More than iced coffee/strawberry.", "Enough to fight Distance Boss forever.", "All that is mentioned and more."]}];
 
     let state = { lives: 9, stage: 'load', active: false, score: 0, pX: 225, pY: 700, bullets: [], obstacles: [], enemies: [], boss: { active: false, hp: 100, max: 100 }, travel: 0, currentBossStage: 0, frameCount: 0, targetX: 225, targetY: 700, qIdx: 0 };
@@ -99,7 +97,6 @@
     const ctx = canvas.getContext('2d');
     let gateYesClicks = 0, noClickAttempts = 0;
 
-    // --- LOADER LOGIC (RETAINED) ---
     document.addEventListener("DOMContentLoaded", () => {
         canvas.width = 450; canvas.height = 800;
         let progress = 0, loadTimer = 0;
@@ -125,10 +122,7 @@
         document.getElementById('quiz-count').innerText = `SYNC: ${state.qIdx+1}/10`;
         document.getElementById('quiz-q').innerText = d.q;
         const cont = document.getElementById('quiz-options'); cont.innerHTML = '';
-        d.a.forEach(opt => {
-            const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt;
-            b.onclick = () => { state.qIdx++; renderQuiz(); }; cont.appendChild(b);
-        });
+        d.a.forEach(opt => { const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt; b.onclick = () => { state.qIdx++; renderQuiz(); }; cont.appendChild(b); });
     }
 
     function triggerVictory(nextStage) {
@@ -154,7 +148,6 @@
         else { canvas.style.display = 'block'; state.active = true; requestAnimationFrame(engine); } 
     }
 
-    // --- STAGE 4 HARVEST ---
     function engine() {
         if(!state.active || state.stage !== 'harvest') return;
         ctx.clearRect(0,0,450,800);
@@ -172,7 +165,6 @@
         requestAnimationFrame(engine);
     }
 
-    // --- STAGE 6 BOSS (PRESERVED) ---
     function loopBoss() {
         if(!state.active || state.stage !== 'boss') return;
         ctx.clearRect(0,0,450,800);
@@ -199,7 +191,6 @@
     function startBossInstance(name, txt, icon, hp) { state.boss = { active: true, name, icon, hp, max: hp }; document.getElementById('boss-label').innerText = name; document.getElementById('boss-tag').style.display='flex'; document.getElementById('bubble').style.display='block'; document.getElementById('bubble').innerText=txt; document.getElementById('bubble').style.left='135px'; document.getElementById('bubble').style.top='200px'; }
     function winBossInstance() { document.getElementById('boss-tag').style.display='none'; document.getElementById('bubble').style.display='none'; if(state.currentBossStage === 2) { state.active=false; showFinalScroll(); } else state.currentBossStage++; state.boss.active=false; }
     
-    // --- STAGE 5 MEMORY (PRESERVED) ---
     function setupMemory() {
         const grid = document.getElementById('memory-grid'); const emojis = ['🦄', '🌈', '👩‍❤️‍👩', '🌸', '✨', '🍓'];
         let cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5); grid.innerHTML = '';
@@ -216,7 +207,6 @@
         });
     }
 
-    // --- FINAL LETTER (PRESERVED) ---
     function showFinalScroll() {
         const scroll = document.getElementById('final-scroll'); scroll.style.display='block'; setTimeout(() => scroll.classList.add('open'), 10);
         let i = 0; const letterDiv = document.getElementById('letter'); letterDiv.innerHTML = "";
