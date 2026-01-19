@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our First Month 🍓</title>
+    <style>
+        :root {
+            --pastel-pink: #ffd1dc;
+            --strawberry-red: #ff4d6d;
+            --cream: #fff5f5;
+            --retro-font: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--cream);
+            font-family: var(--retro-font);
+            color: var(--strawberry-red);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        #game-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            border: 4px solid var(--pastel-pink);
+            box-shadow: 10px 10px 0px var(--pastel-pink);
+            max-width: 90%;
+            width: 400px;
+            position: relative;
+        }
+
+        .btn {
+            background: var(--strawberry-red);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover { transform: scale(1.1); }
+
+        /* Running Button Trick */
+        #run-btn { position: absolute; }
+
+        .hidden { display: none; }
+
+        canvas {
+            background: #fff0f3;
+            border: 2px solid var(--pastel-pink);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .strawberry-icon { font-size: 3rem; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="screen-welcome">
+        <div class="strawberry-icon">🍓</div>
+        <h1>Hi Pretty!</h1>
+        <p>Ready to enter the strawberry patch for our 1st monthsary?</p>
+        <button class="btn" onclick="nextLevel(1)">YES!</button>
+        <button class="btn" id="run-btn" onmouseover="runAway()">No</button>
+    </div>
+
+    <div id="screen-game" class="hidden">
+        <h2 id="level-title">Level 1</h2>
+        <div id="game-content"></div>
+        <p id="feedback"></p>
+    </div>
+
+    <div id="screen-final" class="hidden">
+        <div class="strawberry-icon">💖</div>
+        <h2>Happy 1st Month, Bub!</h2>
+        <p>You cleared all 10 levels! You're stuck with me now.</p>
+        <p style="font-size: 0.8rem;">[Paste Your Photo URL in the code!]</p>
+        <img src="https://via.placeholder.com/150" id="us-photo" style="width:100%; border-radius:10px;">
+    </div>
+</div>
+
+<script>
+    let currentLevel = 0;
+    const gameContent = document.getElementById('game-content');
+    const levelTitle = document.getElementById('level-title');
+
+    function runAway() {
+        const btn = document.getElementById('run-btn');
+        btn.style.top = Math.random() * 80 + "%";
+        btn.style.left = Math.random() * 80 + "%";
+    }
+
+    function nextLevel(lvl) {
+        currentLevel = lvl;
+        document.getElementById('screen-welcome').classList.add('hidden');
+        document.getElementById('screen-game').classList.remove('hidden');
+        
+        if(currentLevel > 10) {
+            showFinal();
+            return;
+        }
+
+        levelTitle.innerText = `Level ${currentLevel}`;
+        renderLevel();
+    }
+
+    function renderLevel() {
+        gameContent.innerHTML = "";
+        if(currentLevel <= 3) {
+            // Quiz Levels
+            let questions = ["", "Who fell first?", "Who is the 'softest' one?", "Who is the best kisser?"];
+            gameContent.innerHTML = `<p>${questions[currentLevel]}</p>
+                <button class="btn" onclick="nextLevel(${currentLevel + 1})">Me</button>
+                <button class="btn" onclick="nextLevel(${currentLevel + 1})">You</button>`;
+        } 
+        else if(currentLevel <= 6) {
+            // Mini Maze Placeholder (Simplified for stability)
+            gameContent.innerHTML = `<p>Retro Maze! Navigate the strawberry to the heart.</p>
+            <div style="font-size:2rem">🍓 → → → 💖</div>
+            <button class="btn" onclick="nextLevel(${currentLevel + 1})">GO!</button>`;
+        }
+        else if(currentLevel <= 9) {
+            // Obby Jump Placeholder
+            gameContent.innerHTML = `<p>Jumping over 'Bad Vibes'!</p>
+            <div style="font-size:2rem">☁️ 🏃‍♀️ ☁️</div>
+            <button class="btn" onclick="nextLevel(${currentLevel + 1})">JUMP!</button>`;
+        }
+        else if(currentLevel == 10) {
+            gameContent.innerHTML = `<p>Unscramble: I _ O _ E _ O U</p>
+            <button class="btn" onclick="nextLevel(11)">L V Y</button>`;
+        }
+    }
+
+    function showFinal() {
+        document.getElementById('screen-game').classList.add('hidden');
+        document.getElementById('screen-final').classList.remove('hidden');
+    }
+</script>
+
+</body>
+</html>
