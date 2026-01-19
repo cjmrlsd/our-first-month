@@ -42,22 +42,30 @@
             cursor: pointer; box-shadow: 0 6px 0 var(--dark-pink);
             margin: 10px; width: 80%; transition: all 0.1s;
         }
+        .btn:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--dark-pink); }
 
+        /* Rubbing Mechanics */
         #bottle-container { position: relative; width: 200px; height: 300px; cursor: pointer; transition: transform 0.1s; }
         #bottle-img { font-size: 150px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); }
         #rub-progress-bar { width: 100%; height: 10px; background: #eee; border-radius: 5px; margin-top: 20px; overflow: hidden; }
         #rub-fill { height: 100%; width: 0%; background: var(--hot-pink); transition: width 0.2s; }
-
-        #pop-text { position: absolute; font-size: 50px; color: var(--hot-pink); font-weight: bold; pointer-events: none; opacity: 0; transition: 0.5s; z-index: 100; }
+        #pop-text { position: absolute; font-size: 50px; color: var(--hot-pink); font-weight: bold; pointer-events: none; opacity: 0; transition: 0.5s; z-index: 100; top: 20%; }
 
         #memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 90%; margin-top: 20px; }
-        .card { aspect-ratio: 1/1; background: var(--hot-pink); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: transparent; border: 2px solid white; }
+        .card { 
+            aspect-ratio: 1/1; background: var(--hot-pink); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 28px;
+            color: transparent; cursor: pointer; border: 2px solid white;
+        }
         .card.flipped { background: white; color: initial; transform: rotateY(180deg); }
 
         #boss-ui { position: absolute; top: 80px; left: 10%; width: 80%; display: none; z-index: 101; }
         #boss-bar-bg { width: 100%; height: 15px; background: #331111; border: 2px solid white; border-radius: 10px; overflow: hidden; }
         #boss-hp { width: 100%; height: 100%; background: linear-gradient(90deg, #ff4d6d, #ffb7c5); transition: 0.2s; }
 
+        #loading-bar-container { width: 85%; height: 28px; background: #331111; border: 3px solid white; border-radius: 20px; margin: 20px 0; overflow: hidden; }
+        #loading-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #ff4d6d, #ff8fa3, #ff4d6d); background-size: 200% 100%; transition: width 0.4s ease-out; }
+        
         .yt-hide { position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
     </style>
 </head>
@@ -77,22 +85,28 @@
         <div style="font-size: 60px;">🍓</div>
         <h2 style="color: var(--dark-pink);">SYNCING LOVE...</h2>
         <div id="loading-perc">0%</div>
-        <div id="loading-fill-container" style="width:80%; height:20px; background:#ddd; border-radius:10px;"><div id="loading-fill" style="width:0%; height:100%; background:var(--hot-pink); border-radius:10px;"></div></div>
+        <div id="loading-bar-container"><div id="loading-fill"></div></div>
     </div>
 
     <div id="scr-intro" class="screen hidden"><h1>STRAWBERRY MULTIVERSE</h1><button class="btn" id="entry-btn">ENTER</button></div>
+    
     <div id="scr-love2" class="screen hidden"><h1>DO YOU REALLY LOVE ME?</h1><button class="btn" onclick="nextLevel()">YES!</button><button id="no-btn" class="btn" style="width:auto">NO</button></div>
 
     <div id="scr-quiz" class="screen hidden">
-        <h2 id="q-num">Q1</h2><p id="q-text"></p><div id="quiz-options"></div>
+        <h2 id="q-num">Q1</h2>
+        <p id="q-text" style="min-height: 60px;"></p>
+        <div id="quiz-options" style="width: 100%;"></div>
     </div>
 
     <div id="scr-memory" class="screen hidden">
-        <h2>MEMORY SYNC</h2><div id="memory-grid"></div>
+        <h2>MEMORY SYNC</h2>
+        <div id="memory-grid"></div>
     </div>
 
     <div id="instruction-screen" class="screen hidden">
-        <h2 id="ins-title"></h2><p id="ins-text"></p><button class="btn" onclick="startActualLvl()">READY!</button>
+        <h2 id="ins-title"></h2>
+        <p id="ins-text"></p>
+        <button class="btn" onclick="startActualLvl()">READY!</button>
     </div>
 
     <canvas id="mainCanvas"></canvas>
@@ -114,12 +128,7 @@
 
     <div id="letter-overlay" class="screen hidden" style="background:white; border: 8px solid var(--pink); z-index: 1000;">
         <h2>Happy Monthsary! 🍓</h2>
-        <p style="font-family: sans-serif; text-align: left; font-size: 14px; line-height: 1.6;">
-            Dear Lexi,<br><br>
-            You did it! Every mile and every strawberry caught brought us closer together. Even though the "Distance Boss" is tough, our love is stronger than any red flag.<br><br>
-            I love you in every multiverse.<br><br>
-            Forever yours,<br>CJ
-        </p>
+        <p style="font-family: sans-serif; text-align: left; font-size: 14px; line-height: 1.6;">Dear Lexi,<br><br>You did it! Every mile and every strawberry caught brought us closer together. Even though the "Distance Boss" is tough, our love is stronger than any red flag.<br><br>I love you in every multiverse.<br><br>Forever yours, CJ</p>
         <button class="btn" onclick="location.reload()">PLAY AGAIN</button>
     </div>
 </div>
@@ -246,7 +255,7 @@
         state.player.x += (state.player.targetX - state.player.x) * 0.2;
         state.player.y += (state.player.targetY - state.player.y) * 0.2;
 
-        if(state.level === 2) { // Dodge
+        if(state.level === 2) { // Dodge Red Flags
             if(state.frames % 25 === 0) state.objects.push({x: canvas.width, y: Math.random()*canvas.height});
             state.objects.forEach((o, i) => {
                 o.x -= 6; ctx.font = "30px Arial"; ctx.fillText("🚩", o.x, o.y);
@@ -256,7 +265,7 @@
             if(state.frames > 600) nextLevel();
         }
 
-        if(state.level === 3) { // Harvest
+        if(state.level === 3) { // Harvest with Basket Image
             if(Math.random() < 0.05) state.objects.push({x: Math.random()*canvas.width, y: -50, t: Math.random() > 0.2 ? '🍓' : '💔'});
             state.objects.forEach((o, i) => {
                 o.y += 7; ctx.font = "40px Arial"; ctx.fillText(o.t, o.x, o.y);
@@ -269,12 +278,12 @@
             if(state.score >= 15) nextLevel();
         }
 
-        if(state.level === 5) { // Boss - NOW WITH STRAWBERRY PLAYER
+        if(state.level === 5) { // Final Boss - Player is Strawberry
             let bossY = Math.sin(Date.now() * 0.002) * 200 + 400;
             ctx.font = "100px Arial"; ctx.fillText("🌏", canvas.width - 120, bossY);
             if(Date.now() % 10 === 0) state.objects.push({x: state.player.x, y: state.player.y});
             state.objects.forEach((o, i) => {
-                o.x += 10; ctx.font = "15px Arial"; ctx.fillText("⚪", o.x, o.y); // Strawberry seeds
+                o.x += 10; ctx.font = "15px Arial"; ctx.fillText("⚪", o.x, o.y);
                 if(o.x > canvas.width - 120 && Math.abs(o.y - bossY + 40) < 60) {
                     state.bossHP -= 2; state.objects.splice(i, 1);
                     document.getElementById('boss-hp').style.width = state.bossHP + "%";
@@ -290,6 +299,7 @@
         requestAnimationFrame(gameLoop);
     }
 
+    // Rubbing Bottle Interaction
     const bottleContainer = document.getElementById('bottle-container');
     let lastX = 0;
     const rub = (e) => {
@@ -300,8 +310,7 @@
             document.getElementById('rub-fill').style.width = state.rubAmount + "%";
             bottleContainer.style.transform = `rotate(${Math.sin(Date.now()) * 5}deg) scale(1.05)`;
             if(state.rubAmount >= 100) {
-                const pop = document.getElementById('pop-text');
-                pop.style.opacity = "1";
+                document.getElementById('pop-text').style.opacity = "1";
                 setTimeout(() => {
                     document.getElementById('scr-bottle').classList.add('hidden');
                     document.getElementById('letter-overlay').classList.remove('hidden');
