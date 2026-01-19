@@ -11,7 +11,6 @@
             --pink: #ffb7c5;
             --hot-pink: #ff4d6d;
             --cream: #fff5f5;
-            --green: #a7c957;
         }
 
         body, html {
@@ -24,7 +23,7 @@
         }
 
         #game-container {
-            width: 375px; height: 667px; /* Mobile aspect ratio for Canva */
+            width: 375px; height: 667px;
             background: var(--cream);
             border: 6px solid white;
             border-radius: 20px;
@@ -33,26 +32,35 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        /* Minecraft Health Bar */
+        /* UI / Hearts */
         #ui-layer {
-            position: absolute; top: 10px; left: 10px; right: 10px;
+            position: absolute; top: 15px; left: 15px; right: 15px;
             z-index: 100; display: none; justify-content: space-between;
             pointer-events: none;
         }
-        .heart-bar { display: flex; gap: 2px; }
-        .heart { color: var(--hot-pink); font-size: 12px; }
+        #heart-bar { color: var(--hot-pink); font-size: 10px; }
 
-        /* General Screen Styles */
+        /* Screens */
         .screen {
             position: absolute; width: 100%; height: 100%;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             text-align: center; padding: 20px; box-sizing: border-box;
+            background: var(--cream);
         }
         .hidden { display: none !important; }
 
-        h1 { font-size: 18px; color: var(--hot-pink); line-height: 1.5; }
-        p { font-size: 10px; color: #555; }
+        /* Instructions Overlay */
+        .instruction-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 200; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 30px;
+            text-align: center; box-sizing: border-box;
+        }
+
+        h1 { font-size: 16px; color: var(--hot-pink); margin-bottom: 20px; }
+        p { font-size: 10px; color: #555; line-height: 1.8; }
 
         .btn {
             background: var(--hot-pink); color: white;
@@ -61,34 +69,30 @@
             font-size: 10px; cursor: pointer; margin: 10px;
             box-shadow: 0 4px 0 #c9184a;
         }
-        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #c9184a; }
 
-        #no-btn { position: absolute; }
+        #no-btn { position: absolute; transition: 0.1s; }
 
-        /* Level 2: Space Impact */
-        #game-canvas { background: #000; width: 100%; height: 100%; display: none; }
-
-        /* Final Screen */
-        .polaroid {
-            background: white; padding: 10px 10px 30px 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transform: rotate(-2deg); margin-top: 20px;
-        }
-        .polaroid img { width: 200px; height: 200px; background: #eee; object-fit: cover; }
+        canvas { display: none; width: 100%; height: 100%; background: #fff0f3; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     <div id="ui-layer">
-        <div class="heart-bar" id="heart-bar"></div>
+        <div id="heart-bar"></div>
         <div id="lvl-display" style="font-size: 8px;">LVL: 1</div>
     </div>
 
+    <div id="instruction-screen" class="instruction-overlay hidden">
+        <h2 id="ins-title" style="color: var(--hot-pink); font-size: 14px;"></h2>
+        <p id="ins-text"></p>
+        <button class="btn" onclick="startLevelAfterInstructions()">START LEVEL</button>
+    </div>
+
     <div id="scr-intro" class="screen">
-        <div style="font-size: 50px;">🍓</div>
+        <div style="font-size: 40px;">🍓</div>
         <h1>Strawberry Multiverse</h1>
-        <p>A special 1-Month Adventure</p>
         <button class="btn" onclick="goToStep(1)">START ADVENTURE</button>
     </div>
 
@@ -106,7 +110,7 @@
 
     <div id="scr-quiz" class="screen hidden">
         <h1 id="q-num">Q1</h1>
-        <p id="q-text">Loading...</p>
+        <p id="q-text" style="margin-bottom:20px;"></p>
         <div id="quiz-options"></div>
     </div>
 
@@ -114,21 +118,21 @@
 
     <div id="scr-final" class="screen hidden">
         <h1>Happy 1st Month!</h1>
-        <div class="polaroid">
-            <img src="https://via.placeholder.com/200" id="us-photo">
-            <p style="color:black">Me & You 🍓</p>
+        <div style="background:white; padding:10px; border:2px solid #eee; margin:10px;">
+            <div style="width:200px; height:200px; background:#ffd1dc; display:flex; align-items:center; justify-content:center;">👩‍❤️‍💋‍👩</div>
         </div>
-        <p>Until next month:</p>
-        <div id="timer" style="font-size: 12px; color: var(--hot-pink);">00:00:00</div>
+        <p>You cleared all levels!</p>
+        <div id="timer" style="font-size: 12px; color: var(--hot-pink); margin-top:10px;"></div>
     </div>
 </div>
 
 <script>
     const state = {
-        step: 0,
         level: 0,
         hearts: 10,
-        quizIndex: 0
+        quizIndex: 0,
+        isPaused: true,
+        coins: 0
     };
 
     const canvas = document.getElementById('mainCanvas');
@@ -136,22 +140,21 @@
     canvas.width = 375;
     canvas.height = 667;
 
-    // --- NAVIGATION ---
-    function goToStep(s) {
-        document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
-        if(s === 1) document.getElementById('scr-love1').classList.remove('hidden');
-        if(s === 2) document.getElementById('scr-love2').classList.remove('hidden');
-    }
+    const levelInstructions = {
+        1: { title: "LEVEL 1: Connection Quiz", text: "Answer honestly! 10 questions to test our digital chemistry. Click the answer that fits us best!" },
+        2: { title: "LEVEL 2: Space Impact", text: "Distance is the enemy! Drag to move the Strawberry Ship. Tap/Click to shoot SEEDS at the Clocks and Flags. Collect COINS!" }
+    };
 
     function dodge() {
         const btn = document.getElementById('no-btn');
-        btn.style.top = Math.random() * 80 + '%';
-        btn.style.left = Math.random() * 80 + '%';
+        btn.style.top = Math.random() * 70 + 15 + '%';
+        btn.style.left = Math.random() * 70 + 15 + '%';
     }
 
-    function updateHearts() {
-        const bar = document.getElementById('heart-bar');
-        bar.innerHTML = '🍓'.repeat(state.hearts);
+    function goToStep(s) {
+        document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
+        if(s===1) document.getElementById('scr-love1').classList.remove('hidden');
+        if(s===2) document.getElementById('scr-love2').classList.remove('hidden');
     }
 
     function nextLevel() {
@@ -160,24 +163,40 @@
         document.getElementById('ui-layer').style.display = 'flex';
         document.getElementById('lvl-display').innerText = "LVL: " + state.level;
         updateHearts();
-
-        if(state.level === 1) startQuiz();
-        if(state.level === 2) startSpaceImpact();
-        if(state.level >= 10) showFinal();
+        
+        const ins = levelInstructions[state.level];
+        if (ins) {
+            document.getElementById('ins-title').innerText = ins.title;
+            document.getElementById('ins-text').innerText = ins.text;
+            document.getElementById('instruction-screen').classList.remove('hidden');
+        } else {
+            showFinal();
+        }
     }
 
-    // --- LEVEL 1: QUIZ ---
+    function startLevelAfterInstructions() {
+        document.getElementById('instruction-screen').classList.add('hidden');
+        state.isPaused = false;
+        if(state.level === 1) startQuiz();
+        if(state.level === 2) startSpaceImpact();
+    }
+
+    function updateHearts() {
+        document.getElementById('heart-bar').innerText = "❤️".repeat(state.hearts);
+    }
+
+    // --- LEVEL 1 QUIZ ---
     const quizData = [
         { q: "Who yaps more on the phone?", a: ["Me", "You"] },
+        { q: "Who is the most likely to fall asleep on video calls?", a: ["Me", "You"] },
+        { q: "Who is the 'softest' for the other?", a: ["Me", "You"] },
+        { q: "Who is the morning person?", a: ["Me", "You"] },
+        { q: "Who is more clingy (in a cute way)?", a: ["Me", "You"] },
+        { q: "Our favorite way to spend a digital date?", a: ["Movies","Gaming","Yap","All of the above"] },
         { q: "Who fell first?", a: ["Me", "You"] },
-        { q: "First date idea?", a: ["Picnic", "Arcade"] },
-        { q: "Who is the 'softest'?", a: ["Me", "You"] },
-        { q: "Favorite thing about us?", a: ["Vibe", "Everything"] },
-        { q: "Who gives more princess treatment?", a: ["Me", "You"] },
-        { q: "Morning or Night person?", a: ["Sun", "Moon"] },
-        { q: "Coffee or Tea dates?", a: ["Coffee", "Tea"] },
-        { q: "Who is more clingy?", a: ["Me", "You"] },
-        { q: "Ready for Level 2?", a: ["YES", "YES!"] }
+        { q: "Who is the biggest overthinker?", a: ["Me", "You"] },
+        { q: "Who sends more 'I love you' texts?", a: ["Me", "You"] },
+        { q: "Ready to fight distance?", a: ["YES", "YES!"] }
     ];
 
     function startQuiz() {
@@ -193,8 +212,7 @@
         options.innerHTML = '';
         data.a.forEach(choice => {
             const b = document.createElement('button');
-            b.className = 'btn';
-            b.innerText = choice;
+            b.className = 'btn'; b.innerText = choice;
             b.onclick = () => {
                 state.quizIndex++;
                 if(state.quizIndex < quizData.length) showQuestion();
@@ -204,60 +222,68 @@
         });
     }
 
-    // --- LEVEL 2: SPACE IMPACT ---
+    // --- LEVEL 2 SPACE IMPACT ---
+    let ship = { x: 50, y: 330 };
+    let seeds = [];
+    let enemies = [];
+    let coins = [];
+    let frames = 0;
+
+    canvas.addEventListener('mousedown', () => { if(state.level === 2) seeds.push({x: ship.x+20, y: ship.y}); });
+    canvas.addEventListener('mousemove', (e) => { 
+        const rect = canvas.getBoundingClientRect();
+        ship.y = e.clientY - rect.top; 
+    });
+
     function startSpaceImpact() {
         canvas.style.display = 'block';
-        let shipY = 300;
-        let enemies = [];
-        let frames = 0;
-
         function loop() {
-            if(state.level !== 2) return;
-            ctx.fillStyle = '#fff5f5';
-            ctx.fillRect(0,0, canvas.width, canvas.height);
+            if(state.level !== 2 || state.isPaused) return;
+            ctx.clearRect(0,0,canvas.width, canvas.height);
             
-            // Draw Ship (Strawberry)
+            // Player
             ctx.font = "30px Arial";
-            ctx.fillText("🍓", 50, shipY);
+            ctx.fillText("🍓", ship.x, ship.y + 10);
 
-            // Spawn Clock/Flag enemies
-            if(frames % 60 === 0) {
-                enemies.push({ x: 400, y: Math.random() * 600, t: Math.random() > 0.5 ? "⏰" : "🚩" });
-            }
+            // Seeds
+            seeds.forEach((s, i) => {
+                s.x += 7; ctx.fillText("🌱", s.x, s.y + 10);
+                if(s.x > canvas.width) seeds.splice(i,1);
+            });
 
+            // Enemies
+            if(frames % 60 === 0) enemies.push({x: 400, y: Math.random()*600, t: Math.random()>0.5?"⏰":"🚩"});
             enemies.forEach((en, i) => {
-                en.x -= 3;
-                ctx.fillText(en.t, en.x, en.y);
-                // Collision
-                if(en.x < 80 && en.x > 30 && Math.abs(en.y - shipY) < 30) {
-                    state.hearts--;
-                    updateHearts();
-                    enemies.splice(i, 1);
+                en.x -= 3; ctx.fillText(en.t, en.x, en.y);
+                // Seed hit enemy
+                seeds.forEach((sd, si) => {
+                    if(Math.abs(sd.x - en.x) < 30 && Math.abs(sd.y - en.y) < 30) {
+                        enemies.splice(i,1); seeds.splice(si,1);
+                    }
+                });
+                // Enemy hit player
+                if(en.x < 80 && en.x > 30 && Math.abs(en.y - ship.y) < 30) {
+                    state.hearts--; updateHearts(); enemies.splice(i,1);
                 }
             });
 
             frames++;
-            if(frames > 500) { canvas.style.display='none'; nextLevel(); return; }
+            if(frames > 800) { canvas.style.display='none'; nextLevel(); return; }
             requestAnimationFrame(loop);
         }
-
-        window.onmousemove = (e) => { shipY = e.clientY - 100; };
         loop();
     }
 
-    // --- FINAL SCREEN ---
     function showFinal() {
         document.getElementById('scr-final').classList.remove('hidden');
-        // Countdown to next month
-        const nextMonth = new Date();
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        document.getElementById('ui-layer').style.display = 'none';
+        const nextMonth = new Date(); nextMonth.setMonth(nextMonth.getMonth()+1);
         setInterval(() => {
-            const now = new Date();
-            const diff = nextMonth - now;
-            const h = Math.floor(diff / 3600000);
+            const diff = nextMonth - new Date();
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff % 86400000) / 3600000);
             const m = Math.floor((diff % 3600000) / 60000);
-            const s = Math.floor((diff % 60000) / 1000);
-            document.getElementById('timer').innerText = `${h}h ${m}m ${s}s`;
+            document.getElementById('timer').innerText = `${d}d ${h}h ${m}m To Next Month`;
         }, 1000);
     }
 </script>
