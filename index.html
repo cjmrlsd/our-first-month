@@ -22,26 +22,21 @@
         .tight-btn { width: auto !important; padding: 10px 25px !important; display: inline-block; }
         #load-bar-container { width: 80%; height: 22px; background: var(--surface-white); border-radius: 12px; border: 3px solid #ffb3c1; overflow: hidden; margin: 20px 0; position: relative; }
         #load-bar-fill { width: 0%; height: 100%; background: var(--accent-red); position: absolute; left: 0; top: 0; transition: width 0.1s linear; }
-        #victory-overlay { position: absolute; inset: 0; z-index: 2000; background: rgba(255, 245, 247, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .victory-text { font-family: 'Fredoka One'; color: var(--deep-berry); font-size: 32px; animation: bounce 0.5s infinite alternate; }
-        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
-        #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 90%; max-width: 320px; }
-        .card { aspect-ratio: 1/1; background: #ffc2d1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; color: transparent; border: 3px solid white; box-shadow: 0 4px 0 #fb6f92; transition: 0.3s; }
-        .card.flipped { background: white; color: initial; transform: rotateY(180deg); }
-        .card.matched { background: #f0fff4; border-color: #b7e4c7; box-shadow: none; }
         #final-scroll { display: none; position: absolute; inset: 0; z-index: 1000; background: var(--scroll-paper); padding: 40px 25px; overflow-y: auto; border: 10px solid #ffdae0; transform: scale(0); transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #final-scroll.open { display: block; transform: scale(1); }
         #letter { text-align: left; font-size: 10px; line-height: 1.8; color: var(--text-dark); font-family: 'Press Start 2P', cursive; white-space: pre-wrap; }
         canvas { background: transparent; width: 100%; height: 100%; display: none; object-fit: contain; }
-        #death-screen { position: absolute; inset: 0; background: rgba(94, 58, 62, 0.95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        
+        /* Celebration Final Page */
+        .countdown-timer { font-family: 'Silkscreen'; font-size: 18px; color: var(--deep-berry); margin: 20px 0; background: white; padding: 15px; border-radius: 20px; border: 3px dashed var(--accent-red); width: 100%; }
+        .monthsary-title { font-family: 'Fredoka One'; color: var(--deep-berry); font-size: 26px; line-height: 1.2; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 <div id="game-container">
     <div id="stats-bar" style="position: absolute; top: 20px; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; color: var(--deep-berry);"><div id="lives-ui">❤️❤️❤️❤️❤️❤️❤️❤️❤️</div></div>
-    
     <div id="music-player-container" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;"><div id="player"></div></div>
-    <div id="victory-overlay"><div class="victory-text">LEVEL CLEAR! ✨</div></div>
+    <div id="victory-overlay" style="position: absolute; inset: 0; z-index: 2000; background: rgba(255, 245, 247, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center;"><div class="victory-text" style="font-family: 'Fredoka One'; color: var(--deep-berry); font-size: 32px; animation: bounce 0.5s infinite alternate;">LEVEL CLEAR! ✨</div></div>
 
     <div id="scr-load" class="screen">
         <div style="font-size:65px; animation: pulse 1s infinite;">🍓</div>
@@ -57,11 +52,8 @@
 
     <div id="scr-gate1" class="screen hidden"><h2>DO YOU LOVE ME?</h2><div style="display:flex; gap:10px;"><button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button><button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button></div></div>
     <div id="scr-gate2" class="screen hidden"><h2>DO YOU REALLY LOVE ME?</h2><div id="gate-area-logic" style="width:100%; height:300px; position:relative; display:flex; gap:10px; align-items:center; justify-content:center;"><button id="yes-btn-3" class="btn tight-btn" onclick="handleYesSequence()">YES!</button><button id="no-run" class="btn tight-btn" onmouseover="teleportNo()" ontouchstart="teleportNo()" onclick="handleNoClick()">NO</button></div></div>
-
     <div id="scr-quiz" class="screen hidden"><h2 id="quiz-count" style="font-size:11px; color:var(--deep-berry);">SYNCING...</h2><p id="quiz-q" style="min-height:50px; font-weight:bold; font-size:16px; font-family: 'Fredoka One';"></p><div id="quiz-options" style="display:flex; flex-direction:column; align-items:center; width:100%; gap:8px;"></div></div>
-    
     <div id="scr-memory" class="screen hidden"><h2 style="font-family:'Fredoka One'; color: var(--deep-berry);">✨ HEART SNAP ✨</h2><div id="matches-text" style="font-family:'Silkscreen'; margin-bottom: 10px;">Matches: 0 / 6</div><div id="memory-grid"></div></div>
-
     <div id="scr-boss" class="screen hidden" style="padding:0;">
         <div class="hud-mini" style="position: absolute; top: 15px; width: 90%; left: 5%; display: flex; align-items: center; justify-content: space-between; background: var(--surface-white); padding: 8px 12px; border-radius: 15px; border: 2px solid #ffb3c1; z-index: 100;">
             <span class="flag">🇸🇪</span>
@@ -69,17 +61,29 @@
             <span class="flag">🇵🇭</span>
         </div>
         <div id="boss-tag" style="position: absolute; top: 75px; width: 100%; display: none; flex-direction: column; align-items: center; z-index: 100;"><div class="boss-name" id="boss-label" style="font-size: 11px; font-weight: 900; color: var(--deep-berry); margin-bottom: 3px; letter-spacing: 1px;">VILLAIN</div><div class="hp-container" style="width: 60%; height: 10px; background: #ddd; border-radius: 5px; border: 1.5px solid var(--deep-berry); overflow: hidden;"><div class="hp-fill" id="hp-fill" style="height: 100%; width: 100%; background: var(--deep-berry); transition: width 0.2s;"></div></div></div>
-        <div id="bubble" class="dialog-bubble" style="position: absolute; background: white; border: 3px solid var(--deep-berry); padding: 10px; border-radius: 18px; font-size: 14px; color: #444; font-weight: bold; text-align: center; z-index: 90; display: none; width: 180px;"></div>
+        <div id="bubble" style="position: absolute; background: white; border: 3px solid var(--deep-berry); padding: 10px; border-radius: 18px; font-size: 14px; color: #444; font-weight: bold; text-align: center; z-index: 90; display: none; width: 180px;"></div>
+        <canvas id="gameCanvas"></canvas>
     </div>
 
     <div id="final-scroll">
         <div class="scroll-title" style="color: var(--deep-berry); font-family: 'Fredoka One'; text-align: center; margin-bottom: 20px; font-size: 24px;">📜 Victory for Lexi & CJ</div>
         <div id="letter"></div>
-        <center><div style="font-size: 30px; margin: 20px 0;">👩‍❤️‍💋‍👩</div><button onclick="location.reload()" class="btn tight-btn" style="background: var(--deep-berry); border-radius:30px; font-family:'Fredoka One'; font-size: 16px;">Replay Journey</button></center>
+        <center id="letter-footer" class="hidden">
+            <div style="font-size: 30px; margin: 10px 0;">👩‍❤️‍💋‍👩</div>
+            <button class="btn tight-btn" onclick="showCelebration()">View Our Next Milestone ✨</button>
+        </center>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
-    <div id="death-screen"><h1 style="font-family:'Silkscreen';">YOU DIED</h1><div id="fill-ui"></div><p>BLOW INTO MIC!</p><button class="btn tight-btn" onclick="initMic()">REVIVE</button></div>
+    <div id="scr-celebration" class="screen hidden" style="z-index: 2000; background: var(--bg-gradient);">
+        <div style="font-size: 50px;">☁️🌸☁️</div>
+        <h1 class="monthsary-title">Happy 1st Monthsary! 🍓</h1>
+        <p style="font-family: 'Quicksand'; font-weight: bold;">Every second with you is a high score.</p>
+        <div style="font-size: 12px; margin-top: 20px;">Countdown to Month 2:</div>
+        <div class="countdown-timer" id="monthsary-timer">00:00:00:00</div>
+        <button class="btn tight-btn" onclick="location.reload()" style="background: var(--accent-red); margin-top: 20px;">Replay Adventure</button>
+    </div>
+
+    <div id="death-screen" style="position: absolute; inset: 0; background: rgba(94, 58, 62, 0.95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><h1 style="font-family:'Silkscreen';">YOU DIED</h1><div id="fill-ui"></div><p>BLOW INTO MIC!</p><button class="btn tight-btn" onclick="initMic()">REVIVE</button></div>
     <div id="ready-overlay" class="screen hidden" style="background:rgba(255,245,247,0.98); z-index:1000;"><h2 id="ready-title" style="font-family:'Fredoka One'; color: var(--deep-berry);"></h2><p id="ready-instr" style="font-weight: bold;"></p><h1 id="countdown" style="font-family:'Silkscreen';">3</h1></div>
 </div>
 
@@ -88,6 +92,22 @@
     const tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
     function onYouTubeIframeAPIReady() { ytPlayer = new YT.Player('player', { height: '1', width: '1', videoId: 'Uj93hicGDNc', playerVars: { 'autoplay': 1, 'controls': 0, 'modestbranding': 1, 'loop': 1, 'playlist': 'Uj93hicGDNc', 'origin': window.location.origin }, events: { 'onReady': (e) => { e.target.mute(); e.target.playVideo(); }, 'onStateChange': (e) => { if (e.data == 1) musicReady = true; } } }); }
+
+    // Countdown Logic for Month 2 (Feb 20th)
+    const milestoneDate = new Date("2026-02-20T00:00:00").getTime();
+    setInterval(() => {
+        const now = new Date().getTime();
+        const diff = milestoneDate - now;
+        if (diff > 0) {
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+            document.getElementById('monthsary-timer').innerText = `${days}d ${hours}h ${mins}m ${secs}s`;
+        } else {
+            document.getElementById('monthsary-timer').innerText = "Milestone Reached! ❤️";
+        }
+    }, 1000);
 
     const triviaList = ["LDR Love Language: Videocalls until we fall asleep. 💤", "Who yaps more? Definitely one of us. 🎤", "Time zones can't keep us apart! ⏰", "CJ + Lexi = The Ultimate Duo. 🍓", "Syncing braincells in 3... 2... 1...", "Did you know CJ loves you more than iced coffee?", "Distance is just a number."];
     const quizData = [{q: "What’s our official LDR love language?", a: ["Virtual movie marathons.", "Yapping sessions", "Sending TikToks I’ve already seen.", "Falling asleep on the phone together.", "Lablab", "All of the above (We’re obsessed)."]}, {q: "The most flirty thing you can say to me right now is...", a: ["'I booked a flight.'", "'Check your door, I sent food.'", "I'm wearing that shirt you like.'", "Aliiiiiiiii~ <3", "None (It's actually 'I bought you a Squishmallow')."]}, {q: "Who is the designated 'Yap-Master' during calls?", a: ["You (and it's adorable).", "Me (sorry for the 20-minute rant).", "We both fight for the mic.", "The dog that won't stop barking."]}, {q: "What’s my favorite 'view' whilst we’re apart?", a: ["Your morning selfies.", "Your message or call notifications.", "The countdown app on my home screen.", "All (but mostly your face)."]}, {q: "Our first physical meeting would be like...", a: ["A slow-mo movie scene.", "Pure chaos and crying.", "'Finally, I can stop smelling my screen.'", "A Pinterest board coming to life."]}, {q: "What is the ultimate 'LDR struggle' we’ve mastered?", a: ["Bad Wi-Fi during the best part.", "Time zone math (mathematician vibes).", "The 'I miss you' loop every 5 mins.", "The grumpy mode kapag gutom", "All of the above."]}, {q: "Which red flag I’d actually ignore for you?", a: ["You leave me on read for 2 mins.", "Your music taste is interesting.", "You’re a miles-away-princess.", "None (You're a green flag with glitter)."]}, {q: "If we were in a 'U-Haul' movie, who’s driving?", a: ["You (The Captain).", "Me (The Navigator).", "We’re both in the back with snacks.", "We aren't driving, we're already moved in."]}, {q: "The most 'us' thing we do is...", a: ["Virtual date nights with same movie.", "TikTok shares 50x a day.", "Competitive flirting.", "All of the above."]}, {q: "How much do I actually love you?", a: ["To the moon and back.", "More than iced coffee/strawberry.", "Enough to fight Distance Boss forever.", "All that is mentioned and more."]}];
@@ -119,10 +139,14 @@
     function renderQuiz() {
         if(state.qIdx >= 10) { triggerVictory('harvest'); return; }
         const d = quizData[state.qIdx];
+        const cont = document.getElementById('quiz-options');
         document.getElementById('quiz-count').innerText = `SYNC: ${state.qIdx+1}/10`;
         document.getElementById('quiz-q').innerText = d.q;
-        const cont = document.getElementById('quiz-options'); cont.innerHTML = '';
-        d.a.forEach(opt => { const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt; b.onclick = () => { state.qIdx++; renderQuiz(); }; cont.appendChild(b); });
+        cont.innerHTML = '';
+        d.a.forEach(opt => {
+            const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt;
+            b.onclick = () => { state.qIdx++; renderQuiz(); }; cont.appendChild(b);
+        });
     }
 
     function triggerVictory(nextStage) {
@@ -144,8 +168,7 @@
     function initLogic(s) { 
         document.getElementById('stats-bar').style.display = 'flex'; 
         if(s === 'memory') { canvas.style.display = 'none'; showScreen('scr-memory'); setupMemory(); } 
-        else if(s === 'boss') { canvas.style.display = 'block'; showScreen('scr-boss'); state.active = true; loopBoss(); } 
-        else { canvas.style.display = 'block'; state.active = true; requestAnimationFrame(engine); } 
+        else { canvas.style.display = 'block'; state.active = true; if(s==='boss') loopBoss(); else requestAnimationFrame(engine); } 
     }
 
     function engine() {
@@ -188,38 +211,26 @@
         requestAnimationFrame(loopBoss);
     }
 
-    function startBossInstance(name, txt, icon, hp) { state.boss = { active: true, name, icon, hp, max: hp }; document.getElementById('boss-label').innerText = name; document.getElementById('boss-tag').style.display='flex'; document.getElementById('bubble').style.display='block'; document.getElementById('bubble').innerText=txt; document.getElementById('bubble').style.left='135px'; document.getElementById('bubble').style.top='200px'; }
-    function winBossInstance() { document.getElementById('boss-tag').style.display='none'; document.getElementById('bubble').style.display='none'; if(state.currentBossStage === 2) { state.active=false; showFinalScroll(); } else state.currentBossStage++; state.boss.active=false; }
-    
-    function setupMemory() {
-        const grid = document.getElementById('memory-grid'); const emojis = ['🦄', '🌈', '👩‍❤️‍👩', '🌸', '✨', '🍓'];
-        let cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5); grid.innerHTML = '';
-        cards.forEach(emoji => {
-            const card = document.createElement('div'); card.className = 'card'; card.innerText = emoji;
-            card.onclick = () => {
-                if(card.classList.contains('flipped') || (state.flippedCards && state.flippedCards.length >= 2)) return;
-                card.classList.add('flipped'); state.flippedCards = state.flippedCards || []; state.flippedCards.push(card);
-                if(state.flippedCards.length === 2) {
-                    if(state.flippedCards[0].innerText === state.flippedCards[1].innerText) { state.flippedCards.forEach(c => c.classList.add('matched')); state.flippedCards = []; if(document.querySelectorAll('.matched').length === 12) triggerVictory('boss'); }
-                    else { setTimeout(() => { state.flippedCards.forEach(c => c.classList.remove('flipped')); state.flippedCards = []; }, 800); }
-                }
-            }; grid.appendChild(card);
-        });
-    }
+    function startBossInstance(name, txt, icon, hp) { state.boss = { active: true, name, icon, hp, max: hp }; document.getElementById('boss-label').innerText = name; document.getElementById('boss-tag').style.display='flex'; document.querySelector('#scr-boss #bubble').style.display='block'; document.querySelector('#scr-boss #bubble').innerText=txt; document.querySelector('#scr-boss #bubble').style.left='135px'; document.querySelector('#scr-boss #bubble').style.top='200px'; }
+    function winBossInstance() { document.getElementById('boss-tag').style.display='none'; document.querySelector('#scr-boss #bubble').style.display='none'; if(state.currentBossStage === 2) { state.active=false; showFinalScroll(); } else state.currentBossStage++; state.boss.active=false; }
+    function setupMemory() { const grid = document.getElementById('memory-grid'); const emojis = ['🦄', '🌈', '👩‍❤️‍👩', '🌸', '✨', '🍓']; let cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5); grid.innerHTML = ''; cards.forEach(emoji => { const card = document.createElement('div'); card.className = 'card'; card.innerText = emoji; card.onclick = () => { if(card.classList.contains('flipped') || (state.flippedCards && state.flippedCards.length >= 2)) return; card.classList.add('flipped'); state.flippedCards = state.flippedCards || []; state.flippedCards.push(card); if(state.flippedCards.length === 2) { if(state.flippedCards[0].innerText === state.flippedCards[1].innerText) { state.flippedCards.forEach(c => c.classList.add('matched')); state.flippedCards = []; if(document.querySelectorAll('.matched').length === 12) triggerVictory('boss'); } else { setTimeout(() => { state.flippedCards.forEach(c => c.classList.remove('flipped')); state.flippedCards = []; }, 800); } } }; grid.appendChild(card); }); }
 
     function showFinalScroll() {
         const scroll = document.getElementById('final-scroll'); scroll.style.display='block'; setTimeout(() => scroll.classList.add('open'), 10);
         let i = 0; const letterDiv = document.getElementById('letter'); letterDiv.innerHTML = "";
         const letterContent = `Lexi, They say in most games you only get one life, but honestly? Being with you feels like a permanent power-up. Whether we’re locked in on a mission or just yapping until the stars fade into the morning, you’re the only one I want on my team. No debate.\n\nDistance is just a glitch in the system—a temporary lag spike in a connection that’s already written in the stars. My heart is permanently synced to yours. The numbers on a screen could never measure the way you make me feel; you are the only thing that feels real in this digital multiverse.\n\nYou’ve guarded my heart better than any high score, and I promise to keep yours on lock forever. You aren't just my Player Two; you’re my sanctuary, my endgame, and my entire world.\n\nI’m so cooked for you, Lexi. I'm choosing you today, tomorrow, and every day after that.\n\nYours forever, CJ Morales`;
-        function type() { if(i < letterContent.length) { letterDiv.innerHTML += letterContent[i]==='\n'?'\n':letterContent[i]; i++; setTimeout(type, 30); scroll.scrollTop=scroll.scrollHeight; } } type();
+        function type() { if(i < letterContent.length) { letterDiv.innerHTML += letterContent[i]==='\n'?'\n':letterContent[i]; i++; setTimeout(type, 30); scroll.scrollTop=scroll.scrollHeight; } else { document.getElementById('letter-footer').classList.remove('hidden'); scroll.scrollTop=scroll.scrollHeight; } } type();
     }
 
-    const handleInput = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const touchX = (clientX - rect.left) * (canvas.width / rect.width);
-        state.targetX = touchX; state.pX = touchX;
-    };
+    function showCelebration() {
+        document.getElementById('final-scroll').classList.remove('open');
+        setTimeout(() => {
+            document.getElementById('final-scroll').style.display = 'none';
+            showScreen('scr-celebration');
+        }, 500);
+    }
+
+    const handleInput = (e) => { const rect = canvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const touchX = (clientX - rect.left) * (canvas.width / rect.width); state.targetX = touchX; state.pX = touchX; };
     window.addEventListener('mousedown', handleInput); window.addEventListener('touchstart', handleInput);
     window.addEventListener('mousemove', handleInput);
     function hit() { state.lives--; document.getElementById('lives-ui').innerText = "❤️".repeat(state.lives); if(state.lives<=0) { state.active=false; document.getElementById('death-screen').style.display='flex'; } }
