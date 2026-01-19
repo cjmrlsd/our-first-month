@@ -10,7 +10,7 @@
         :root {
             --pink: #ffb7c5;
             --hot-pink: #ff4d6d;
-            --dark-pink: #8a263a; /* New Dark Shade of Pink */
+            --dark-pink: #8a263a;
             --cream: #fff5f5;
         }
 
@@ -18,7 +18,7 @@
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #220a0e; /* Deep dark pink background for outer margins */
+            background-color: #220a0e;
             font-family: 'Silkscreen', cursive;
             overflow: hidden; display: flex; justify-content: center; align-items: center;
         }
@@ -30,29 +30,25 @@
             position: relative; overflow: hidden;
             border: 4px solid white;
             box-shadow: 0 0 20px rgba(138, 38, 58, 0.5);
-            color: var(--dark-pink); /* Global text color */
-        }
-
-        .shake { animation: shake 0.2s ease-in-out; }
-        @keyframes shake {
-            0%, 100% { transform: translate(0,0); }
-            25% { transform: translate(-4px, 4px); }
-            50% { transform: translate(4px, -4px); }
-            75% { transform: translate(-4px, -4px); }
-        }
-
-        #ui-layer {
-            position: absolute; top: env(safe-area-inset-top, 20px);
-            left: 20px; right: 20px; z-index: 100;
-            display: none; justify-content: space-between; pointer-events: none;
             color: var(--dark-pink);
+        }
+
+        /* Hidden YouTube Player */
+        #youtube-player { position: absolute; visibility: hidden; width: 1px; height: 1px; }
+
+        #music-toggle {
+            position: absolute; top: 20px; right: 20px;
+            z-index: 1000; background: white; border: 2px solid var(--hot-pink);
+            border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 20px; box-shadow: 0 4px 0 var(--pink);
         }
 
         .screen {
             position: absolute; inset: 0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            text-align: center; padding: 30px; z-index: 10;
+            text-align: center; padding: 20px; z-index: 10;
             background: var(--cream);
         }
 
@@ -60,77 +56,45 @@
 
         .btn {
             background: var(--hot-pink); color: white;
-            border: none; padding: 18px; border-radius: 50px;
-            font-family: 'Silkscreen', cursive; font-size: 14px;
-            cursor: pointer; box-shadow: 0 6px 0 var(--dark-pink);
-            margin: 10px; width: 80%; transition: 0.1s;
+            border: none; padding: 15px 10px; border-radius: 50px;
+            font-family: 'Silkscreen', cursive; font-size: 13px;
+            cursor: pointer; box-shadow: 0 5px 0 var(--dark-pink);
+            margin: 8px 0; width: 90%; transition: 0.1s;
         }
 
-        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--dark-pink); }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--dark-pink); }
 
-        #no-btn { 
-            position: absolute; z-index: 9999; 
-            width: auto !important; background: #ff85a1;
-            transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        #no-btn { position: absolute; z-index: 9999; width: auto !important; padding: 10px 20px; background: #ff85a1; }
 
         canvas { display: none; width: 100%; height: 100%; background: #fff0f3; }
 
-        #memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
-        .card { 
-            aspect-ratio: 1/1; background: var(--hot-pink); border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; font-size: 28px;
-            color: transparent; transition: 0.3s;
-        }
-        .card.flipped { background: white; color: initial; transform: rotateY(180deg); }
+        #quiz-options { display: flex; flex-direction: column; align-items: center; width: 100%; }
 
         #letter-overlay {
-            position: absolute; inset: 8%; background: #fffafa;
+            position: absolute; inset: 5%; background: #fffafa;
             border: 4px solid var(--hot-pink); border-radius: 20px;
-            padding: 25px; z-index: 5000; overflow-y: auto;
-            display: none; flex-direction: column; box-shadow: 0 10px 30px rgba(138, 38, 58, 0.3);
+            padding: 20px; z-index: 5000; overflow-y: auto;
+            display: none; flex-direction: column;
         }
 
-        #boss-ui { position: absolute; top: 80px; left: 10%; width: 80%; display: none; z-index: 101; }
-        #boss-bar-bg { width: 100%; height: 15px; background: var(--dark-pink); border-radius: 10px; overflow: hidden; }
-        #boss-hp { width: 100%; height: 100%; background: linear-gradient(90deg, #ff4d6d, #ffb7c5); transition: 0.3s; }
-        
-        /* Specific dark text overrides */
-        h1, h2, p, #countdown { color: var(--dark-pink); }
-        .letter-body { 
-            font-family: 'Courier New', Courier, monospace; 
-            font-size: 14px; line-height: 1.5; 
-            color: var(--dark-pink); 
-            text-align: left; margin: 15px 0; 
-        }
+        h1, h2, p { color: var(--dark-pink); margin: 10px 0; }
+        .letter-body { font-family: sans-serif; font-size: 15px; line-height: 1.6; color: var(--dark-pink); text-align: left; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="ui-layer">
-        <div id="heart-bar">❤️</div>
-        <div id="lvl-display">LVL: 1</div>
-    </div>
+    <div id="youtube-player"></div>
+    <div id="music-toggle" onclick="toggleMusic()">🎵</div>
 
-    <div id="letter-overlay">
-        <h2 style="font-size: 18px;">A Special Letter 💌</h2>
-        <div class="letter-body">
-            Dear [Name],<br><br>
-            Happy 1st Month! 🍓<br><br>
-            They say the first month is just the beginning, but with you, it feels like I've found my favorite person in the entire multiverse.<br><br>
-            Thank you for every laugh, every yap, and every moment. You make the world so much brighter.<br><br>
-            I love you more than all the strawberries in the world.<br><br>
-            Yours Forever,<br>
-            [Your Name]
-        </div>
-        <button class="btn" onclick="closeLetter()">CLOSE</button>
+    <div id="ui-layer" style="position:absolute; top:20px; left:20px; display:none; z-index:100; pointer-events: none;">
+        <div id="heart-bar">❤️❤️❤️❤️❤️</div>
     </div>
 
     <div id="scr-intro" class="screen">
-        <div style="font-size: 80px; margin-bottom: 20px;">🍓</div>
+        <div style="font-size: 60px;">🍓</div>
         <h1>STRAWBERRY<br>MULTIVERSE</h1>
-        <button class="btn" onclick="goToStep(1)">START ADVENTURE</button>
+        <button class="btn" onclick="startAdventure()">START ADVENTURE</button>
     </div>
 
     <div id="scr-love2" class="screen hidden">
@@ -139,277 +103,71 @@
         <button id="no-btn" class="btn">NO</button>
     </div>
 
-    <div id="scr-quiz" class="screen hidden">
-        <h2 id="q-num">Q1</h2>
-        <p id="q-text"></p>
-        <div id="quiz-options" style="width: 100%;"></div>
+    <div id="instruction-screen" class="screen hidden">
+        <h2 id="ins-title"></h2>
+        <p id="ins-text"></p>
+        <button class="btn" onclick="startActualLvl()">I'M READY!</button>
     </div>
 
-    <div id="scr-memory" class="screen hidden">
-        <h2>MEMORY SYNC</h2>
-        <div id="memory-grid"></div>
+    <div id="scr-quiz" class="screen hidden">
+        <h2 id="q-num" style="font-size: 14px;">SYNC Q1</h2>
+        <p id="q-text" style="font-size: 16px; margin-bottom: 20px;"></p>
+        <div id="quiz-options"></div>
     </div>
 
     <canvas id="mainCanvas"></canvas>
 
-    <div id="boss-ui">
-        <div style="font-size: 10px; margin-bottom: 5px;">DISTANCE BOSS</div>
-        <div id="boss-bar-bg"><div id="boss-hp"></div></div>
-    </div>
-
     <div id="scr-final" class="screen hidden">
         <h1>VICTORY!</h1>
-        <div style="font-size: 80px; margin: 20px;">🍓✨</div>
+        <div style="font-size: 60px; margin: 20px;">🍓✨</div>
         <button class="btn" onclick="openLetter()">READ MY LETTER 💌</button>
     </div>
 
-    <div id="instruction-screen" class="screen hidden" style="background: rgba(255,245,245,0.98);">
-        <h2 id="ins-title"></h2>
-        <p id="ins-text"></p>
-        <button class="btn" id="go-btn" onclick="initLevelTimer()">I'M READY!</button>
-        <div id="countdown"></div>
+    <div id="letter-overlay">
+        <h2>Happy 1st Month Aliii! 🍓</h2>
+        <div class="letter-body">
+            Dear Lexi Merindo,<br><br>
+            They say the first month is just the beginning, but with you, it feels like I've found my favorite person in the entire multiverse.<br><br>
+            Even across the distance, every video call and every text makes me fall for you all over again. I can't wait for that first airport hug.<br><br>
+            I love you more than all the strawberries in the world.<br><br>
+            Yours Forever,<br>
+            Cj Morales
+        </div>
+        <button class="btn" onclick="closeLetter()">CLOSE</button>
     </div>
 </div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
+    let player;
     const state = { 
-        level: 0, hearts: 5, quizIndex: 0, isPaused: true, 
-        bossHP: 100, particles: [], 
-        player: { x: 0, y: 0, targetX: 0, targetY: 0 },
-        frames: 0, objects: []
+        level: 0, hearts: 5, quizIndex: 0, 
+        frames: 0, objects: [], isPaused: true,
+        player: { x: 200, y: 400, targetX: 200, targetY: 400 }
     };
 
-    const canvas = document.getElementById('mainCanvas');
-    const ctx = canvas.getContext('2d');
-    const container = document.getElementById('game-container');
-    const noBtn = document.getElementById('no-btn');
-
-    function resize() {
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    // --- JUICE ---
-    function spawnParticles(x, y, color, count = 8) {
-        for(let i=0; i<count; i++) {
-            state.particles.push({
-                x, y, vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12, life: 1.0, color 
-            });
-        }
+    // Initialize YouTube Player
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('youtube-player', {
+            height: '0', width: '0',
+            videoId: 'Uj93hicGDNc',
+            events: { 'onReady': onPlayerReady }
+        });
     }
 
-    function updateParticles() {
-        for(let i=state.particles.length-1; i>=0; i--) {
-            let p = state.particles[i];
-            p.x += p.vx; p.y += p.vy; p.life -= 0.04;
-            if(p.life <= 0) state.particles.splice(i,1);
-            else {
-                ctx.globalAlpha = p.life;
-                ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y, 5, 5);
-            }
-        }
-        ctx.globalAlpha = 1;
+    function onPlayerReady(event) {
+        // Player is ready but won't play until startAdventure()
     }
 
-    // --- TROLL ---
-    function teleportNo() {
-        const x = Math.random() * (container.clientWidth - 100) + 20;
-        const y = Math.random() * (container.clientHeight - 60) + 20;
-        noBtn.style.left = `${x}px`;
-        noBtn.style.top = `${y}px`;
-        spawnParticles(x + 40, y + 20, '#ff85a1', 5);
-    }
-    noBtn.addEventListener('mouseover', teleportNo);
-    noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); teleportNo(); });
-
-    // --- SYSTEM ---
-    function goToStep(s) {
-        document.getElementById('scr-intro').classList.add('hidden');
-        document.getElementById('scr-love2').classList.remove('hidden');
+    function startAdventure() {
+        if (player && player.playVideo) player.playVideo();
+        goToStep(1);
     }
 
-    function nextLevel() {
-        state.level++;
-        state.isPaused = true;
-        state.frames = 0;
-        state.objects = [];
-        
-        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-        canvas.style.display = 'none';
-        document.getElementById('boss-ui').style.display = 'none';
-        
-        document.getElementById('ui-layer').style.display = 'flex';
-        document.getElementById('lvl-display').innerText = `LVL: ${state.level}`;
-        updateHearts();
-
-        const data = [
-            null,
-            {t: "LVL 1: SYNC", d: "Sync our hearts with 10 questions!"},
-            {t: "LVL 2: IMPACT", d: "Dodge the flags! Drag to move strawberry."},
-            {t: "LVL 3: HARVEST", d: "Catch strawberries, avoid heartbreaks!"},
-            {t: "LVL 4: MEMORY", d: "Find the matching emoji pairs."},
-            {t: "FINAL: DISTANCE", d: "Defeat the Distance Boss! Shoot the 🌱"}
-        ][state.level];
-
-        if(data) {
-            const ins = document.getElementById('instruction-screen');
-            document.getElementById('ins-title').innerText = data.t;
-            document.getElementById('ins-text').innerText = data.d;
-            document.getElementById('go-btn').classList.remove('hidden');
-            document.getElementById('countdown').innerText = "";
-            ins.classList.remove('hidden');
+    function toggleMusic() {
+        const status = player.getPlayerState();
+        if (status === 1) { // Playing
+            player.pauseVideo();
+            document.getElementById('music-toggle').innerText = "🔇";
         } else {
-            document.getElementById('scr-final').classList.remove('hidden');
-        }
-    }
-
-    function initLevelTimer() {
-        document.getElementById('go-btn').classList.add('hidden');
-        let c = 3; 
-        const cd = document.getElementById('countdown');
-        const itv = setInterval(() => {
-            cd.innerText = c > 0 ? c : "GO!";
-            if(c-- < 0) { 
-                clearInterval(itv); 
-                document.getElementById('instruction-screen').classList.add('hidden');
-                startActualLvl(); 
-            }
-        }, 800);
-    }
-
-    function startActualLvl() {
-        state.isPaused = false;
-        if(state.level === 1) startQuiz();
-        else if(state.level === 4) startMem();
-        else {
-            canvas.style.display = 'block';
-            if(state.level === 5) document.getElementById('boss-ui').style.display = 'block';
-            requestAnimationFrame(runGameLoop);
-        }
-    }
-
-    // --- QUIZ ---
-    function startQuiz() {
-        const scr = document.getElementById('scr-quiz');
-        scr.classList.remove('hidden');
-        const qs = ["Who yaps more?", "Who falls asleep during movies?", "Who gives better hugs?", "Who fell in love first?", "Who is the morning person?", "Who is more stubborn?", "Who is the cutest?", "Who is more protective?", "Ready for Month 2?", "Forever?"];
-        
-        document.getElementById('q-num').innerText = `Q${state.quizIndex + 1}`;
-        document.getElementById('q-text').innerText = qs[state.quizIndex];
-        
-        const opt = document.getElementById('quiz-options'); 
-        opt.innerHTML = '';
-        ["Me", "You"].forEach(o => {
-            const b = document.createElement('button');
-            b.className = 'btn';
-            b.innerText = o;
-            b.onclick = () => {
-                spawnParticles(window.innerWidth/2, window.innerHeight/2, '#ffb7c5', 10);
-                state.quizIndex++;
-                if(state.quizIndex < 10) startQuiz();
-                else { scr.classList.add('hidden'); nextLevel(); }
-            };
-            opt.appendChild(b);
-        });
-    }
-
-    // --- ACTION LOOP ---
-    function runGameLoop() {
-        if(state.isPaused) return;
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        
-        state.player.x += (state.player.targetX - state.player.x) * 0.15;
-        state.player.y += (state.player.targetY - state.player.y) * 0.15;
-
-        if(state.level === 2) {
-            if(state.frames % 30 === 0) state.objects.push({x: canvas.width, y: Math.random()*canvas.height});
-            state.objects.forEach((o, i) => {
-                o.x -= 5; ctx.font = "24px Arial"; ctx.fillText("🚩", o.x, o.y);
-                if(Math.hypot(o.x - state.player.x, o.y - state.player.y) < 30) { triggerHit(); state.objects.splice(i,1); }
-            });
-            ctx.font = "40px Arial"; ctx.fillText("🍓", state.player.x - 20, state.player.y + 15);
-            if(state.frames > 500) nextLevel();
-        }
-
-        if(state.level === 3) {
-            if(state.frames % 25 === 0) state.objects.push({x: Math.random()*canvas.width, y: -50, t: Math.random() > 0.2 ? 'b' : 'x'});
-            state.objects.forEach((o, i) => {
-                o.y += 5; ctx.font = "30px Arial"; ctx.fillText(o.t === 'b' ? "🍓" : "💔", o.x, o.y);
-                if(Math.hypot(o.x - state.player.x, o.y - (canvas.height - 60)) < 40) {
-                    if(o.t === 'x') triggerHit();
-                    else spawnParticles(o.x, o.y, '#ff4d6d');
-                    state.objects.splice(i,1);
-                }
-            });
-            ctx.font = "50px Arial"; ctx.fillText("🧺", state.player.x - 25, canvas.height - 40);
-            if(state.frames > 600) nextLevel();
-        }
-
-        if(state.level === 5) {
-            let bossY = Math.sin(state.frames * 0.05) * (canvas.height/3) + (canvas.height/2);
-            ctx.font = "80px Arial"; ctx.fillText("🌏", canvas.width - 100, bossY + 30);
-            ctx.font = "30px Arial"; ctx.fillText("🍓", state.player.x - 15, state.player.y + 15);
-            if(state.frames % 10 === 0) state.objects.push({x: state.player.x, y: state.player.y});
-            state.objects.forEach((o, i) => {
-                o.x += 10; ctx.fillText("🌱", o.x, o.y);
-                if(o.x > canvas.width - 100 && Math.abs(o.y - bossY) < 50) {
-                    state.bossHP -= 1.5;
-                    document.getElementById('boss-hp').style.width = state.bossHP + "%";
-                    spawnParticles(o.x, o.y, '#4dff88', 3);
-                    state.objects.splice(i,1);
-                }
-            });
-            if(state.bossHP <= 0) nextLevel();
-        }
-
-        updateParticles();
-        state.frames++;
-        if(!state.isPaused) requestAnimationFrame(runGameLoop);
-    }
-
-    function triggerHit() {
-        state.hearts--;
-        updateHearts();
-        container.classList.add('shake');
-        setTimeout(() => container.classList.remove('shake'), 200);
-    }
-
-    // --- MEMORY ---
-    function startMem() {
-        const grid = document.getElementById('memory-grid'); grid.innerHTML = '';
-        document.getElementById('scr-memory').classList.remove('hidden');
-        let matched = 0; let cards = ['🍓','💖','📞','🎮','🍰','🎁'];
-        let deck = [...cards, ...cards].sort(() => Math.random() - 0.5);
-        let active = [];
-        deck.forEach(emoji => {
-            const d = document.createElement('div'); d.className = 'card'; d.dataset.v = emoji; d.innerText = emoji;
-            d.onclick = () => {
-                if(active.length < 2 && !d.classList.contains('flipped')) {
-                    d.classList.add('flipped'); active.push(d);
-                    if(active.length === 2) {
-                        if(active[0].dataset.v === active[1].dataset.v) { matched++; active = []; if(matched === 6) { document.getElementById('scr-memory').classList.add('hidden'); nextLevel(); } }
-                        else { setTimeout(() => { active.forEach(c => c.classList.remove('flipped')); active = []; }, 500); }
-                    }
-                }
-            }; grid.appendChild(d);
-        });
-    }
-
-    const updateTarget = (e) => {
-        const p = e.touches ? e.touches[0] : e;
-        const r = canvas.getBoundingClientRect();
-        state.player.targetX = p.clientX - r.left;
-        state.player.targetY = p.clientY - r.top;
-    };
-    canvas.addEventListener('mousemove', updateTarget);
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); updateTarget(e); }, {passive:false});
-
-    function updateHearts() { document.getElementById('heart-bar').innerText = "❤️".repeat(state.hearts); if(state.hearts <= 0) { state.hearts = 5; updateHearts(); } }
-    function openLetter() { document.getElementById('letter-overlay').style.display = 'flex'; }
-    function closeLetter() { document.getElementById('letter-overlay').style.display = 'none'; }
-</script>
-</body>
-</html>
+            player.playVideo();
