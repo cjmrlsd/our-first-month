@@ -50,7 +50,6 @@
         }
         .hidden { display: none !important; }
 
-        /* Instructions Overlay */
         .instruction-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.98);
@@ -68,10 +67,20 @@
             font-family: 'Press Start 2P', cursive;
             font-size: 10px; cursor: pointer; margin: 10px;
             box-shadow: 0 4px 0 #c9184a;
+            z-index: 10;
         }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #c9184a; }
 
-        #no-btn { position: absolute; transition: 0.1s; }
+        /* FIXED: Added absolute positioning and initial placement */
+        #no-btn { 
+            position: absolute; 
+            top: 60%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            transition: 0.2s ease;
+            white-space: nowrap;
+            z-index: 50; 
+        }
 
         canvas { display: none; width: 100%; height: 100%; background: #fff0f3; }
     </style>
@@ -104,8 +113,10 @@
 
     <div id="scr-love2" class="screen hidden">
         <h1>Do you REALLY love me?</h1>
-        <button class="btn" onclick="nextLevel()">YES</button>
-        <button class="btn" id="no-btn" onmouseover="dodge()">NO</button>
+        <div style="height: 100px; width: 100%; position: relative;">
+            <button class="btn" onclick="nextLevel()" style="position: absolute; top: 0; left: 50%; transform: translateX(-110%);">YES</button>
+            <button class="btn" id="no-btn" onmouseover="dodge()" ontouchstart="dodge()">NO</button>
+        </div>
     </div>
 
     <div id="scr-quiz" class="screen hidden">
@@ -145,10 +156,20 @@
         2: { title: "LEVEL 2: Space Impact", text: "Distance is the enemy! Drag to move the Strawberry Ship. Tap/Click to shoot SEEDS at the Clocks and Flags. Collect COINS!" }
     };
 
+    // FIXED DODGE FUNCTION
     function dodge() {
         const btn = document.getElementById('no-btn');
-        btn.style.top = Math.random() * 70 + 15 + '%';
-        btn.style.left = Math.random() * 70 + 15 + '%';
+        // Calculate random positions within the game container
+        const maxX = 375 - btn.offsetWidth;
+        const maxY = 667 - btn.offsetHeight;
+        
+        const randomX = Math.floor(Math.random() * maxX);
+        const randomY = Math.floor(Math.random() * maxY);
+
+        // Remove the initial centering transform and use raw coordinates
+        btn.style.transform = 'none';
+        btn.style.left = randomX + 'px';
+        btn.style.top = randomY + 'px';
     }
 
     function goToStep(s) {
@@ -255,13 +276,11 @@
             if(frames % 60 === 0) enemies.push({x: 400, y: Math.random()*600, t: Math.random()>0.5?"⏰":"🚩"});
             enemies.forEach((en, i) => {
                 en.x -= 3; ctx.fillText(en.t, en.x, en.y);
-                // Seed hit enemy
                 seeds.forEach((sd, si) => {
                     if(Math.abs(sd.x - en.x) < 30 && Math.abs(sd.y - en.y) < 30) {
                         enemies.splice(i,1); seeds.splice(si,1);
                     }
                 });
-                // Enemy hit player
                 if(en.x < 80 && en.x > 30 && Math.abs(en.y - ship.y) < 30) {
                     state.hearts--; updateHearts(); enemies.splice(i,1);
                 }
