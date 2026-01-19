@@ -14,41 +14,23 @@
         }
         * { touch-action: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #1a0508; font-family: 'Quicksand', sans-serif; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        
-        #game-container { 
-            width: 100vw; height: 100vh; max-width: 450px; 
-            background: var(--bg-gradient); 
-            position: relative; border: var(--border-soft); 
-            overflow: hidden; border-radius: 25px; 
-            box-shadow: 0 15px 50px rgba(0,0,0,0.1); 
-        }
-
+        #game-container { width: 100vw; height: 100vh; max-width: 450px; background: var(--bg-gradient); position: relative; border: var(--border-soft); overflow: hidden; border-radius: 25px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
         .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 10; }
         .hidden { display: none !important; }
-
-        .btn { 
-            background: var(--deep-berry); color: white; border: none; 
-            padding: 12px 20px; border-radius: 15px; font-family: 'Silkscreen'; 
-            font-size: 11px; box-shadow: 0 6px 0 #ad1457; cursor: pointer; margin: 5px; 
-        }
+        .btn { background: var(--deep-berry); color: white; border: none; padding: 12px 20px; border-radius: 15px; font-family: 'Silkscreen'; font-size: 11px; box-shadow: 0 6px 0 #ad1457; cursor: pointer; margin: 5px; width: 85%; }
         .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #ad1457; }
         .tight-btn { width: auto !important; padding: 10px 25px !important; display: inline-block; }
-
         #load-bar-container { width: 80%; height: 22px; background: var(--surface-white); border-radius: 12px; border: 3px solid var(--text-pixel); overflow: hidden; margin: 20px 0; position: relative; }
         #load-bar-fill { width: 0%; height: 100%; background: var(--accent-red); position: absolute; left: 0; top: 0; }
-
         #victory-overlay { position: absolute; inset: 0; z-index: 2000; background: rgba(255, 255, 255, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; }
         .victory-text { font-family: 'Fredoka One'; color: var(--accent-red); font-size: 32px; animation: bounce 0.5s infinite alternate; }
-
         #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 90%; max-width: 320px; }
         .card { aspect-ratio: 1/1; background: var(--primary-pink); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; color: transparent; border: 3px solid white; box-shadow: 0 4px 0 #ad1457; transition: 0.3s; }
         .card.flipped { background: white; color: initial; transform: rotateY(180deg); }
         .card.matched { background: #e0ffe0; border-color: #90ee90; box-shadow: none; }
-
         #final-scroll { display: none; position: absolute; inset: 0; z-index: 1000; background: var(--scroll-paper); padding: 40px 25px; overflow-y: auto; border: 10px solid #fce4ec; transform: scale(0); transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #final-scroll.open { display: block; transform: scale(1); }
         #letter { text-align: left; font-size: 10px; line-height: 1.8; color: var(--text-dark); font-family: 'Press Start 2P', cursive; }
-        
         canvas { background: transparent; width: 100%; height: 100%; display: none; object-fit: contain; }
         #death-screen { position: absolute; inset: 0; background: rgba(26, 5, 8, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
     </style>
@@ -57,8 +39,7 @@
 
 <div id="game-container">
     <div id="stats-bar" style="position: absolute; top: 20px; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; color: var(--deep-berry);"><div id="lives-ui">❤️❤️❤️❤️❤️❤️❤️❤️❤️</div></div>
-    <div id="music-player" style="position: absolute; width: 1px; height: 1px; opacity: 0;"></div>
-
+    <div id="music-player" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden;"></div>
     <div id="victory-overlay"><div class="victory-text">LEVEL CLEAR! ✨</div></div>
 
     <div id="scr-load" class="screen">
@@ -72,11 +53,11 @@
         <h1 style="font-family:'Fredoka One'; color: var(--accent-red); font-size: 28px;">STRAWBERRY MULTIVERSE</h1>
         <button class="btn tight-btn" onclick="startAdventureWithMusic()">START ADVENTURE ✨</button>
     </div>
-
     <div id="scr-gate1" class="screen hidden"><h2>DO YOU LOVE ME?</h2><div style="display:flex; gap:10px;"><button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button><button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button></div></div>
     <div id="scr-gate2" class="screen hidden"><h2>DO YOU REALLY LOVE ME?</h2><div id="gate-area-logic" style="width:100%; height:300px; position:relative; display:flex; gap:10px; align-items:center; justify-content:center;"><button id="yes-btn-3" class="btn tight-btn" onclick="handleYesSequence()">YES!</button><button id="no-run" class="btn tight-btn" onmouseover="teleportNo()" ontouchstart="teleportNo()" onclick="handleNoClick()">NO</button></div></div>
 
     <div id="scr-quiz" class="screen hidden"><h2 id="quiz-count" style="font-size:11px; color:var(--deep-berry);">SYNCING...</h2><p id="quiz-q" style="min-height:50px; font-weight:bold; font-size:16px; font-family: 'Fredoka One';"></p><div id="quiz-options" style="display:flex; flex-direction:column; align-items:center; width:100%; gap:8px;"></div></div>
+
     <div id="scr-memory" class="screen hidden"><h2 style="font-family:'Fredoka One'; color: var(--accent-red);">✨ HEART SNAP ✨</h2><div id="matches-text" style="font-family:'Silkscreen'; margin-bottom: 10px;">Matches: 0 / 6</div><div id="memory-grid"></div></div>
 
     <div id="scr-boss" class="screen hidden" style="padding:0;">
@@ -101,8 +82,30 @@
 </div>
 
 <script>
-    const triviaList = ["LDR Love Language: FaceTiming until we fall asleep. 💤", "Who yaps more? Definitely one of us. 🎤", "Time zones can't keep us apart! ⏰", "CJ + Lexi = The Ultimate Duo. 🍓", "Syncing braincells in 3... 2... 1...", "Did you know CJ loves you more than iced coffee?", "Distance is just a number."];
-    const quizData = [{q: "What’s our official LDR love language?", a: ["Virtual movie marathons.", "Yapping sessions", "Sending TikToks I’ve already seen.", "Falling asleep on the phone together.", "Lablab", "All of the above (We’re obsessed)."]}, {q: "The most flirty thing you can say to me right now is...", a: ["'I booked a flight.'", "'Check your door, I sent food.'", "I'm wearing that shirt you like.'", "Aliiiiiiiii~ <3", "None (It's actually 'I bought you a Squishmallow')."]}, {q: "Who is the designated 'Yap-Master' during calls?", a: ["You (and it's adorable).", "Me (sorry for the 20-minute rant).", "We both fight for the mic.", "The dog that won't stop barking."]}, {q: "What’s my favorite 'view' whilst we’re apart?", a: ["Your morning selfies.", "Your message or call notifications.", "The countdown app on my home screen.", "All (but mostly your face)."]}, {q: "Our first physical meeting would be like...", a: ["A slow-mo movie scene.", "Pure chaos and crying.", "'Finally, I can stop smelling my screen.'", "A Pinterest board coming to life."]}, {q: "What is the ultimate 'LDR struggle' we’ve mastered?", a: ["Bad Wi-Fi during the best part.", "Time zone math (mathematician vibes).", "The 'I miss you' loop every 5 mins.", "The grumpy mode kapag gutom", "All of the above."]}, {q: "Which red flag I’d actually ignore for you?", a: ["You leave me on read for 2 mins.", "Your music taste is interesting.", "You’re a miles-away-princess.", "None (You're a green flag with glitter)."]}, {q: "If we were in a 'U-Haul' movie, who’s driving?", a: ["You (The Captain).", "Me (The Navigator).", "We’re both in the back with snacks.", "We aren't driving, we're already moved in."]}, {q: "The most 'us' thing we do is...", a: ["Virtual date nights with same movie.", "TikTok shares 50x a day.", "Competitive flirting.", "All of the above."]}, {q: "How much do I actually love you?", a: ["To the moon and back.", "More than iced coffee/strawberry.", "Enough to fight Distance Boss forever.", "All that is mentioned and more."]}];
+    // --- STAGE 1: TRIVIAS ---
+    const triviaList = [
+        "LDR Love Language: FaceTiming until we fall asleep. 💤",
+        "Who yaps more? Definitely one of us. 🎤",
+        "Time zones can't keep us apart! ⏰",
+        "CJ + Lexi = The Ultimate Duo. 🍓",
+        "Syncing braincells in 3... 2... 1...",
+        "Did you know CJ loves you more than iced coffee?",
+        "Distance is just a number."
+    ];
+
+    // --- STAGE 3: SYNC QUESTIONS ---
+    const quizData = [
+        {q: "What’s our official LDR love language?", a: ["Virtual movie marathons.", "Yapping sessions", "Sending TikToks I’ve already seen.", "Falling asleep on the phone together.", "Lablab", "All of the above (We’re obsessed)."]},
+        {q: "The most flirty thing you can say to me right now is...", a: ["'I booked a flight.'", "'Check your door, I sent food.'", "I'm wearing that shirt you like.'", "Aliiiiiiiii~ <3", "None (It's actually 'I bought you a Squishmallow')."]},
+        {q: "Who is the designated 'Yap-Master' during calls?", a: ["You (and it's adorable).", "Me (sorry for the 20-minute rant).", "We both fight for the mic.", "The dog that won't stop barking."]},
+        {q: "What’s my favorite 'view' whilst we’re apart?", a: ["Your morning selfies.", "Your message or call notifications.", "The countdown app on my home screen.", "All (but mostly your face)."]},
+        {q: "Our first physical meeting would be like...", a: ["A slow-mo movie scene.", "Pure chaos and crying.", "'Finally, I can stop smelling my screen.'", "A Pinterest board coming to life."]},
+        {q: "What is the ultimate 'LDR struggle' we’ve mastered?", a: ["Bad Wi-Fi during the best part.", "Time zone math (mathematician vibes).", "The 'I miss you' loop every 5 mins.", "The grumpy mode kapag gutom", "All of the above."]},
+        {q: "Which red flag I’d actually ignore for you?", a: ["You leave me on read for 2 mins.", "Your music taste is interesting.", "You’re a miles-away-princess.", "None (You're a green flag with glitter)."]},
+        {q: "If we were in a 'U-Haul' movie, who’s driving?", a: ["You (The Captain).", "Me (The Navigator).", "We’re both in the back with snacks.", "We aren't driving, we're already moved in."]},
+        {q: "The most 'us' thing we do is...", a: ["Virtual date nights with same movie.", "TikTok shares 50x a day.", "Competitive flirting.", "All of the above."]},
+        {q: "How much do I actually love you?", a: ["To the moon and back.", "More than iced coffee/strawberry.", "Enough to fight Distance Boss forever.", "All that is mentioned and more."]}
+    ];
 
     let state = { lives: 9, stage: 'load', active: false, score: 0, pX: 225, pY: 700, velX: 0, velY: 0, bullets: [], obstacles: [], enemies: [], boss: { active: false, hp: 100, max: 100, timer: 0 }, travel: 0, currentBossStage: 0, frameCount: 0, targetX: 225, targetY: 700, qIdx: 0, keys: {}, onGround: false };
     const canvas = document.getElementById('gameCanvas');
@@ -110,46 +113,42 @@
     const platforms = [{x:0,y:750,w:450,h:50},{x:50,y:620,w:120,h:15},{x:280,y:530,w:120,h:15},{x:100,y:440,w:120,h:15},{x:280,y:350,w:120,h:15},{x:50,y:260,w:350,h:20,goal:true}];
     let gateYesClicks = 0, noClickAttempts = 0;
 
-    // --- FORCED LOADER SCRIPT ---
+    // --- FORCED LOADER ---
     document.addEventListener("DOMContentLoaded", function() {
         canvas.width = 450; canvas.height = 800;
         let progress = 0;
         const fill = document.getElementById('load-bar-fill');
         const pText = document.getElementById('percent-text');
         const tBox = document.getElementById('trivia-box');
-
         const loadInt = setInterval(() => {
-            progress += 1;
-            fill.style.width = progress + "%";
-            pText.innerText = progress + "%";
-
-            if(progress % 20 === 0) {
-                tBox.innerText = triviaList[Math.floor(Math.random()*triviaList.length)];
-            }
-
-            if(progress >= 100) {
-                clearInterval(loadInt);
-                showScreen('scr-title');
-            }
-        }, 40); // Standard 4-second loading
+            progress += 1; fill.style.width = progress + "%"; pText.innerText = progress + "%";
+            if(progress % 20 === 0) tBox.innerText = triviaList[Math.floor(Math.random()*triviaList.length)];
+            if(progress >= 100) { clearInterval(loadInt); showScreen('scr-title'); }
+        }, 40);
     });
 
     function startAdventureWithMusic() {
-        document.getElementById('music-player').innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/Uj93hicGDNc?autoplay=1&loop=1&playlist=Uj93hicGDNc" frameborder="0" allow="autoplay"></iframe>`;
+        // No-Ad YouTube Privacy Mode
+        const musicURL = "https://www.youtube-nocookie.com/embed/Uj93hicGDNc?autoplay=1&controls=0&modestbranding=1&loop=1&playlist=Uj93hicGDNc&rel=0&iv_load_policy=3";
+        document.getElementById('music-player').innerHTML = `<iframe width="200" height="200" src="${musicURL}" frameborder="0" allow="autoplay"></iframe>`;
         showScreen('scr-gate1');
     }
 
-    // CONCEPT-PRESERVED FUNCTIONS
     function handleYesSequence() { if(++gateYesClicks >= 3) startQuiz(); teleportNo(); }
     function teleportNo() { const noBtn = document.getElementById('no-run'); noBtn.style.position = 'absolute'; const area = document.getElementById('gate-area-logic'); noBtn.style.left = Math.random()*(area.clientWidth-80)+'px'; noBtn.style.top = Math.random()*(area.clientHeight-40)+'px'; }
     function handleNoClick() { if(++noClickAttempts >= 20) { alert("Halaa di mo na ako lab? :<<"); noClickAttempts=0; } teleportNo(); }
+    
     function startQuiz() { showScreen('scr-quiz'); renderQuiz(); }
     function renderQuiz() {
         if(state.qIdx >= 10) { triggerVictory('harvest'); return; }
-        const d = quizData[state.qIdx]; document.getElementById('quiz-count').innerText = `SYNC: ${state.qIdx+1}/10`;
+        const d = quizData[state.qIdx];
+        document.getElementById('quiz-count').innerText = `SYNC: ${state.qIdx+1}/10`;
         document.getElementById('quiz-q').innerText = d.q;
         const cont = document.getElementById('quiz-options'); cont.innerHTML = '';
-        d.a.forEach(opt => { const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt; b.onclick = () => { state.qIdx++; renderQuiz(); }; cont.appendChild(b); });
+        d.a.forEach(opt => {
+            const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt;
+            b.onclick = () => { state.qIdx++; renderQuiz(); }; cont.appendChild(b);
+        });
     }
 
     function triggerVictory(nextStage) {
@@ -162,8 +161,9 @@
     function startStage(s) {
         state.stage = s; state.active = false; state.score = 0; state.enemies = []; state.obstacles = []; state.bullets = []; state.pX = 225; state.pY = 700; state.velX = 0; state.velY = 0;
         showScreen('ready-overlay');
-        const cfg = { harvest: ["THE HARVEST", "Catch 10 Hearts!"], obby: ["THE LEAP", "TAPPING jumps! Move left/right to CJ!"], memory: ["HEART SNAP", "Match Pairs!"], boss: ["FINAL BOSS", "Defeat Distance!"] };
-        document.getElementById('ready-title').innerText = cfg[s][0]; document.getElementById('ready-instr').innerText = cfg[s][1];
+        const cfg = { harvest: ["THE HARVEST", "Catch 10 Hearts!"], obby: ["THE LEAP", "TAPPING jumps! Reach CJ!"], memory: ["HEART SNAP", "Match all Pairs!"], boss: ["FINAL BOSS", "Defeat Distance!"] };
+        document.getElementById('ready-title').innerText = cfg[s][0];
+        document.getElementById('ready-instr').innerText = cfg[s][1];
         let c = 3; const itv = setInterval(() => { if(--c <= 0) { clearInterval(itv); document.getElementById('ready-overlay').classList.add('hidden'); initLogic(s); } else document.getElementById('countdown').innerText = c; }, 1000);
     }
 
@@ -228,9 +228,8 @@
 
     function showFinalScroll() {
         const scroll = document.getElementById('final-scroll'); scroll.style.display='block'; setTimeout(() => scroll.classList.add('open'), 10);
-        let i = 0; 
-        const letterDiv = document.getElementById('letter');
-        letterDiv.innerHTML = "";
+        let i = 0; const letterDiv = document.getElementById('letter'); letterDiv.innerHTML = "";
+        const letterContent = `Lexi, They say in most games you only get one life, but honestly? Being with you feels like a permanent power-up. Whether we’re locked in on a mission or just yapping until the stars fade into the morning, you’re the only one I want on my team. No debate.\n\nDistance is just a glitch in the system—a temporary lag spike in a connection that’s already written in the stars. My heart is permanently synced to yours. The numbers on a screen could never measure the way you make me feel; you are the only thing that feels real in this digital multiverse.\n\nYou’ve guarded my heart better than any high score, and I promise to keep yours on lock forever. You aren't just my Player Two; you’re my sanctuary, my endgame, and my entire world.\n\nI’m so cooked for you, Lexi. I'm choosing you today, tomorrow, and every day after that.\n\nYours forever, CJ Morales`;
         function type() { if(i < letterContent.length) { letterDiv.innerHTML += letterContent[i]==='\n'?'<br>':letterContent[i]; i++; setTimeout(type, 30); scroll.scrollTop=scroll.scrollHeight; } } type();
     }
 
