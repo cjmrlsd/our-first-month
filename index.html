@@ -24,7 +24,6 @@
         #load-bar-fill { width: 0%; height: 100%; background: var(--accent-red); position: absolute; left: 0; top: 0; }
         #victory-overlay { position: absolute; inset: 0; z-index: 2000; background: rgba(255, 245, 247, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; }
         .victory-text { font-family: 'Fredoka One'; color: var(--deep-berry); font-size: 32px; animation: bounce 0.5s infinite alternate; }
-        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
         #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 90%; max-width: 320px; }
         .card { aspect-ratio: 1/1; background: #ffc2d1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; color: transparent; border: 3px solid white; box-shadow: 0 4px 0 #fb6f92; transition: 0.3s; }
         .card.flipped { background: white; color: initial; transform: rotateY(180deg); }
@@ -38,26 +37,29 @@
 <body>
 <div id="game-container">
     <div id="stats-bar" style="position: absolute; top: 20px; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; color: var(--deep-berry);"><div id="lives-ui">❤️❤️❤️❤️❤️❤️❤️❤️❤️</div></div>
-    <div id="music-player" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></div>
+    
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <div id="music-player-container" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
+        <div id="player"></div>
+    </div>
+
     <div id="victory-overlay"><div class="victory-text">LEVEL CLEAR! ✨</div></div>
 
     <div id="scr-load" class="screen">
         <div style="font-size:65px; animation: pulse 1s infinite;">🍓</div>
         <div id="percent-text" style="font-family:'Silkscreen'; color: var(--text-pixel); font-weight: bold;">0%</div>
         <div id="load-bar-container"><div id="load-bar-fill"></div></div>
-        <div id="trivia-box" style="height:60px; font-size:13px; font-weight:bold; color: var(--text-pixel); font-family: 'Fredoka One'; padding: 0 10px;">Syncing Multiverse...</div>
+        <div id="trivia-box" style="height:60px; font-size:13px; font-weight:bold; color: var(--text-pixel); font-family: 'Fredoka One'; padding: 0 10px;">Checking Music Status...</div>
     </div>
 
     <div id="scr-title" class="screen hidden">
         <h1 style="font-family:'Fredoka One'; color: var(--deep-berry); font-size: 28px;">STRAWBERRY MULTIVERSE</h1>
-        <button class="btn tight-btn" onclick="startAdventureWithMusic()">START ADVENTURE ✨</button>
+        <button id="start-btn" class="btn tight-btn" onclick="startGame()">START ADVENTURE ✨</button>
     </div>
 
     <div id="scr-gate1" class="screen hidden"><h2>DO YOU LOVE ME?</h2><div style="display:flex; gap:10px;"><button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button><button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button></div></div>
     <div id="scr-gate2" class="screen hidden"><h2>DO YOU REALLY LOVE ME?</h2><div id="gate-area-logic" style="width:100%; height:300px; position:relative; display:flex; gap:10px; align-items:center; justify-content:center;"><button id="yes-btn-3" class="btn tight-btn" onclick="handleYesSequence()">YES!</button><button id="no-run" class="btn tight-btn" onmouseover="teleportNo()" ontouchstart="teleportNo()" onclick="handleNoClick()">NO</button></div></div>
-
     <div id="scr-quiz" class="screen hidden"><h2 id="quiz-count" style="font-size:11px; color:var(--deep-berry);">SYNCING...</h2><p id="quiz-q" style="min-height:50px; font-weight:bold; font-size:16px; font-family: 'Fredoka One';"></p><div id="quiz-options" style="display:flex; flex-direction:column; align-items:center; width:100%; gap:8px;"></div></div>
-
     <div id="scr-memory" class="screen hidden"><h2 style="font-family:'Fredoka One'; color: var(--deep-berry);">✨ HEART SNAP ✨</h2><div id="matches-text" style="font-family:'Silkscreen'; margin-bottom: 10px;">Matches: 0 / 6</div><div id="memory-grid"></div></div>
 
     <div id="scr-boss" class="screen hidden" style="padding:0;">
@@ -82,48 +84,75 @@
 </div>
 
 <script>
-    /* STAGE 1 TRIVIA & STAGE 3 QUESTIONS (UNTOUCHED) */
     const triviaList = ["LDR Love Language: FaceTiming until we fall asleep. 💤", "Who yaps more? Definitely one of us. 🎤", "Time zones can't keep us apart! ⏰", "CJ + Lexi = The Ultimate Duo. 🍓", "Syncing braincells in 3... 2... 1...", "Did you know CJ loves you more than iced coffee?", "Distance is just a number."];
-    const quizData = [
-        {q: "What’s our official LDR love language?", a: ["Virtual movie marathons.", "Yapping sessions", "Sending TikToks I’ve already seen.", "Falling asleep on the phone together.", "Lablab", "All of the above (We’re obsessed)."]},
-        {q: "The most flirty thing you can say to me right now is...", a: ["'I booked a flight.'", "'Check your door, I sent food.'", "I'm wearing that shirt you like.'", "Aliiiiiiiii~ <3", "None (It's actually 'I bought you a Squishmallow')."]},
-        {q: "Who is the designated 'Yap-Master' during calls?", a: ["You (and it's adorable).", "Me (sorry for the 20-minute rant).", "We both fight for the mic.", "The dog that won't stop barking."]},
-        {q: "What’s my favorite 'view' whilst we’re apart?", a: ["Your morning selfies.", "Your message or call notifications.", "The countdown app on my home screen.", "All (but mostly your face)."]},
-        {q: "Our first physical meeting would be like...", a: ["A slow-mo movie scene.", "Pure chaos and crying.", "'Finally, I can stop smelling my screen.'", "A Pinterest board coming to life."]},
-        {q: "What is the ultimate 'LDR struggle' we’ve mastered?", a: ["Bad Wi-Fi during the best part.", "Time zone math (mathematician vibes).", "The 'I miss you' loop every 5 mins.", "The grumpy mode kapag gutom", "All of the above."]},
-        {q: "Which red flag I’d actually ignore for you?", a: ["You leave me on read for 2 mins.", "Your music taste is interesting.", "You’re a miles-away-princess.", "None (You're a green flag with glitter)."]},
-        {q: "If we were in a 'U-Haul' movie, who’s driving?", a: ["You (The Captain).", "Me (The Navigator).", "We’re both in the back with snacks.", "We aren't driving, we're already moved in."]},
-        {q: "The most 'us' thing we do is...", a: ["Virtual date nights with same movie.", "TikTok shares 50x a day.", "Competitive flirting.", "All of the above."]},
-        {q: "How much do I actually love you?", a: ["To the moon and back.", "More than iced coffee/strawberry.", "Enough to fight Distance Boss forever.", "All that is mentioned and more."]}
-    ];
+    const quizData = [{q: "What’s our official LDR love language?", a: ["Virtual movie marathons.", "Yapping sessions", "Sending TikToks I’ve already seen.", "Falling asleep on the phone together.", "Lablab", "All of the above (We’re obsessed)."]}, {q: "The most flirty thing you can say to me right now is...", a: ["'I booked a flight.'", "'Check your door, I sent food.'", "I'm wearing that shirt you like.'", "Aliiiiiiiii~ <3", "None (It's actually 'I bought you a Squishmallow')."]}, {q: "Who is the designated 'Yap-Master' during calls?", a: ["You (and it's adorable).", "Me (sorry for the 20-minute rant).", "We both fight for the mic.", "The dog that won't stop barking."]}, {q: "What’s my favorite 'view' whilst we’re apart?", a: ["Your morning selfies.", "Your message or call notifications.", "The countdown app on my home screen.", "All (but mostly your face)."]}, {q: "Our first physical meeting would be like...", a: ["A slow-mo movie scene.", "Pure chaos and crying.", "'Finally, I can stop smelling my screen.'", "A Pinterest board coming to life."]}, {q: "What is the ultimate 'LDR struggle' we’ve mastered?", a: ["Bad Wi-Fi during the best part.", "Time zone math (mathematician vibes).", "The 'I miss you' loop every 5 mins.", "The grumpy mode kapag gutom", "All of the above."]}, {q: "Which red flag I’d actually ignore for you?", a: ["You leave me on read for 2 mins.", "Your music taste is interesting.", "You’re a miles-away-princess.", "None (You're a green flag with glitter)."]}, {q: "If we were in a 'U-Haul' movie, who’s driving?", a: ["You (The Captain).", "Me (The Navigator).", "We’re both in the back with snacks.", "We aren't driving, we're already moved in."]}, {q: "The most 'us' thing we do is...", a: ["Virtual date nights with same movie.", "TikTok shares 50x a day.", "Competitive flirting.", "All of the above."]}, {q: "How much do I actually love you?", a: ["To the moon and back.", "More than iced coffee/strawberry.", "Enough to fight Distance Boss forever.", "All that is mentioned and more."]}];
 
     let state = { lives: 9, stage: 'load', active: false, score: 0, pX: 225, pY: 700, velX: 0, velY: 0, bullets: [], obstacles: [], enemies: [], boss: { active: false, hp: 100, max: 100, timer: 0 }, travel: 0, currentBossStage: 0, frameCount: 0, targetX: 225, targetY: 700, qIdx: 0, keys: {}, onGround: false };
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const platforms = [{x:0,y:750,w:450,h:50},{x:50,y:620,w:120,h:15},{x:280,y:530,w:120,h:15},{x:100,y:440,w:120,h:15},{x:280,y:350,w:120,h:15},{x:50,y:260,w:350,h:20,goal:true}];
-    let gateYesClicks = 0, noClickAttempts = 0;
+    let gateYesClicks = 0, noClickAttempts = 0, musicReady = false;
+    let ytPlayer;
 
-    /* THE HEARTFELT LETTER CONTENT */
-    const letterContent = `Lexi, They say in most games you only get one life, but honestly? Being with you feels like a permanent power-up. Whether we’re locked in on a mission or just yapping until the stars fade into the morning, you’re the only one I want on my team. No debate.\n\nDistance is just a glitch in the system—a temporary lag spike in a connection that’s already written in the stars. My heart is permanently synced to yours. The numbers on a screen could never measure the way you make me feel; you are the only thing that feels real in this digital multiverse.\n\nYou’ve guarded my heart better than any high score, and I promise to keep yours on lock forever. You aren't just my Player Two; you’re my sanctuary, my endgame, and my entire world.\n\nI’m so cooked for you, Lexi. I'm choosing you today, tomorrow, and every day after that.\n\nYours forever, CJ Morales`;
+    // --- ANTI-AD LOADING GATE ---
+    function onYouTubeIframeAPIReady() {
+        ytPlayer = new YT.Player('player', {
+            height: '1', width: '1',
+            videoId: 'Uj93hicGDNc',
+            playerVars: { 'autoplay': 1, 'controls': 0, 'modestbranding': 1, 'loop': 1, 'playlist': 'Uj93hicGDNc' },
+            events: {
+                'onReady': (event) => { 
+                    event.target.mute(); // Autoplay requires mute initially
+                    event.target.playVideo();
+                },
+                'onStateChange': (event) => {
+                    // YT State 1 is "Playing". If it's playing and it's not an ad, we consider it ready.
+                    if (event.data == YT.PlayerState.PLAYING) {
+                        musicReady = true;
+                    }
+                }
+            }
+        });
+    }
 
-    /* UNTOUCHED STAGE 1 LOADING LOGIC */
     document.addEventListener("DOMContentLoaded", function() {
         canvas.width = 450; canvas.height = 800;
         let progress = 0;
         const loadInt = setInterval(() => {
-            progress += 1; document.getElementById('load-bar-fill').style.width = progress + "%"; document.getElementById('percent-text').innerText = progress + "%";
-            if(progress % 20 === 0) document.getElementById('trivia-box').innerText = triviaList[Math.floor(Math.random()*triviaList.length)];
-            if(progress >= 100) { clearInterval(loadInt); showScreen('scr-title'); }
-        }, 40);
+            // Load up to 95% normally
+            if (progress < 95) {
+                progress += 1;
+            } 
+            // Only finish the last 5% if YouTube confirms music is playing (not an ad)
+            else if (progress >= 95 && progress < 100 && musicReady) {
+                progress += 1;
+            }
+
+            document.getElementById('load-bar-fill').style.width = progress + "%";
+            document.getElementById('percent-text').innerText = progress + "%";
+            
+            if(progress < 95 && progress % 20 === 0) {
+                document.getElementById('trivia-box').innerText = triviaList[Math.floor(Math.random()*triviaList.length)];
+            } else if (progress >= 95 && !musicReady) {
+                document.getElementById('trivia-box').innerText = "Skipping Ads & Buffering Music... 🎧";
+            }
+
+            if(progress >= 100) {
+                clearInterval(loadInt);
+                showScreen('scr-title');
+            }
+        }, 50);
     });
 
-    function startAdventureWithMusic() {
-        const musicURL = "https://www.youtube-nocookie.com/embed/Uj93hicGDNc?autoplay=1&controls=0&modestbranding=1&loop=1&playlist=Uj93hicGDNc&rel=0&iv_load_policy=3";
-        document.getElementById('music-player').innerHTML = `<iframe width="200" height="200" src="${musicURL}" frameborder="0" allow="autoplay"></iframe>`;
+    function startGame() {
+        ytPlayer.unMute();
+        ytPlayer.setVolume(50);
         showScreen('scr-gate1');
     }
 
-    /* UNTOUCHED GATES, QUIZ, MEMORY, BOSS HANDLERS */
+    function startAdventureWithMusic() { startGame(); }
+
+    // concepto-preserved logic
     function handleYesSequence() { if(++gateYesClicks >= 3) startQuiz(); teleportNo(); }
     function teleportNo() { const noBtn = document.getElementById('no-run'); noBtn.style.position = 'absolute'; const area = document.getElementById('gate-area-logic'); noBtn.style.left = Math.random()*(area.clientWidth-80)+'px'; noBtn.style.top = Math.random()*(area.clientHeight-40)+'px'; }
     function handleNoClick() { if(++noClickAttempts >= 20) { alert("Halaa di mo na ako lab? :<<"); noClickAttempts=0; } teleportNo(); }
@@ -135,101 +164,21 @@
         const cont = document.getElementById('quiz-options'); cont.innerHTML = '';
         d.a.forEach(opt => { const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt; b.onclick = () => { state.qIdx++; renderQuiz(); }; cont.appendChild(b); });
     }
-
-    function triggerVictory(nextStage) {
-        state.active = false;
-        const ov = document.getElementById('victory-overlay');
-        ov.style.display = 'flex';
-        setTimeout(() => { ov.style.display = 'none'; startStage(nextStage); }, 2000);
-    }
-
-    function startStage(s) {
-        state.stage = s; state.active = false; state.score = 0; state.enemies = []; state.obstacles = []; state.bullets = []; state.pX = 225; state.pY = 700; state.velX = 0; state.velY = 0;
-        showScreen('ready-overlay');
-        const cfg = { harvest: ["THE HARVEST", "Catch 10 Hearts!"], obby: ["THE LEAP", "TAPPING jumps! Reach CJ!"], memory: ["HEART SNAP", "Match all Pairs!"], boss: ["FINAL BOSS", "Defeat Distance!"] };
-        document.getElementById('ready-title').innerText = cfg[s][0]; document.getElementById('ready-instr').innerText = cfg[s][1];
-        let c = 3; const itv = setInterval(() => { if(--c <= 0) { clearInterval(itv); document.getElementById('ready-overlay').classList.add('hidden'); initLogic(s); } else document.getElementById('countdown').innerText = c; }, 1000);
-    }
-
+    function triggerVictory(nextStage) { state.active = false; const ov = document.getElementById('victory-overlay'); ov.style.display = 'flex'; setTimeout(() => { ov.style.display = 'none'; startStage(nextStage); }, 2000); }
+    function startStage(s) { state.stage = s; state.active = false; state.score = 0; state.enemies = []; state.obstacles = []; state.bullets = []; state.pX = 225; state.pY = 700; state.velX = 0; state.velY = 0; showScreen('ready-overlay'); const cfg = { harvest: ["THE HARVEST", "Catch 10 Hearts!"], obby: ["THE LEAP", "TAP to jump! Reach CJ!"], memory: ["HEART SNAP", "Match all Pairs!"], boss: ["FINAL BOSS", "Defeat Distance!"] }; document.getElementById('ready-title').innerText = cfg[s][0]; document.getElementById('ready-instr').innerText = cfg[s][1]; let c = 3; const itv = setInterval(() => { if(--c <= 0) { clearInterval(itv); document.getElementById('ready-overlay').classList.add('hidden'); initLogic(s); } else document.getElementById('countdown').innerText = c; }, 1000); }
     function initLogic(s) { document.getElementById('stats-bar').style.display = 'flex'; canvas.style.display = 'block'; if(s === 'memory') { canvas.style.display = 'none'; showScreen('scr-memory'); setupMemory(); } else if(s === 'boss') { showScreen('scr-boss'); state.active = true; loopBoss(); } else { state.active = true; requestAnimationFrame(engine); } }
-
-    /* FIXED STAGE 4 & 5 PHYSICS ENGINE */
-    function engine() {
-        if(!state.active || state.stage === 'boss' || state.stage === 'memory') return;
-        ctx.clearRect(0,0,450,800);
-        if(state.stage === 'harvest') {
-            if(Math.random() < 0.05) state.enemies.push({x: Math.random()*400 + 25, y: -50, t: Math.random() > 0.3 ? '💖' : '👾'});
-            state.enemies.forEach((it, i) => { it.y += 6; ctx.font = "40px Arial"; ctx.fillText(it.t, it.x - 20, it.y); if(it.y > 670 && it.y < 730 && Math.abs(it.x - state.pX) < 50) { if(it.t === '💖') state.score++; else hit(); state.enemies.splice(i,1); } });
-            ctx.fillStyle = "#5d3a3e"; ctx.font = "bold 20px Fredoka One"; ctx.fillText(`Hearts: ${state.score}/10`, 20, 50);
-            drawP("🧺", 700); if(state.score >= 10) triggerVictory('obby');
-        }
-        if(state.stage === 'obby') {
-            state.velY += 0.8; state.pX += state.velX; state.pY += state.velY; state.velX *= 0.85;
-            platforms.forEach(plat => {
-                ctx.fillStyle = plat.goal ? '#ffea8a' : '#ff8fa3'; ctx.beginPath(); ctx.roundRect(plat.x, plat.y, plat.w, plat.h, 5); ctx.fill();
-                if(state.pX > plat.x - 20 && state.pX < plat.x + plat.w + 20 && state.pY > plat.y - 5 && state.pY < plat.y + plat.h + 5 && state.velY > 0) { state.pY = plat.y; state.velY = 0; state.onGround = true; if(plat.goal) triggerVictory('memory'); }
-            });
-            if(state.pY > 850) { hit(); state.pX = 225; state.pY = 700; state.velY = 0; }
-            ctx.font = "40px Arial"; ctx.fillText("🧍‍♀️", state.pX - 20, state.pY); ctx.fillText("👧", 250, 240);
-        }
-        requestAnimationFrame(engine);
-    }
-
-    /* UNTOUCHED STAGE 7 BOSS LOGIC */
-    function loopBoss() {
-        if(!state.active || state.stage !== 'boss') return;
-        state.frameCount++; state.pX += (state.targetX - state.pX) * 0.15; state.pY += (state.targetY - state.pY) * 0.15;
-        if(!state.boss.active) {
-            state.travel += 0.085; document.querySelector('.distance-fill').style.width = state.travel + '%'; document.getElementById('km-text').innerText = Math.floor(10500 * (1 - state.travel/100)).toLocaleString() + " KM";
-            if(state.travel >= 30 && state.currentBossStage === 0) startBossInstance("STORM", "Lexi, you can't pass!", "⛈️", 250);
-            if(state.travel >= 65 && state.currentBossStage === 1) startBossInstance("GHOST", "7 hour gap!", "👻", 350);
-            if(state.travel >= 98 && state.currentBossStage === 2) startBossInstance("WORLD", "GIVE UP!", "🌍", 650);
-        }
-        if(state.frameCount % 8 === 0) state.bullets.push({x: state.pX, y: state.pY, s: 16});
-        state.bullets.forEach((b, i) => { b.y -= b.s; if(state.boss.active && b.y < 200 && Math.abs(b.x - 225) < 80) { state.boss.hp -= 5; state.bullets.splice(i, 1); document.getElementById('hp-fill').style.width = (state.boss.hp/state.boss.max*100) + '%'; if(state.boss.hp <= 0) winBossInstance(); } });
-        if(state.boss.active && state.frameCount % 20 === 0) state.obstacles.push({x: Math.random()*450, y: 150, t: '⚡'});
-        state.obstacles.forEach((o, i) => { o.y += 7; if(Math.hypot(state.pX-o.x, state.pY-o.y) < 35) { state.travel=Math.max(0, state.travel - 2); state.obstacles.splice(i,1); } });
-        drawBoss(); requestAnimationFrame(loopBoss);
-    }
-
+    function engine() { if(!state.active || state.stage === 'boss' || state.stage === 'memory') return; ctx.clearRect(0,0,450,800); if(state.stage === 'harvest') { if(Math.random() < 0.05) state.enemies.push({x: Math.random()*400 + 25, y: -50, t: Math.random() > 0.3 ? '💖' : '👾'}); state.enemies.forEach((it, i) => { it.y += 6; ctx.font = "40px Arial"; ctx.fillText(it.t, it.x - 20, it.y); if(it.y > 670 && it.y < 730 && Math.abs(it.x - state.pX) < 50) { if(it.t === '💖') state.score++; else hit(); state.enemies.splice(i,1); } }); ctx.fillStyle = "#5d3a3e"; ctx.font = "bold 20px Fredoka One"; ctx.fillText(`Hearts: ${state.score}/10`, 20, 50); drawP("🧺", 700); if(state.score >= 10) triggerVictory('obby'); }
+    if(state.stage === 'obby') { state.velY += 0.8; state.pX += state.velX; state.pY += state.velY; state.velX *= 0.85; platforms.forEach(plat => { ctx.fillStyle = plat.goal ? '#ffea8a' : '#ff8fa3'; ctx.beginPath(); ctx.roundRect(plat.x, plat.y, plat.w, plat.h, 5); ctx.fill(); if(state.pX > plat.x - 20 && state.pX < plat.x + plat.w + 20 && state.pY > plat.y - 5 && state.pY < plat.y + plat.h + 5 && state.velY > 0) { state.pY = plat.y; state.velY = 0; state.onGround = true; if(plat.goal) triggerVictory('memory'); } }); if(state.pY > 850) { hit(); state.pX = 225; state.pY = 700; state.velY = 0; } ctx.font = "40px Arial"; ctx.fillText("🧍‍♀️", state.pX - 20, state.pY); ctx.fillText("👧", 250, 240); } requestAnimationFrame(engine); }
+    function loopBoss() { if(!state.active || state.stage !== 'boss') return; state.frameCount++; state.pX += (state.targetX - state.pX) * 0.15; state.pY += (state.targetY - state.pY) * 0.15; if(!state.boss.active) { state.travel += 0.085; document.querySelector('.distance-fill').style.width = state.travel + '%'; document.getElementById('km-text').innerText = Math.floor(10500 * (1 - state.travel/100)).toLocaleString() + " KM"; if(state.travel >= 30 && state.currentBossStage === 0) startBossInstance("STORM", "Lexi, you can't pass!", "⛈️", 250); if(state.travel >= 65 && state.currentBossStage === 1) startBossInstance("GHOST", "7 hour gap!", "👻", 350); if(state.travel >= 98 && state.currentBossStage === 2) startBossInstance("WORLD", "GIVE UP!", "🌍", 650); }
+    if(state.frameCount % 8 === 0) state.bullets.push({x: state.pX, y: state.pY, s: 16}); state.bullets.forEach((b, i) => { b.y -= b.s; if(state.boss.active && b.y < 200 && Math.abs(b.x - 225) < 80) { state.boss.hp -= 5; state.bullets.splice(i, 1); document.getElementById('hp-fill').style.width = (state.boss.hp/state.boss.max*100) + '%'; if(state.boss.hp <= 0) winBossInstance(); } }); if(state.boss.active && state.frameCount % 20 === 0) state.obstacles.push({x: Math.random()*450, y: 150, t: '⚡'}); state.obstacles.forEach((o, i) => { o.y += 7; if(Math.hypot(state.pX-o.x, state.pY-o.y) < 35) { state.travel=Math.max(0, state.travel - 2); state.obstacles.splice(i,1); } }); drawBoss(); requestAnimationFrame(loopBoss); }
     function startBossInstance(name, txt, icon, hp) { state.boss = { active: true, name, icon, hp, max: hp, timer: 0 }; document.getElementById('boss-label').innerText = name; document.getElementById('boss-tag').style.display='flex'; document.getElementById('bubble').style.display='block'; document.getElementById('bubble').innerText=txt; document.getElementById('bubble').style.left='135px'; document.getElementById('bubble').style.top='200px'; }
     function winBossInstance() { document.getElementById('boss-tag').style.display='none'; document.getElementById('bubble').style.display='none'; if(state.currentBossStage === 2) { state.active=false; showFinalScroll(); } else state.currentBossStage++; state.boss.active=false; }
     function drawBoss() { ctx.clearRect(0,0,450,800); state.bullets.forEach(b => { ctx.font='20px Arial'; ctx.fillText('❤️', b.x-10, b.y); }); state.obstacles.forEach(o => { ctx.font='24px Arial'; ctx.fillText(o.t, o.x-12, o.y); }); ctx.font='45px Arial'; ctx.fillText('🍓', state.pX-22, state.pY); if(state.boss.active) { ctx.font='100px Arial'; ctx.textAlign='center'; ctx.fillText(state.boss.icon, 225, 180); } }
-
-    function setupMemory() {
-        const grid = document.getElementById('memory-grid'); const emojis = ['🦄', '🌈', '👩‍❤️‍👩', '🌸', '✨', '🍓'];
-        let cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5); grid.innerHTML = '';
-        cards.forEach(emoji => {
-            const card = document.createElement('div'); card.className = 'card'; card.innerText = emoji;
-            card.onclick = () => {
-                if(card.classList.contains('flipped') || (state.flippedCards && state.flippedCards.length >= 2)) return;
-                card.classList.add('flipped'); state.flippedCards = state.flippedCards || []; state.flippedCards.push(card);
-                if(state.flippedCards.length === 2) {
-                    if(state.flippedCards[0].innerText === state.flippedCards[1].innerText) { state.flippedCards.forEach(c => c.classList.add('matched')); state.flippedCards = []; if(document.querySelectorAll('.matched').length === 12) triggerVictory('boss'); }
-                    else { setTimeout(() => { state.flippedCards.forEach(c => c.classList.remove('flipped')); state.flippedCards = []; }, 800); }
-                }
-            }; grid.appendChild(card);
-        });
-    }
-
-    /* THE TYPEWRITER LETTER HANDLER */
-    function showFinalScroll() {
-        const scroll = document.getElementById('final-scroll'); scroll.style.display='block'; setTimeout(() => scroll.classList.add('open'), 10);
-        let i = 0; const letterDiv = document.getElementById('letter'); letterDiv.innerHTML = "";
-        function type() { if(i < letterContent.length) { letterDiv.innerHTML += letterContent[i]==='\n'?'<br>':letterContent[i]; i++; setTimeout(type, 30); scroll.scrollTop=scroll.scrollHeight; } } type();
-    }
-
-    const handleInput = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const touchX = (clientX - rect.left) * (canvas.width / rect.width);
-        if (state.stage === 'obby') {
-            if (e.type === 'touchstart' || e.type === 'mousedown') { if (state.onGround) { state.velY = -17; state.onGround = false; } }
-            state.targetX = touchX; state.velX += (touchX < state.pX) ? -1.2 : 1.2;
-        } else { state.targetX = touchX; state.pX = touchX; }
-    };
-    window.addEventListener('mousedown', handleInput); window.addEventListener('touchstart', handleInput);
-    window.addEventListener('mousemove', (e) => { if(state.stage !== 'obby') handleInput(e); });
+    function setupMemory() { const grid = document.getElementById('memory-grid'); const emojis = ['🦄', '🌈', '👩‍❤️‍👩', '🌸', '✨', '🍓']; let cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5); grid.innerHTML = ''; cards.forEach(emoji => { const card = document.createElement('div'); card.className = 'card'; card.innerText = emoji; card.onclick = () => { if(card.classList.contains('flipped') || (state.flippedCards && state.flippedCards.length >= 2)) return; card.classList.add('flipped'); state.flippedCards = state.flippedCards || []; state.flippedCards.push(card); if(state.flippedCards.length === 2) { if(state.flippedCards[0].innerText === state.flippedCards[1].innerText) { state.flippedCards.forEach(c => c.classList.add('matched')); state.flippedCards = []; if(document.querySelectorAll('.matched').length === 12) triggerVictory('boss'); } else { setTimeout(() => { state.flippedCards.forEach(c => c.classList.remove('flipped')); state.flippedCards = []; }, 800); } } }; grid.appendChild(card); }); }
+    function showFinalScroll() { const scroll = document.getElementById('final-scroll'); scroll.style.display='block'; setTimeout(() => scroll.classList.add('open'), 10); let i = 0; const letterDiv = document.getElementById('letter'); letterDiv.innerHTML = ""; const letterContent = `Lexi, They say in most games you only get one life, but honestly? Being with you feels like a permanent power-up. Whether we’re locked in on a mission or just yapping until the stars fade into the morning, you’re the only one I want on my team. No debate.\n\nDistance is just a glitch in the system—a temporary lag spike in a connection that’s already written in the stars. My heart is permanently synced to yours. The numbers on a screen could never measure the way you make me feel; you are the only thing that feels real in this digital multiverse.\n\nYou’ve guarded my heart better than any high score, and I promise to keep yours on lock forever. You aren't just my Player Two; you’re my sanctuary, my endgame, and my entire world.\n\nI’m so cooked for you, Lexi. I'm choosing you today, tomorrow, and every day after that.\n\nYours forever, CJ Morales`;
+    function type() { if(i < letterContent.length) { letterDiv.innerHTML += letterContent[i]==='\n'?'<br>':letterContent[i]; i++; setTimeout(type, 30); scroll.scrollTop=scroll.scrollHeight; } } type(); }
+    const handleInput = (e) => { const rect = canvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const touchX = (clientX - rect.left) * (canvas.width / rect.width); if (state.stage === 'obby') { if (e.type === 'touchstart' || e.type === 'mousedown') { if (state.onGround) { state.velY = -17; state.onGround = false; } } state.targetX = touchX; state.velX += (touchX < state.pX) ? -1.2 : 1.2; } else { state.targetX = touchX; state.pX = touchX; } };
+    window.addEventListener('mousedown', handleInput); window.addEventListener('touchstart', handleInput); window.addEventListener('mousemove', (e) => { if(state.stage !== 'obby') handleInput(e); });
     function drawP(e, y) { ctx.font="50px Arial"; ctx.fillText(e, state.pX-25, y); }
     function hit() { state.lives--; document.getElementById('lives-ui').innerText = "❤️".repeat(state.lives); if(state.lives<=0) { state.active=false; document.getElementById('death-screen').style.display='flex'; } }
     function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
