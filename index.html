@@ -7,69 +7,38 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Silkscreen:wght@400;700&family=Quicksand:wght@500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Aligned to Soft Pink Pastels */
-            --primary-pink: #ffdae0;    /* Soft Backgrounds */
-            --accent-red: #ff8fa3;      /* Critical UI / Soft Hearts */
-            --deep-berry: #ff4d6d;      /* Buttons / Strong Contrast */
+            --primary-pink: #ffdae0; --accent-red: #ff8fa3; --deep-berry: #ff4d6d;
             --bg-gradient: linear-gradient(180deg, #fff0f3 0%, #ffdae0 100%);
-            --surface-white: rgba(255, 255, 255, 0.85);
-            --scroll-paper: #fff9fa;
-            --text-dark: #5e3a3e;       /* Muted dark brown-pink for text */
-            --text-pixel: #8a5a61;
-            --border-soft: 6px solid #ffffff;
-            --gold: #ffea8a;            /* Pastel Gold */
+            --surface-white: rgba(255, 255, 255, 0.85); --scroll-paper: #fff9fa;
+            --text-dark: #5e3a3e; --text-pixel: #8a5a61; --border-soft: 6px solid #ffffff; --gold: #ffea8a;
         }
-
         * { touch-action: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #ffe5ec; font-family: 'Quicksand', sans-serif; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        
-        #game-container { 
-            width: 100vw; height: 100vh; max-width: 450px; 
-            background: var(--bg-gradient); 
-            position: relative; border: var(--border-soft); 
-            overflow: hidden; border-radius: 25px; 
-            box-shadow: 0 15px 50px rgba(255, 182, 193, 0.4); 
-        }
-
+        #game-container { width: 100vw; height: 100vh; max-width: 450px; background: var(--bg-gradient); position: relative; border: var(--border-soft); overflow: hidden; border-radius: 25px; box-shadow: 0 15px 50px rgba(255, 182, 193, 0.4); }
         .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 10; color: var(--text-dark); }
         .hidden { display: none !important; }
-
-        .btn { 
-            background: var(--deep-berry); color: white; border: none; 
-            padding: 12px 20px; border-radius: 15px; font-family: 'Silkscreen'; 
-            font-size: 11px; box-shadow: 0 6px 0 #e63958; cursor: pointer; margin: 5px; 
-        }
+        .btn { background: var(--deep-berry); color: white; border: none; padding: 12px 20px; border-radius: 15px; font-family: 'Silkscreen'; font-size: 11px; box-shadow: 0 6px 0 #e63958; cursor: pointer; margin: 5px; width: 85%; }
         .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #e63958; }
         .tight-btn { width: auto !important; padding: 10px 25px !important; display: inline-block; }
-
         #load-bar-container { width: 80%; height: 22px; background: var(--surface-white); border-radius: 12px; border: 3px solid #ffb3c1; overflow: hidden; margin: 20px 0; position: relative; }
         #load-bar-fill { width: 0%; height: 100%; background: var(--accent-red); position: absolute; left: 0; top: 0; }
-
         #victory-overlay { position: absolute; inset: 0; z-index: 2000; background: rgba(255, 245, 247, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; }
         .victory-text { font-family: 'Fredoka One'; color: var(--deep-berry); font-size: 32px; animation: bounce 0.5s infinite alternate; }
-
+        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
         #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 90%; max-width: 320px; }
         .card { aspect-ratio: 1/1; background: #ffc2d1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; color: transparent; border: 3px solid white; box-shadow: 0 4px 0 #fb6f92; transition: 0.3s; }
         .card.flipped { background: white; color: initial; transform: rotateY(180deg); }
         .card.matched { background: #f0fff4; border-color: #b7e4c7; box-shadow: none; }
-
         #final-scroll { display: none; position: absolute; inset: 0; z-index: 1000; background: var(--scroll-paper); padding: 40px 25px; overflow-y: auto; border: 10px solid #ffdae0; transform: scale(0); transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #final-scroll.open { display: block; transform: scale(1); }
         #letter { text-align: left; font-size: 10px; line-height: 1.8; color: var(--text-dark); font-family: 'Press Start 2P', cursive; }
-        
         canvas { background: transparent; width: 100%; height: 100%; display: none; object-fit: contain; }
-        #death-screen { position: absolute; inset: 0; background: rgba(94, 58, 62, 0.95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        
-        .hud-mini { position: absolute; top: 15px; width: 90%; left: 5%; display: flex; align-items: center; justify-content: space-between; background: var(--surface-white); padding: 8px 12px; border-radius: 15px; border: 2px solid #ffb3c1; z-index: 100; }
-        .distance-fill { height: 100%; width: 0%; background: var(--accent-red); }
-        .km-label { font-size: 10px; color: var(--text-dark); font-weight: 900; position: absolute; width: 100%; text-align: center; top: 0; }
     </style>
 </head>
 <body>
-
 <div id="game-container">
     <div id="stats-bar" style="position: absolute; top: 20px; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; color: var(--deep-berry);"><div id="lives-ui">❤️❤️❤️❤️❤️❤️❤️❤️❤️</div></div>
-    <div id="music-player" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden;"></div>
+    <div id="music-player" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></div>
     <div id="victory-overlay"><div class="victory-text">LEVEL CLEAR! ✨</div></div>
 
     <div id="scr-load" class="screen">
@@ -92,13 +61,13 @@
     <div id="scr-memory" class="screen hidden"><h2 style="font-family:'Fredoka One'; color: var(--deep-berry);">✨ HEART SNAP ✨</h2><div id="matches-text" style="font-family:'Silkscreen'; margin-bottom: 10px;">Matches: 0 / 6</div><div id="memory-grid"></div></div>
 
     <div id="scr-boss" class="screen hidden" style="padding:0;">
-        <div class="hud-mini">
+        <div class="hud-mini" style="position: absolute; top: 15px; width: 90%; left: 5%; display: flex; align-items: center; justify-content: space-between; background: var(--surface-white); padding: 8px 12px; border-radius: 15px; border: 2px solid #ffb3c1; z-index: 100;">
             <span class="flag">🇸🇪</span>
-            <div class="distance-bar-container" style="flex-grow: 1; margin: 0 10px; height: 14px; background: #eee; border-radius: 7px; position: relative; overflow: hidden; border: 1px solid #ddd;"><div class="km-label" id="km-text">10,500 KM</div><div class="distance-fill" style="height: 100%; width: 0%; background: var(--accent-red); border-radius: 5px;"></div></div>
+            <div class="distance-bar-container" style="flex-grow: 1; margin: 0 10px; height: 14px; background: #eee; border-radius: 7px; position: relative; overflow: hidden; border: 1px solid #ddd;"><div class="km-label" id="km-text" style="font-size: 10px; color: var(--text-dark); font-weight: 900; position: absolute; width: 100%; text-align: center; top: 0;">10,500 KM</div><div class="distance-fill" style="height: 100%; width: 0%; background: var(--accent-red); border-radius: 5px;"></div></div>
             <span class="flag">🇵🇭</span>
         </div>
         <div id="boss-tag" style="position: absolute; top: 75px; width: 100%; display: none; flex-direction: column; align-items: center; z-index: 100;"><div class="boss-name" id="boss-label" style="font-size: 11px; font-weight: 900; color: var(--deep-berry); margin-bottom: 3px; letter-spacing: 1px;">VILLAIN</div><div class="hp-container" style="width: 60%; height: 10px; background: #ddd; border-radius: 5px; border: 1.5px solid var(--deep-berry); overflow: hidden;"><div class="hp-fill" id="hp-fill" style="height: 100%; width: 100%; background: var(--deep-berry); transition: width 0.2s;"></div></div></div>
-        <div id="bubble" class="dialog-bubble"></div>
+        <div id="bubble" class="dialog-bubble" style="position: absolute; background: white; border: 3px solid var(--deep-berry); padding: 10px; border-radius: 18px; font-size: 14px; color: #444; font-weight: bold; text-align: center; z-index: 90; display: none; width: 180px;"></div>
         <canvas id="gameCanvas"></canvas>
     </div>
 
@@ -108,12 +77,12 @@
         <center><div style="font-size: 30px; margin: 20px 0;">👩‍❤️‍💋‍👩</div><button onclick="location.reload()" class="btn tight-btn" style="background: var(--deep-berry); border-radius:30px; font-family:'Fredoka One'; font-size: 16px;">Replay Journey</button></center>
     </div>
 
-    <div id="death-screen"><h1 style="font-family:'Silkscreen';">YOU DIED</h1><div id="fill-ui"></div><p>BLOW INTO MIC!</p><button class="btn tight-btn" onclick="initMic()">REVIVE</button></div>
+    <div id="death-screen" style="position: absolute; inset: 0; background: rgba(94, 58, 62, 0.95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><h1 style="font-family:'Silkscreen';">YOU DIED</h1><div id="fill-ui"></div><p>BLOW INTO MIC!</p><button class="btn tight-btn" onclick="initMic()">REVIVE</button></div>
     <div id="ready-overlay" class="screen hidden" style="background:rgba(255,245,247,0.98); z-index:1000;"><h2 id="ready-title" style="font-family:'Fredoka One'; color: var(--deep-berry);"></h2><p id="ready-instr" style="font-weight: bold;"></p><h1 id="countdown" style="font-family:'Silkscreen';">3</h1></div>
 </div>
 
 <script>
-    /* Concepts, Trivia, and Questions (UNTOUCHED) */
+    /* STAGE 1 TRIVIA & STAGE 3 QUESTIONS (UNTOUCHED) */
     const triviaList = ["LDR Love Language: FaceTiming until we fall asleep. 💤", "Who yaps more? Definitely one of us. 🎤", "Time zones can't keep us apart! ⏰", "CJ + Lexi = The Ultimate Duo. 🍓", "Syncing braincells in 3... 2... 1...", "Did you know CJ loves you more than iced coffee?", "Distance is just a number."];
     const quizData = [
         {q: "What’s our official LDR love language?", a: ["Virtual movie marathons.", "Yapping sessions", "Sending TikToks I’ve already seen.", "Falling asleep on the phone together.", "Lablab", "All of the above (We’re obsessed)."]},
@@ -134,16 +103,16 @@
     const platforms = [{x:0,y:750,w:450,h:50},{x:50,y:620,w:120,h:15},{x:280,y:530,w:120,h:15},{x:100,y:440,w:120,h:15},{x:280,y:350,w:120,h:15},{x:50,y:260,w:350,h:20,goal:true}];
     let gateYesClicks = 0, noClickAttempts = 0;
 
-    /* Loading Logic (UNTOUCHED Mechanics) */
+    /* THE HEARTFELT LETTER CONTENT */
+    const letterContent = `Lexi, They say in most games you only get one life, but honestly? Being with you feels like a permanent power-up. Whether we’re locked in on a mission or just yapping until the stars fade into the morning, you’re the only one I want on my team. No debate.\n\nDistance is just a glitch in the system—a temporary lag spike in a connection that’s already written in the stars. My heart is permanently synced to yours. The numbers on a screen could never measure the way you make me feel; you are the only thing that feels real in this digital multiverse.\n\nYou’ve guarded my heart better than any high score, and I promise to keep yours on lock forever. You aren't just my Player Two; you’re my sanctuary, my endgame, and my entire world.\n\nI’m so cooked for you, Lexi. I'm choosing you today, tomorrow, and every day after that.\n\nYours forever, CJ Morales`;
+
+    /* UNTOUCHED STAGE 1 LOADING LOGIC */
     document.addEventListener("DOMContentLoaded", function() {
         canvas.width = 450; canvas.height = 800;
         let progress = 0;
-        const fill = document.getElementById('load-bar-fill');
-        const pText = document.getElementById('percent-text');
-        const tBox = document.getElementById('trivia-box');
         const loadInt = setInterval(() => {
-            progress += 1; fill.style.width = progress + "%"; pText.innerText = progress + "%";
-            if(progress % 20 === 0) tBox.innerText = triviaList[Math.floor(Math.random()*triviaList.length)];
+            progress += 1; document.getElementById('load-bar-fill').style.width = progress + "%"; document.getElementById('percent-text').innerText = progress + "%";
+            if(progress % 20 === 0) document.getElementById('trivia-box').innerText = triviaList[Math.floor(Math.random()*triviaList.length)];
             if(progress >= 100) { clearInterval(loadInt); showScreen('scr-title'); }
         }, 40);
     });
@@ -154,6 +123,7 @@
         showScreen('scr-gate1');
     }
 
+    /* UNTOUCHED GATES, QUIZ, MEMORY, BOSS HANDLERS */
     function handleYesSequence() { if(++gateYesClicks >= 3) startQuiz(); teleportNo(); }
     function teleportNo() { const noBtn = document.getElementById('no-run'); noBtn.style.position = 'absolute'; const area = document.getElementById('gate-area-logic'); noBtn.style.left = Math.random()*(area.clientWidth-80)+'px'; noBtn.style.top = Math.random()*(area.clientHeight-40)+'px'; }
     function handleNoClick() { if(++noClickAttempts >= 20) { alert("Halaa di mo na ako lab? :<<"); noClickAttempts=0; } teleportNo(); }
@@ -163,10 +133,7 @@
         const d = quizData[state.qIdx]; document.getElementById('quiz-count').innerText = `SYNC: ${state.qIdx+1}/10`;
         document.getElementById('quiz-q').innerText = d.q;
         const cont = document.getElementById('quiz-options'); cont.innerHTML = '';
-        d.a.forEach(opt => {
-            const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt;
-            b.onclick = () => { state.qIdx++; renderQuiz(); }; cont.appendChild(b);
-        });
+        d.a.forEach(opt => { const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt; b.onclick = () => { state.qIdx++; renderQuiz(); }; cont.appendChild(b); });
     }
 
     function triggerVictory(nextStage) {
@@ -179,14 +146,14 @@
     function startStage(s) {
         state.stage = s; state.active = false; state.score = 0; state.enemies = []; state.obstacles = []; state.bullets = []; state.pX = 225; state.pY = 700; state.velX = 0; state.velY = 0;
         showScreen('ready-overlay');
-        const cfg = { harvest: ["THE HARVEST", "Catch 10 Hearts!"], obby: ["THE LEAP", "TAP to jump! Reach CJ!"], memory: ["HEART SNAP", "Match all Pairs!"], boss: ["FINAL BOSS", "Defeat Distance!"] };
-        document.getElementById('ready-title').innerText = cfg[s][0];
-        document.getElementById('ready-instr').innerText = cfg[s][1];
+        const cfg = { harvest: ["THE HARVEST", "Catch 10 Hearts!"], obby: ["THE LEAP", "TAPPING jumps! Reach CJ!"], memory: ["HEART SNAP", "Match all Pairs!"], boss: ["FINAL BOSS", "Defeat Distance!"] };
+        document.getElementById('ready-title').innerText = cfg[s][0]; document.getElementById('ready-instr').innerText = cfg[s][1];
         let c = 3; const itv = setInterval(() => { if(--c <= 0) { clearInterval(itv); document.getElementById('ready-overlay').classList.add('hidden'); initLogic(s); } else document.getElementById('countdown').innerText = c; }, 1000);
     }
 
     function initLogic(s) { document.getElementById('stats-bar').style.display = 'flex'; canvas.style.display = 'block'; if(s === 'memory') { canvas.style.display = 'none'; showScreen('scr-memory'); setupMemory(); } else if(s === 'boss') { showScreen('scr-boss'); state.active = true; loopBoss(); } else { state.active = true; requestAnimationFrame(engine); } }
 
+    /* FIXED STAGE 4 & 5 PHYSICS ENGINE */
     function engine() {
         if(!state.active || state.stage === 'boss' || state.stage === 'memory') return;
         ctx.clearRect(0,0,450,800);
@@ -200,14 +167,15 @@
             state.velY += 0.8; state.pX += state.velX; state.pY += state.velY; state.velX *= 0.85;
             platforms.forEach(plat => {
                 ctx.fillStyle = plat.goal ? '#ffea8a' : '#ff8fa3'; ctx.beginPath(); ctx.roundRect(plat.x, plat.y, plat.w, plat.h, 5); ctx.fill();
-                if(state.pX + 15 > plat.x && state.pX - 15 < plat.x + plat.w && state.pY > plat.y && state.pY < plat.y + plat.h) { if(state.velY > 0) { state.pY = plat.y; state.velY = 0; state.onGround = true; if(plat.goal) triggerVictory('memory'); } }
+                if(state.pX > plat.x - 20 && state.pX < plat.x + plat.w + 20 && state.pY > plat.y - 5 && state.pY < plat.y + plat.h + 5 && state.velY > 0) { state.pY = plat.y; state.velY = 0; state.onGround = true; if(plat.goal) triggerVictory('memory'); }
             });
-            if(state.pY > 850) { hit(); state.pX = 225; state.pY = 700; }
-            ctx.font = "40px Arial"; ctx.fillText("🧍‍♀️", state.pX - 20, state.pY); ctx.fillText("👧", 210, 230);
+            if(state.pY > 850) { hit(); state.pX = 225; state.pY = 700; state.velY = 0; }
+            ctx.font = "40px Arial"; ctx.fillText("🧍‍♀️", state.pX - 20, state.pY); ctx.fillText("👧", 250, 240);
         }
         requestAnimationFrame(engine);
     }
 
+    /* UNTOUCHED STAGE 7 BOSS LOGIC */
     function loopBoss() {
         if(!state.active || state.stage !== 'boss') return;
         state.frameCount++; state.pX += (state.targetX - state.pX) * 0.15; state.pY += (state.targetY - state.pY) * 0.15;
@@ -244,10 +212,10 @@
         });
     }
 
+    /* THE TYPEWRITER LETTER HANDLER */
     function showFinalScroll() {
         const scroll = document.getElementById('final-scroll'); scroll.style.display='block'; setTimeout(() => scroll.classList.add('open'), 10);
         let i = 0; const letterDiv = document.getElementById('letter'); letterDiv.innerHTML = "";
-        const letterContent = `Lexi, They say in most games you only get one life, but honestly? Being with you feels like a permanent power-up. Whether we’re locked in on a mission or just yapping until the stars fade into the morning, you’re the only one I want on my team. No debate.\n\nDistance is just a glitch in the system—a temporary lag spike in a connection that’s already written in the stars. My heart is permanently synced to yours. The numbers on a screen could never measure the way you make me feel; you are the only thing that feels real in this digital multiverse.\n\nYou’ve guarded my heart better than any high score, and I promise to keep yours on lock forever. You aren't just my Player Two; you’re my sanctuary, my endgame, and my entire world.\n\nI’m so cooked for you, Lexi. I'm choosing you today, tomorrow, and every day after that.\n\nYours forever, CJ Morales`;
         function type() { if(i < letterContent.length) { letterDiv.innerHTML += letterContent[i]==='\n'?'<br>':letterContent[i]; i++; setTimeout(type, 30); scroll.scrollTop=scroll.scrollHeight; } } type();
     }
 
