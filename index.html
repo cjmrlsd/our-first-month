@@ -30,99 +30,68 @@
             position: relative; overflow: hidden;
             border: 4px solid white;
             box-shadow: 0 0 20px rgba(138, 38, 58, 0.5);
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 1s ease;
+            transition: transform 0.6s ease, background 1s ease;
         }
 
+        .flipped { transform: rotate(180deg); }
         .yt-hide { position: absolute; visibility: hidden; width: 1px; height: 1px; pointer-events: none; }
-
-        #music-toggle {
-            position: absolute; top: 20px; right: 20px;
-            z-index: 1000; background: white; border: 2px solid var(--hot-pink);
-            border-radius: 50%; width: 44px; height: 44px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 20px; box-shadow: 0 4px 0 var(--pink);
-        }
-
-        .screen {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            text-align: center; padding: 20px; z-index: 10;
-            background: inherit;
-        }
-
+        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 10; background: inherit; }
         .hidden { display: none !important; }
 
-        /* Bottle Game Styles */
-        #bottle-scene {
-            position: absolute; inset: 0; z-index: 2000;
-            background: rgba(255, 245, 245, 0.95);
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-        }
+        /* Loading Feature */
+        #loading-bar-container { width: 80%; height: 25px; background: #eee; border: 3px solid var(--dark-pink); border-radius: 20px; margin: 20px 0; overflow: hidden; position: relative; }
+        #loading-fill { width: 0%; height: 100%; background: var(--hot-pink); transition: width 0.3s ease; }
+        #loading-perc { font-size: 14px; margin-bottom: 5px; color: var(--dark-pink); }
+        #loading-caption { font-size: 11px; color: var(--hot-pink); min-height: 40px; padding: 0 20px; line-height: 1.4; }
 
-        #the-bottle {
-            font-size: 120px; cursor: pointer; transition: transform 0.1s;
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));
-        }
+        .btn { background: var(--hot-pink); color: white; border: none; padding: 15px; border-radius: 50px; font-family: 'Silkscreen', cursive; font-size: 13px; cursor: pointer; box-shadow: 0 5px 0 var(--dark-pink); margin: 8px 0; width: 90%; position: relative; }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--dark-pink); }
 
-        #progress-container {
-            width: 70%; height: 20px; background: #eee;
-            border-radius: 10px; margin-top: 30px; border: 3px solid var(--dark-pink);
-            overflow: hidden;
-        }
-
-        #progress-bar { width: 0%; height: 100%; background: var(--hot-pink); transition: width 0.2s; }
-
-        #confetti-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 1500; display: none; }
-
-        .btn {
-            background: var(--hot-pink); color: white;
-            border: none; padding: 15px; border-radius: 50px;
-            font-family: 'Silkscreen', cursive; font-size: 13px;
-            cursor: pointer; box-shadow: 0 5px 0 var(--dark-pink);
-            margin: 8px 0; width: 90%;
-        }
-
-        #letter-overlay {
-            position: absolute; inset: 5%; background: #fffafa;
-            border: 4px solid var(--hot-pink); border-radius: 20px;
-            padding: 20px; z-index: 5000; overflow-y: auto;
-            display: none; flex-direction: column;
-        }
-
-        #boss-bubble {
-            position: absolute; top: 110px; left: 50%; transform: translateX(-50%);
-            background: white; border: 3px solid var(--dark-pink);
-            padding: 10px; border-radius: 15px; width: 85%; font-size: 11px; z-index: 50; display: none;
-        }
+        #bottle-scene { position: absolute; inset: 0; z-index: 2000; background: rgba(255, 245, 245, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; }
+        #the-bottle { font-size: 120px; transition: transform 0.1s; user-select: none; }
+        #letter-overlay { position: absolute; inset: 5%; background: #fffafa; border: 4px solid var(--hot-pink); border-radius: 20px; padding: 20px; z-index: 5000; overflow-y: auto; display: none; flex-direction: column; }
+        #boss-bubble { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); background: white; border: 3px solid var(--dark-pink); padding: 10px; border-radius: 15px; width: 85%; font-size: 11px; z-index: 50; display: none; }
+        #ui-layer { position:absolute; top:20px; left:20px; display:none; z-index:100; pointer-events: none; }
     </style>
 </head>
-<body onclick="playPopSound()">
+<body>
 
 <div id="game-container">
     <div id="player-chill" class="yt-hide"></div>
     <div id="player-boss" class="yt-hide"></div>
     <div id="player-win" class="yt-hide"></div>
 
-    <div id="music-toggle" onclick="event.stopPropagation(); toggleMusic()">🎵</div>
-    <div id="boss-bubble"></div>
-    <canvas id="confetti-canvas"></canvas>
-
-    <div id="ui-layer" style="position:absolute; top:20px; left:20px; display:none; z-index:100; pointer-events: none;">
+    <div id="music-toggle" onclick="toggleMusic()" style="position: absolute; top: 20px; right: 20px; z-index: 1000; background: white; border: 2px solid var(--hot-pink); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">🎵</div>
+    
+    <div id="ui-layer">
         <div id="heart-bar">❤️❤️❤️❤️❤️</div>
-        <div id="score-text" style="font-size: 12px; margin-top: 5px;">STRAWBERRIES: 0</div>
+        <div id="score-text" style="font-size: 12px; margin-top: 5px; color: var(--dark-pink);">STRAWBERRIES: 0</div>
     </div>
 
-    <div id="scr-intro" class="screen">
+    <div id="scr-loading" class="screen">
+        <div style="font-size: 50px;">🍓</div>
+        <h2 style="font-size: 18px;">SYNCING THE MULTIVERSE...</h2>
+        <div id="loading-perc">0%</div>
+        <div id="loading-bar-container"><div id="loading-fill"></div></div>
+        <div id="loading-caption">Finding the perfect strawberries for Lexi...</div>
+    </div>
+
+    <div id="scr-intro" class="screen hidden">
         <div style="font-size: 60px;">🍓</div>
         <h1>STRAWBERRY<br>MULTIVERSE</h1>
-        <button id="start-btn" class="btn" onclick="startAdventure()" disabled>LOADING MUSIC...</button>
+        <button class="btn" onclick="startAdventure()">ENTER MULTIVERSE</button>
+    </div>
+
+    <div id="scr-love1" class="screen hidden">
+        <h1>DO YOU<br>LOVE ME?</h1>
+        <button class="btn" onclick="goToLove2()">YES!</button>
+        <button id="no-btn-1" class="btn no-run" style="position:absolute;">NO</button>
     </div>
 
     <div id="scr-love2" class="screen hidden">
-        <h1>DO YOU REALLY<br>LOVE ME?</h1>
+        <h1>DO YOU<br>REALLY LOVE ME?</h1>
         <button class="btn" onclick="nextLevel()">YES!</button>
-        <button id="no-btn" class="btn" style="position:absolute;">NO</button>
+        <button id="no-btn-2" class="btn no-run" style="position:absolute;">NO</button>
     </div>
 
     <div id="instruction-screen" class="screen hidden">
@@ -131,104 +100,157 @@
         <button class="btn" onclick="startActualLvl()">SHE'S READY!</button>
     </div>
 
+    <canvas id="mainCanvas" style="display:none; width:100%; height:100%;"></canvas>
+    <div id="boss-bubble"></div>
+
     <div id="bottle-scene">
-        <h2 id="bottle-ins">THE DISTANCE DROPPED SOMETHING!<br>TAP TO PICK UP!</h2>
+        <h2 style="font-size: 16px;">THE DISTANCE DROPPED SOMETHING!</h2>
         <div id="the-bottle" onclick="pickUpBottle()">🍼</div>
-        <div id="progress-container" class="hidden">
-            <div id="progress-bar"></div>
+        <div id="progress-container" class="hidden" style="width:70%; height:20px; background:#eee; border-radius:10px; border:3px solid var(--dark-pink); overflow:hidden; margin-top:20px;">
+            <div id="progress-bar" style="width:0%; height:100%; background:var(--hot-pink);"></div>
         </div>
-        <p id="rub-text" class="hidden">RUB THE BOTTLE TO OPEN IT!</p>
+        <p id="rub-text" class="hidden" style="font-size: 12px; margin-top:10px;">RUB THE BOTTLE TO OPEN!</p>
     </div>
 
-    <canvas id="mainCanvas"></canvas>
-
     <div id="letter-overlay">
-        <h2>Happy Monthsary Aliii! 🍓</h2>
-        <div style="font-family: sans-serif; font-size: 15px; line-height: 1.6;">
-            Dear Lexi Merindo,<br><br>
-            You did it! You defeated the distance. Every strawberry you caught and every heart you protected proves how much we mean to each other.<br><br>
-            I love you more than all the strawberries in the multiverse. I can't wait for our first airport hug.<br><br>
-            Yours Forever,<br>
-            Cj Morales
-        </div>
+        <h2 style="color:var(--dark-pink);">Happy Monthsary Aliii! 🍓</h2>
+        <p style="font-family:sans-serif; line-height:1.6; color:var(--dark-pink);">Lexi, you've defeated the distance! Every strawberry proved our love is stronger than any multiverse. <br><br>I love you forever!<br>- CJ</p>
         <button class="btn" onclick="location.reload()">PLAY AGAIN</button>
     </div>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    let players = {};
-    let isMuted = false;
-    let cleanProgress = 0;
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    const state = { 
-        level: 0, hearts: 5, score: 0, quizIndex: 0, 
-        frames: 0, objects: [], isPaused: true,
-        player: { x: 200, targetX: 200, speedMult: 0.18 }
+    // --- Audio Manager ---
+    const AudioMgr = {
+        ctx: null,
+        isMuted: false,
+        init() {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        },
+        play(type) {
+            if (this.isMuted || !this.ctx) return;
+            if (this.ctx.state === 'suspended') this.ctx.resume();
+            
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            const now = this.ctx.currentTime;
+
+            switch(type) {
+                case 'click':
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                    break;
+                case 'collect': // Coin sound
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.1); // G5
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                    break;
+                case 'hit': // Thud
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.linearRampToValueAtTime(40, now + 0.1);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                    break;
+                case 'dead': // Pitch shift down
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 0.5);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                    break;
+            }
+        }
     };
 
-    function onYouTubeIframeAPIReady() {
-        players.chill = new YT.Player('player-chill', { height: '0', width: '0', videoId: 'Uj93hicGDNc', playerVars: { 'loop': 1, 'playlist': 'Uj93hicGDNc' }, events: { 'onReady': checkReady }});
-        players.boss = new YT.Player('player-boss', { height: '0', width: '0', videoId: '8p_O5H6h3O0', playerVars: { 'loop': 1, 'playlist': '8p_O5H6h3O0' }, events: { 'onReady': checkReady }});
-        players.win = new YT.Player('player-win', { height: '0', width: '0', videoId: '3GwjfUFyY6M', playerVars: { 'loop': 1, 'playlist': '3GwjfUFyY6M' }, events: { 'onReady': checkReady }});
-    }
-
+    // --- YouTube Controller ---
+    let players = {};
     let readyCount = 0;
-    function checkReady() { readyCount++; if(readyCount === 3) { document.getElementById('start-btn').disabled = false; document.getElementById('start-btn').innerText = "START ADVENTURE"; }}
-
-    function playPopSound() {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    function onYouTubeIframeAPIReady() {
+        players.chill = new YT.Player('player-chill', { height: '0', width: '0', videoId: 'Uj93hicGDNc', playerVars: { 'loop': 1, 'playlist': 'Uj93hicGDNc' }, events: { 'onReady': onTrackReady }});
+        players.boss = new YT.Player('player-boss', { height: '0', width: '0', videoId: '8p_O5H6h3O0', playerVars: { 'loop': 1, 'playlist': '8p_O5H6h3O0' }, events: { 'onReady': onTrackReady }});
+        players.win = new YT.Player('player-win', { height: '0', width: '0', videoId: '3GwjfUFyY6M', playerVars: { 'loop': 1, 'playlist': '3GwjfUFyY6M' }, events: { 'onReady': onTrackReady }});
     }
 
-    function switchMusic(track) {
-        if(isMuted) return;
-        Object.values(players).forEach(p => p.pauseVideo());
-        players[track].playVideo();
+    function onTrackReady() {
+        readyCount++;
+        if(readyCount === 3) startLoadingBar();
+    }
+
+    // --- Game Logic ---
+    const state = { level: 0, hearts: 5, score: 0, frames: 0, objects: [], isPaused: true, player: { x: 200, targetX: 200, speedMult: 0.18 }};
+    const captions = ["Fun Fact: Distance makes the gay heart grow fonder. 🌈", "Waiting for the music... and our next hug.", "Lexi + CJ = Endgame. 🍓", "WLW Pro-tip: Video calls count as real dates! 📱✨"];
+
+    function startLoadingBar() {
+        let loadPerc = 0;
+        const interval = setInterval(() => {
+            loadPerc += Math.random() * 15;
+            if(loadPerc >= 100) {
+                loadPerc = 100;
+                clearInterval(interval);
+                document.getElementById('scr-loading').classList.add('hidden');
+                document.getElementById('scr-intro').classList.remove('hidden');
+            }
+            document.getElementById('loading-fill').style.width = loadPerc + "%";
+            document.getElementById('loading-perc').innerText = Math.floor(loadPerc) + "%";
+            if(Math.floor(loadPerc) % 30 === 0) document.getElementById('loading-caption').innerText = captions[Math.floor(Math.random()*captions.length)];
+        }, 200);
     }
 
     function toggleMusic() {
-        isMuted = !isMuted;
-        document.getElementById('music-toggle').innerText = isMuted ? "🔇" : "🎵";
-        if(isMuted) Object.values(players).forEach(p => p.pauseVideo());
-        else {
-            if(state.level === 4) players.boss.playVideo();
-            else if(state.level >= 5) players.win.playVideo();
-            else players.chill.playVideo();
-        }
+        AudioMgr.isMuted = !AudioMgr.isMuted;
+        document.getElementById('music-toggle').innerText = AudioMgr.isMuted ? "🔇" : "🎵";
+        Object.values(players).forEach(p => AudioMgr.isMuted ? p.pauseVideo() : null);
+        if(!AudioMgr.isMuted) switchBGM();
+    }
+
+    function switchBGM() {
+        if(AudioMgr.isMuted) return;
+        Object.values(players).forEach(p => p.pauseVideo());
+        if(state.level < 4) players.chill.playVideo();
+        else if(state.level === 4) players.boss.playVideo();
+        else players.win.playVideo();
     }
 
     function startAdventure() {
-        if (!isMuted) players.chill.playVideo();
+        AudioMgr.init();
+        AudioMgr.play('click');
+        switchBGM();
         document.getElementById('scr-intro').classList.add('hidden');
-        document.getElementById('scr-love2').classList.remove('hidden');
+        document.getElementById('scr-love1').classList.remove('hidden');
     }
 
+    function goToLove2() { AudioMgr.play('click'); document.getElementById('scr-love1').classList.add('hidden'); document.getElementById('scr-love2').classList.remove('hidden'); }
+
     function nextLevel() {
+        AudioMgr.play('click');
         state.level++;
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
         document.getElementById('mainCanvas').style.display = 'none';
         document.getElementById('ui-layer').style.display = 'none';
         document.getElementById('boss-bubble').style.display = 'none';
-        state.isPaused = true;
+        
+        if(state.level === 4 || state.level === 5) switchBGM();
+        if(state.level === 5) { document.getElementById('bottle-scene').style.display = 'flex'; return; }
 
-        if(state.level === 4) switchMusic('boss');
-        if(state.level === 5) { triggerVictory(); return; }
-
-        const data = [
-            null,
-            {t: "LVL 1: SYNC", d: "Sync her heart with CJ's!"},
-            {t: "LVL 2: HARVEST", d: "Help her catch 15 strawberries!"},
-            {t: "LVL 3: THE FLIP", d: "The distance has flipped her world!"},
-            {t: "FINAL BOSS", d: "DISTANCE: 'She'll never reach him!'"}
-        ][state.level];
-
+        const data = [null, {t: "LVL 1: SYNC", d: "Sync her heart with CJ's!"}, {t: "LVL 2: HARVEST", d: "Catch 15 strawberries! Avoid 💔."}, {t: "LVL 3: THE FLIP", d: "Everything is upside down!"}, {t: "FINAL BOSS", d: "DISTANCE: 'She'll never reach him!'" }][state.level];
         const ins = document.getElementById('instruction-screen');
         ins.classList.remove('hidden');
         document.getElementById('ins-title').innerText = data.t;
@@ -236,117 +258,96 @@
     }
 
     function startActualLvl() {
+        AudioMgr.play('click');
         document.getElementById('instruction-screen').classList.add('hidden');
         document.getElementById('ui-layer').style.display = 'block';
         state.isPaused = false;
-        state.frames = 0; state.objects = []; state.score = 0;
-        updateUI();
-        if (state.level === 3) document.getElementById('game-container').classList.add('flipped');
-        if (state.level === 4) document.getElementById('boss-bubble').style.display = 'block';
+        state.score = 0; state.frames = 0; state.objects = [];
+        if(state.level === 3) document.getElementById('game-container').classList.add('flipped');
+        if(state.level === 4) document.getElementById('boss-bubble').style.display = 'block';
         document.getElementById('mainCanvas').style.display = 'block';
+        updateUI();
         runGameLoop();
-    }
-
-    function updateUI() {
-        document.getElementById('heart-bar').innerText = "❤️".repeat(Math.max(0, state.hearts));
-        document.getElementById('score-text').innerText = state.level === 4 ? "HER WILLPOWER: " + state.score + "/30" : `STRAWBERRIES: ${state.score} / 15`;
-        if(state.level === 4) {
-            const b = document.getElementById('boss-bubble');
-            if(state.score < 15) b.innerText = "Distance: 'She's too weak!'";
-            else b.innerText = "Distance: 'Impossible! Her love is too strong!'";
-        }
-    }
-
-    function runGameLoop() {
-        if(state.isPaused) return;
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        state.player.x += (state.player.targetX - state.player.x) * state.player.speedMult;
-
-        if(state.frames % 20 === 0) {
-            state.objects.push({ x: Math.random()*(canvas.width-40), y: -50, t: (state.level === 4 && Math.random() > 0.4 ? '💔' : '🍓'), size: 45 });
-        }
-        
-        state.objects.forEach((o, i) => {
-            o.y += 6;
-            ctx.font = o.size + "px Arial"; 
-            ctx.fillText(o.t, o.x, o.y);
-            if(o.y > canvas.height - 100 && o.y < canvas.height - 10 && Math.abs(o.x - state.player.x) < 90) {
-                if(o.t === '🍓') state.score++; else state.hearts--;
-                state.objects.splice(i, 1);
-                updateUI();
-            }
-        });
-        
-        ctx.font = "80px Arial"; 
-        ctx.fillText("🧺", state.player.x - 40, canvas.height - 50);
-        state.frames++;
-        if(state.hearts <= 0) { state.hearts = 5; nextLevel(); }
-        if(state.score >= (state.level === 4 ? 30 : 15)) nextLevel();
-        else requestAnimationFrame(runGameLoop);
-    }
-
-    function triggerVictory() {
-        switchMusic('win');
-        document.getElementById('confetti-canvas').style.display = 'block';
-        startConfetti();
-        document.getElementById('bottle-scene').style.display = 'flex';
-    }
-
-    function pickUpBottle() {
-        document.getElementById('bottle-ins').innerHTML = "SHE PICKED IT UP!";
-        document.getElementById('progress-container').classList.remove('hidden');
-        document.getElementById('rub-text').classList.remove('hidden');
-        document.getElementById('the-bottle').style.fontSize = "180px";
-        document.getElementById('the-bottle').innerText = "🍾";
-        
-        // Mobile Rubbing Logic
-        window.addEventListener('touchmove', (e) => {
-            if(cleanProgress < 100) {
-                cleanProgress += 0.5;
-                document.getElementById('progress-bar').style.width = cleanProgress + "%";
-                document.getElementById('the-bottle').style.transform = `rotate(${Math.sin(cleanProgress)*10}deg)`;
-                if(cleanProgress >= 100) revealLetter();
-            }
-        });
-    }
-
-    function revealLetter() {
-        document.getElementById('bottle-scene').style.display = 'none';
-        document.getElementById('letter-overlay').style.display = 'flex';
     }
 
     const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
+    canvas.width = 450; canvas.height = 850;
+
+    function runGameLoop() {
+        if(state.isPaused || state.level < 2 || state.level > 4) return;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        state.player.x += (state.player.targetX - state.player.x) * 0.18;
+
+        if(state.frames % 30 === 0) {
+            state.objects.push({x: Math.random()*(canvas.width-40), y:-50, t: (state.level === 4 && Math.random()>0.4?'💔':'🍓')});
+        }
+        
+        state.objects.forEach((o, i) => {
+            o.y += 6;
+            ctx.font = "45px Arial"; ctx.fillText(o.t, o.x, o.y);
+            // Optimized Collision
+            if(o.y > canvas.height - 110 && o.y < canvas.height - 20 && Math.abs(o.x - state.player.x) < 90) {
+                if(o.t === '🍓') { state.score++; AudioMgr.play('collect'); } 
+                else { state.hearts--; AudioMgr.play('hit'); }
+                state.objects.splice(i, 1);
+                updateUI();
+            }
+            if(o.y > canvas.height) state.objects.splice(i, 1);
+        });
+        
+        ctx.font = "80px Arial"; ctx.fillText("🧺", state.player.x - 40, canvas.height - 50);
+        state.frames++;
+
+        if(state.hearts <= 0) { 
+            AudioMgr.play('dead'); 
+            state.hearts = 5; state.score = 0; state.objects = []; 
+            updateUI(); 
+        }
+
+        if(state.score >= (state.level === 4 ? 30 : 15)) nextLevel();
+        else requestAnimationFrame(runGameLoop);
+    }
+
+    function updateUI() {
+        document.getElementById('heart-bar').innerText = "❤️".repeat(Math.max(0, state.hearts));
+        document.getElementById('score-text').innerText = state.level === 4 ? "WILLPOWER: " + state.score + "/30" : `STRAWBERRIES: ${state.score}/15`;
+    }
+
+    function pickUpBottle() {
+        AudioMgr.play('click');
+        document.getElementById('progress-container').classList.remove('hidden');
+        document.getElementById('rub-text').classList.remove('hidden');
+        document.getElementById('the-bottle').innerText = "🍾";
+        let cleanProgress = 0;
+        const rub = () => {
+            if(cleanProgress < 100) {
+                cleanProgress += 1.5;
+                document.getElementById('progress-bar').style.width = cleanProgress + "%";
+                if(cleanProgress >= 100) {
+                    AudioMgr.play('collect');
+                    document.getElementById('bottle-scene').style.display = 'none';
+                    document.getElementById('letter-overlay').style.display = 'flex';
+                }
+            }
+        };
+        window.addEventListener('touchmove', rub);
+    }
+
     canvas.addEventListener('touchmove', (e) => {
         let rect = canvas.getBoundingClientRect();
-        let cx = e.touches[0].clientX - rect.left;
-        state.player.targetX = (state.level === 3) ? rect.width - cx : cx;
+        state.player.targetX = e.touches[0].clientX - rect.left;
     });
 
-    const noBtn = document.getElementById('no-btn');
-    noBtn.addEventListener('touchstart', (e) => { 
-        noBtn.style.left = Math.random()*70+'%'; noBtn.style.top = Math.random()*70+'%'; 
-    });
-
-    // Simple Confetti
-    const cCanvas = document.getElementById('confetti-canvas');
-    const cCtx = cCanvas.getContext('2d');
-    let particles = [];
-    function startConfetti() {
-        cCanvas.width = window.innerWidth; cCanvas.height = window.innerHeight;
-        for(let i=0; i<100; i++) particles.push({x:Math.random()*cCanvas.width, y:Math.random()*cCanvas.height, r:Math.random()*6+2, d:Math.random()*10, color:`hsl(${Math.random()*360},100%,50%)`});
-        drawConfetti();
-    }
-    function drawConfetti() {
-        cCtx.clearRect(0,0,cCanvas.width,cCanvas.height);
-        particles.forEach(p => {
-            cCtx.beginPath(); cCtx.fillStyle = p.color; cCtx.arc(p.x, p.y, p.r, 0, Math.PI*2); cCtx.fill();
-            p.y += 3; if(p.y > cCanvas.height) p.y = -10;
+    document.querySelectorAll('.no-run').forEach(btn => {
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            btn.style.left = Math.random()*70+'%'; btn.style.top = Math.random()*70+'%';
         });
-        requestAnimationFrame(drawConfetti);
-    }
-    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
-    canvas.width = 450; canvas.height = 850;
+    });
+
+    // Button sound wrapper
+    document.querySelectorAll('.btn').forEach(b => b.addEventListener('mousedown', () => AudioMgr.play('click')));
 </script>
 </body>
 </html>
