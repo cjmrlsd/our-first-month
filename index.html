@@ -3,195 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>For Lexi 🍓</title>
+    <title>Strawberry Multiverse 🍓</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Silkscreen&family=Quicksand:wght@500;700&display=swap');
         
-        :root { --pink: #ffc1cc; --hot-pink: #ff4d6d; --berry: #5d2e0c; }
+        :root { 
+            --pink: #ffc1cc; --hot-pink: #ff4d6d; --berry: #5d2e0c; 
+            --gold: #ffd700; --gold-light: #fff9c4;
+        }
 
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background: #1a0508; 
-            font-family: 'Quicksand', sans-serif; 
-            height: 100vh; 
-            width: 100vw; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            overflow: hidden; 
+            background: #1a0508; font-family: 'Quicksand', sans-serif; 
+            height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; 
         }
 
         #game-container { 
-            width: 100%; 
-            height: 100%; 
-            max-width: 450px; 
-            background: #fff5f5; 
-            position: relative; 
-            border: 4px solid white;
+            width: 100%; height: 100%; max-width: 450px; background: #fff5f5; 
+            position: relative; border: 4px solid white; overflow: hidden;
         }
 
         .screen { 
-            position: absolute; 
-            inset: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            text-align: center; 
-            padding: 20px; 
-            z-index: 10; 
-            background: #fff5f5;
+            position: absolute; inset: 0; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 10; background: #fff5f5;
         }
 
         .hidden { display: none !important; }
 
-        /* Stage 1: Loading */
+        /* BUTTONS */
+        .btn { 
+            background: var(--hot-pink); color: white; border: none; padding: 15px 30px; 
+            border-radius: 50px; font-family: 'Silkscreen'; box-shadow: 0 6px 0 #e63958; 
+            cursor: pointer; font-size: 14px; position: relative;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #e63958; }
+
+        /* LOADING BAR */
         #load-bar-container { width: 80%; height: 20px; background: #eee; border-radius: 10px; border: 2px solid var(--berry); overflow: hidden; margin: 20px 0; }
         #load-bar-fill { width: 0%; height: 100%; background: var(--hot-pink); }
         
-        .btn { 
-            background: var(--hot-pink); 
-            color: white; 
-            border: none; 
-            padding: 15px 30px; 
-            border-radius: 50px; 
-            font-family: 'Silkscreen'; 
-            box-shadow: 0 6px 0 #e63958; 
-            cursor: pointer;
-            font-size: 14px;
+        /* NO BUTTON */
+        #no-run { position: absolute; transition: 0.1s; background: #555; box-shadow: 0 6px 0 #333; }
+
+        /* GAMEPLAY */
+        #stats-bar { position: absolute; top: 20px; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; color: var(--hot-pink); }
+        canvas { width: 100%; height: 100%; display: none; background: #fff5f5; }
+
+        /* HEARTFELT MESSAGE CARD */
+        #heartfelt-card {
+            background: white; padding: 25px; border-radius: 20px; width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 3px solid var(--pink);
+            animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .gold-border { border: 4px solid var(--gold) !important; background: var(--gold-light) !important; }
 
-        #no-run { 
-            position: absolute; 
-            transition: 0.1s translate; 
-            z-index: 100;
-        }
-
-        canvas { width: 100%; height: 100%; display: none; }
-
-        /* Heartfelt Ending */
-        #final-msg {
-            font-size: 16px;
-            line-height: 1.6;
-            color: var(--berry);
-            background: white;
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            width: 90%;
-            animation: fadeIn 2s;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="scr-vibe" class="screen">
-        <h2 style="font-family:'Silkscreen'; color:var(--hot-pink); margin-bottom:20px;">READY FOR YOUR GIFT?</h2>
-        <button class="btn" onclick="initGame()">ENTER MULTIVERSE 🍓</button>
-        <p style="margin-top:15px; font-size:12px;">(Turns on music & vibe)</p>
+    <div id="scr-start" class="screen">
+        <div style="font-size: 80px; margin-bottom: 20px;">🍓</div>
+        <h1 style="font-family:'Silkscreen'; color:var(--hot-pink); font-size: 20px;">STRAWBERRY MULTIVERSE</h1>
+        <p style="margin-bottom: 30px; font-size: 14px; color: var(--berry);">For my favorite girl, Lexi.</p>
+        <button class="btn" onclick="startVibe()">START THE VIBE ✨</button>
+        <iframe id="yt-player" width="1" height="1" src="" frameborder="0" style="visibility: hidden;"></iframe>
     </div>
 
     <div id="scr-load" class="screen hidden">
-        <div style="font-size:60px;">🍓</div>
-        <div id="percent-text" style="font-family:'Silkscreen'; color:var(--hot-pink);">0%</div>
+        <div style="font-size:60px; animation: float 2s infinite ease-in-out;">🍓</div>
+        <div id="percent-text" style="font-family:'Silkscreen'; color:var(--hot-pink); margin-top:10px;">0%</div>
         <div id="load-bar-container"><div id="load-bar-fill"></div></div>
-        <div id="trivia-box" style="font-size:12px; font-weight:bold; color:var(--berry);">Connecting to Lexi's heart...</div>
+        <div id="trivia-box" style="font-size:12px; font-weight:bold; color:var(--berry); height: 40px;">Syncing with Lexi...</div>
     </div>
 
     <div id="scr-gate" class="screen hidden">
-        <h2 style="margin-bottom:40px;">DO YOU REALLY LOVE ME?</h2>
-        <div style="position:relative; width:100%; height:300px;">
-            <button class="btn" onclick="startQuiz()">YES, FOREVER!</button>
-            <button id="no-run" class="btn" style="background:#555; box-shadow:0 6px 0 #333;">NO</button>
+        <h2 style="color: var(--berry); margin-bottom: 50px;">DO YOU REALLY LOVE ME?</h2>
+        <div id="gate-area" style="position:relative; width:100%; height:300px;">
+            <button class="btn" onclick="showScreen('scr-quiz'); renderQuiz();">YES, FOREVER!</button>
+            <button id="no-run" class="btn">NO</button>
         </div>
     </div>
 
     <div id="scr-quiz" class="screen hidden">
-        <p id="quiz-q" style="font-weight:bold; margin-bottom:20px;"></p>
-        <div id="quiz-options" style="display:grid; gap:10px; width:100%;"></div>
+        <p id="quiz-q" style="font-weight:bold; color:var(--berry); margin-bottom:20px;"></p>
+        <div id="quiz-options" style="display:grid; gap:12px; width:100%;"></div>
     </div>
 
+    <div id="stats-bar"><div id="lives-ui">❤️❤️❤️❤️❤️❤️❤️❤️❤️</div></div>
     <canvas id="gameCanvas"></canvas>
 
     <div id="scr-final" class="screen hidden" style="background:var(--pink);">
-        <div id="final-msg">
-            <h1 style="font-family:'Silkscreen'; margin-bottom:15px;">MY LEXI 🍓</h1>
-            <p>Every mile between us is just a reminder of how much you're worth the wait. You didn't just play a game; you've been winning my heart every single day. No boss is tougher than distance, and no game is as sweet as you.</p>
-            <p style="margin-top:15px; font-weight:bold;">I love you more than words can code.</p>
-            <p style="margin-top:10px; font-family:'Silkscreen'; font-size:12px;">— CJ</p>
+        <div id="heartfelt-card">
+            <div id="final-icon" style="font-size:60px; margin-bottom:15px;">🍓</div>
+            <h2 id="final-title" style="font-family:'Silkscreen'; color:var(--hot-pink); margin-bottom:15px;">I LOVE YOU</h2>
+            <div id="final-text" style="font-size:15px; line-height:1.6; color:var(--berry); text-align:left;">
+                </div>
+            <p style="margin-top:20px; font-family:'Silkscreen'; font-size:12px; color:var(--hot-pink);">— CJ, Your Programmer</p>
         </div>
-        <button class="btn" style="margin-top:30px;" onclick="location.reload()">REPLAY ❤️</button>
+        <button class="btn" style="margin-top:25px;" onclick="location.reload()">REPLAY ADVENTURE ❤️</button>
     </div>
 </div>
 
-<audio id="bg-music" loop>
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-</audio>
-
 <script>
-    let state = { qIdx: 0, loading: 0 };
-    const music = document.getElementById('bg-music');
+    let state = { 
+        loading: 0, qIdx: 0, lives: 9, deathCount: 0, stage: 'start', 
+        pX: 200, pY: 600, active: false, score: 0, enemies: [] 
+    };
 
-    function initGame() {
+    function startVibe() {
+        // Load the Boba Date track via YouTube Embed (No ads/UI)
+        document.getElementById('yt-player').src = "https://www.youtube.com/embed/Uj93hicGDNc?autoplay=1&loop=1&playlist=Uj93hicGDNc";
         showScreen('scr-load');
-        music.play();
-        loadLogic();
+        runLoader();
     }
 
-    function loadLogic() {
-        const trivia = ["Distance means nothing. ✈️", "Lexi is the prettiest. ✨", "CJ ❤️ Lexi Forever.", "Loading braincell sync..."];
+    function runLoader() {
+        const trivia = ["Preparing the Multiverse...", "Scaling for mobile...", "Buying virtual flowers...", "Checking braincell sync..."];
         const itv = setInterval(() => {
             state.loading++;
             document.getElementById('percent-text').innerText = state.loading + "%";
             document.getElementById('load-bar-fill').style.width = state.loading + "%";
             if(state.loading % 25 === 0) document.getElementById('trivia-box').innerText = trivia[state.loading/25-1];
-            if(state.loading >= 100) { clearInterval(itv); showScreen('scr-gate'); initNoButton(); }
-        }, 40);
+            if(state.loading >= 100) { clearInterval(itv); setupGate(); }
+        }, 35);
     }
 
-    function initNoButton() {
+    function setupGate() {
+        showScreen('scr-gate');
         const no = document.getElementById('no-run');
-        const moveNo = () => {
-            const x = Math.random() * 60 + 20;
-            const y = Math.random() * 60 + 20;
-            no.style.left = `${x}%`;
-            no.style.top = `${y}%`;
+        const moveNo = (e) => {
+            if(e) e.preventDefault();
+            const x = Math.random() * 60 + 10;
+            const y = Math.random() * 60 + 10;
+            no.style.left = x + "%";
+            no.style.top = y + "%";
         };
-        no.addEventListener('touchstart', (e) => { e.preventDefault(); moveNo(); });
+        no.addEventListener('touchstart', moveNo);
         no.addEventListener('mouseover', moveNo);
     }
 
-    const questions = [
-        {q: "Who is CJ's favorite person?", a: ["Lexi", "Lexi", "Lexi", "All of the above"]},
-        {q: "Are we endgame?", a: ["Yes", "Definitely", "Absolutely", "💍"]}
+    const quizData = [
+        {q: "Our official Love Language?", a: ["Boba Dates", "FaceTime 24/7", "Gaming", "All the above!"]},
+        {q: "Is Lexi the prettiest girl?", a: ["Yes", "Obviously", "No competition", "💍"]}
     ];
 
-    function startQuiz() {
-        showScreen('scr-quiz');
-        renderQuiz();
-    }
-
     function renderQuiz() {
-        if(state.qIdx >= questions.length) return showScreen('scr-final');
-        const q = questions[state.qIdx];
+        const q = quizData[state.qIdx];
+        if(!q) return startShootingGame();
         document.getElementById('quiz-q').innerText = q.q;
-        const opts = document.getElementById('quiz-options');
-        opts.innerHTML = '';
-        q.a.forEach(txt => {
+        const opt = document.getElementById('quiz-options');
+        opt.innerHTML = '';
+        q.a.forEach(text => {
             const b = document.createElement('button');
             b.className = 'btn';
-            b.innerText = txt;
+            b.innerText = text;
             b.onclick = () => { state.qIdx++; renderQuiz(); };
-            opts.appendChild(b);
+            opt.appendChild(b);
         });
     }
 
+    function startShootingGame() {
+        showScreen('gameCanvas');
+        document.getElementById('gameCanvas').style.display = 'block';
+        document.getElementById('stats-bar').style.display = 'flex';
+        state.active = true;
+        // Simple Game Engine logic for mobile
+        requestAnimationFrame(gameLoop);
+    }
+
+    function gameLoop() {
+        if(!state.active) return;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 450; canvas.height = 800;
+        ctx.clearRect(0,0,450,800);
+        
+        // Draw Player (Strawberry)
+        ctx.font = "50px Arial";
+        ctx.fillText("🍓", state.pX - 25, 700);
+
+        // Enemy logic (Distance bolts)
+        if(Math.random() < 0.05) state.enemies.push({x: Math.random()*400, y: 0});
+        state.enemies.forEach((en, i) => {
+            en.y += 5;
+            ctx.fillText("👾", en.x, en.y);
+            if(en.y > 650 && Math.abs(en.x - state.pX) < 40) {
+                state.lives--; 
+                state.enemies.splice(i, 1);
+                if(state.lives <= 0) { state.deathCount++; state.lives = 9; }
+            }
+            if(en.y > 800) { state.score++; state.enemies.splice(i, 1); }
+        });
+
+        document.getElementById('lives-ui').innerText = "❤️".repeat(state.lives);
+        if(state.score > 20) winGame();
+        else requestAnimationFrame(gameLoop);
+    }
+
+    function winGame() {
+        state.active = false;
+        showScreen('scr-final');
+        const card = document.getElementById('heartfelt-card');
+        const text = document.getElementById('final-text');
+        const title = document.getElementById('final-title');
+        const icon = document.getElementById('final-icon');
+
+        if(state.deathCount === 0) {
+            card.classList.add('gold-border');
+            icon.innerText = "🏆";
+            title.innerText = "PERFECT SYNC! ⭐";
+            text.innerHTML = "Lexi, you're not just a gamer queen, you're my absolute everything. You beat this game without breaking a single heart, just like you've protected mine. Distance is just a number, but my love for you is infinite. You're my endgame, forever and always.";
+        } else {
+            text.innerHTML = "You did it, Lexi! Every obstacle you cleared represents a mile we've conquered together. No matter how many 'respawns' we need, I'll always be here waiting for you. I love you more than any high score.";
+        }
+    }
+
+    // Touch controls for the Strawberry
+    window.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0];
+        const rect = document.getElementById('game-container').getBoundingClientRect();
+        state.pX = touch.clientX - rect.left;
+    });
+
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+        document.getElementById('gameCanvas').style.display = 'none';
         document.getElementById(id).classList.remove('hidden');
     }
 </script>
