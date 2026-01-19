@@ -21,36 +21,59 @@
 
         * { touch-action: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #1a0508; font-family: 'Quicksand', sans-serif; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        #game-container { width: 100vw; height: 100vh; max-width: 450px; background: var(--bg-gradient); position: relative; border: var(--border-soft); overflow: hidden; border-radius: 25px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
-        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 10; background: transparent; }
+        
+        #game-container { 
+            width: 100vw; height: 100vh; max-width: 450px; 
+            background: var(--bg-gradient); 
+            position: relative; border: var(--border-soft); 
+            overflow: hidden; border-radius: 25px; 
+            box-shadow: 0 15px 50px rgba(0,0,0,0.1); 
+        }
+
+        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 10; }
         .hidden { display: none !important; }
-        .btn { background: var(--deep-berry); color: white; border: none; padding: 12px 20px; border-radius: 15px; font-family: 'Silkscreen'; font-size: 11px; box-shadow: 0 6px 0 #ad1457; cursor: pointer; margin: 5px; width: 85%; }
+
+        /* Buttons */
+        .btn { 
+            background: var(--deep-berry); color: white; border: none; 
+            padding: 12px 20px; border-radius: 15px; font-family: 'Silkscreen'; 
+            font-size: 11px; box-shadow: 0 6px 0 #ad1457; cursor: pointer; margin: 5px; 
+        }
         .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #ad1457; }
         .tight-btn { width: auto !important; padding: 10px 25px !important; display: inline-block; }
+
+        /* Loader */
         #load-bar-container { width: 80%; height: 22px; background: var(--surface-white); border-radius: 12px; border: 3px solid var(--text-pixel); overflow: hidden; margin: 20px 0; }
         #load-bar-fill { width: 0%; height: 100%; background: var(--accent-red); transition: width 0.1s linear; }
+
+        /* HUD */
         #stats-bar { position: absolute; top: 20px; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; color: var(--deep-berry); }
-        canvas { background: transparent; width: 100%; height: 100%; display: none; object-fit: contain; }
-        #final-scroll { display: none; position: absolute; inset: 0; z-index: 1000; background: var(--scroll-paper); padding: 40px 25px; overflow-y: auto; border: 10px solid #fce4ec; transform: scale(0); transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        #final-scroll.open { display: block; transform: scale(1); }
-        #letter { text-align: left; font-size: 10px; line-height: 1.8; color: var(--text-dark); font-family: 'Press Start 2P', cursive; }
-        .scroll-title { color: var(--accent-red); font-family: 'Fredoka One'; text-align: center; margin-bottom: 20px; font-size: 24px; }
-        #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 90%; max-width: 320px; }
-        .card { aspect-ratio: 1/1; background: var(--primary-pink); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; color: transparent; border: 3px solid white; box-shadow: 0 4px 0 #ad1457; }
-        .card.flipped { background: white; color: initial; transform: rotateY(180deg); }
-        .card.matched { background: #e0ffe0; border-color: #90ee90; box-shadow: none; }
-        #death-screen { position: absolute; inset: 0; background: rgba(26, 5, 8, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        
-        /* STAGE 7 BOSS HUD */
         .hud-mini { position: absolute; top: 15px; width: 90%; left: 5%; display: flex; align-items: center; justify-content: space-between; background: var(--surface-white); padding: 8px 12px; border-radius: 15px; border: 2px solid var(--primary-pink); z-index: 100; }
         .distance-bar-container { flex-grow: 1; margin: 0 10px; height: 14px; background: #eee; border-radius: 7px; position: relative; overflow: hidden; border: 1px solid #ddd; }
         .distance-fill { height: 100%; width: 0%; background: var(--accent-red); border-radius: 5px; }
         .km-label { font-size: 10px; color: var(--accent-red); font-weight: 900; position: absolute; width: 100%; text-align: center; top: 0; text-shadow: 1px 1px white; }
+        
+        /* Boss */
         #boss-tag { position: absolute; top: 75px; width: 100%; display: none; flex-direction: column; align-items: center; z-index: 100; }
         .hp-container { width: 60%; height: 10px; background: #ddd; border-radius: 5px; border: 1.5px solid var(--accent-red); overflow: hidden; }
         .hp-fill { height: 100%; width: 100%; background: var(--accent-red); transition: width 0.2s; }
         .boss-name { font-size: 11px; font-weight: 900; color: var(--accent-red); margin-bottom: 3px; letter-spacing: 1px; }
-        .dialog-bubble { position: absolute; background: white; border: 3px solid var(--accent-red); padding: 10px; border-radius: 18px; font-size: 14px; color: #444; font-weight: bold; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 90; display: none; width: 180px; }
+        .dialog-bubble { position: absolute; background: white; border: 3px solid var(--accent-red); padding: 10px; border-radius: 18px; font-size: 14px; color: #444; font-weight: bold; text-align: center; z-index: 90; display: none; width: 180px; }
+
+        /* Memory */
+        #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 90%; max-width: 320px; }
+        .card { aspect-ratio: 1/1; background: var(--primary-pink); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; color: transparent; border: 3px solid white; box-shadow: 0 4px 0 #ad1457; transition: 0.3s; }
+        .card.flipped { background: white; color: initial; transform: rotateY(180deg); }
+        .card.matched { background: #e0ffe0; border-color: #90ee90; box-shadow: none; }
+
+        /* Final Scroll */
+        #final-scroll { display: none; position: absolute; inset: 0; z-index: 1000; background: var(--scroll-paper); padding: 40px 25px; overflow-y: auto; border: 10px solid #fce4ec; transform: scale(0); transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #final-scroll.open { display: block; transform: scale(1); }
+        #letter { text-align: left; font-size: 10px; line-height: 1.8; color: var(--text-dark); font-family: 'Press Start 2P', cursive; }
+        .scroll-title { color: var(--accent-red); font-family: 'Fredoka One'; text-align: center; margin-bottom: 20px; font-size: 24px; }
+
+        canvas { background: transparent; width: 100%; height: 100%; display: none; object-fit: contain; }
+        #death-screen { position: absolute; inset: 0; background: rgba(26, 5, 8, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
     </style>
 </head>
 <body>
@@ -62,20 +85,42 @@
         <div style="font-size:65px; animation: pulse 1s infinite;">🍓</div>
         <div id="percent-text" style="font-family:'Silkscreen'; color: var(--text-pixel);">0%</div>
         <div id="load-bar-container"><div id="load-bar-fill"></div></div>
-        <div id="trivia-box" style="height:60px; font-size:13px; font-weight:bold; color: var(--text-pixel); font-family: 'Fredoka One';">Syncing...</div>
+        <div id="trivia-box" style="height:60px; font-size:13px; font-weight:bold; color: var(--text-pixel); font-family: 'Fredoka One';">Syncing Hearts...</div>
     </div>
 
     <div id="scr-title" class="screen hidden">
         <h1 style="font-family:'Fredoka One'; color: var(--accent-red); font-size: 28px;">STRAWBERRY MULTIVERSE</h1>
-        <button class="btn tight-btn" onclick="startVibe()">START ADVENTURE ✨</button>
-        <iframe id="yt-player" width="1" height="1" src="" frameborder="0" style="visibility: hidden;"></iframe>
+        <button class="btn tight-btn" onclick="startAdventureWithMusic()">START ADVENTURE ✨</button>
+        <div id="music-player"></div>
     </div>
-    <div id="scr-gate1" class="screen hidden"><h2>DO YOU LOVE ME?</h2><button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button><button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button></div>
-    <div id="scr-gate2" class="screen hidden"><h2>DO YOU REALLY LOVE ME?</h2><div id="gate-area-logic" style="width:100%; height:300px; position:relative; display:flex; gap:10px; align-items:center; justify-content:center;"><button id="yes-btn-3" class="btn tight-btn" onclick="handleYesSequence()">YES!</button><button id="no-run" class="btn tight-btn" onmouseover="teleportNo()" ontouchstart="teleportNo()" onclick="handleNoClick()">NO</button></div></div>
 
-    <div id="scr-quiz" class="screen hidden"><h2 id="quiz-count" style="font-size:11px; color:var(--deep-berry);">SYNCING...</h2><p id="quiz-q" style="min-height:50px; font-weight:bold; font-size:16px; font-family: 'Fredoka One';"></p><div id="quiz-options"></div></div>
+    <div id="scr-gate1" class="screen hidden">
+        <h2 style="font-family:'Fredoka One'; color: var(--text-pixel);">DO YOU LOVE ME?</h2>
+        <div style="display:flex; gap:10px;">
+            <button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button>
+            <button class="btn tight-btn" onclick="showScreen('scr-gate2')">YES</button>
+        </div>
+    </div>
 
-    <div id="scr-memory" class="screen hidden"><h2 style="font-family:'Fredoka One'; color: var(--accent-red);">✨ HEART SNAP ✨</h2><div id="matches-text" style="font-family:'Silkscreen'; margin-bottom: 10px;">Matches: 0 / 6</div><div id="memory-grid"></div></div>
+    <div id="scr-gate2" class="screen hidden">
+        <h2 style="font-family:'Fredoka One'; color: var(--text-pixel);">DO YOU REALLY LOVE ME?</h2>
+        <div id="gate-area-logic" style="width:100%; height:300px; position:relative; display:flex; gap:10px; align-items:center; justify-content:center;">
+            <button id="yes-btn-3" class="btn tight-btn" onclick="handleYesSequence()">YES!</button>
+            <button id="no-run" class="btn tight-btn" onmouseover="teleportNo()" ontouchstart="teleportNo()" onclick="handleNoClick()">NO</button>
+        </div>
+    </div>
+
+    <div id="scr-quiz" class="screen hidden">
+        <h2 id="quiz-count" style="font-size:11px; color:var(--deep-berry); font-family:'Silkscreen';">SYNCING...</h2>
+        <p id="quiz-q" style="min-height:50px; font-weight:bold; font-size:16px; font-family: 'Fredoka One';"></p>
+        <div id="quiz-options" style="display:flex; flex-direction:column; align-items:center; width:100%; gap:8px;"></div>
+    </div>
+
+    <div id="scr-memory" class="screen hidden">
+        <h2 style="font-family:'Fredoka One'; color: var(--accent-red);">✨ HEART SNAP ✨</h2>
+        <div id="matches-text" style="font-family:'Silkscreen'; margin-bottom: 10px;">Matches: 0 / 6</div>
+        <div id="memory-grid"></div>
+    </div>
 
     <div id="scr-boss" class="screen hidden" style="padding:0;">
         <div class="hud-mini">
@@ -103,6 +148,7 @@
 
 <script>
     const triviaList = ["LDR Love Language: FaceTiming until we fall asleep. 💤", "Who yaps more? Definitely one of us. 🎤", "Time zones can't keep us apart! ⏰", "CJ + Lexi = The Ultimate Duo. 🍓", "Syncing braincells in 3... 2... 1...", "Did you know CJ loves you more than iced coffee?", "Distance is just a number."];
+    
     const quizData = [
         {q: "What’s our official LDR love language?", a: ["Virtual movie marathons.", "Yapping sessions", "Sending TikToks I’ve already seen.", "Falling asleep on the phone together.", "Lablab", "All of the above (We’re obsessed)."]},
         {q: "The most flirty thing you can say to me right now is...", a: ["'I booked a flight.'", "'Check your door, I sent food.'", "I'm wearing that shirt you like.'", "Aliiiiiiiii~ <3", "None (It's actually 'I bought you a Squishmallow')."]},
@@ -116,56 +162,66 @@
         {q: "How much do I actually love you?", a: ["To the moon and back.", "More than iced coffee/strawberry.", "Enough to fight Distance Boss forever.", "All that is mentioned and more."]}
     ];
 
-    let state = { lives: 9, stage: 'load', active: false, score: 0, pX: 225, pY: 700, velX: 0, velY: 0, bullets: [], obstacles: [], enemies: [], boss: { active: false, hp: 100, max: 100, timer: 0 }, travel: 0, currentBossStage: 0, frameCount: 0, targetX: 225, targetY: 700, qIdx: 0 };
-    let keys = {}; // For Desktop Controls
+    let state = { lives: 9, stage: 'load', active: false, score: 0, pX: 225, pY: 700, velX: 0, velY: 0, bullets: [], obstacles: [], enemies: [], boss: { active: false, hp: 100, max: 100, timer: 0 }, travel: 0, currentBossStage: 0, frameCount: 0, targetX: 225, targetY: 700, qIdx: 0, keys: {} };
     let gateYesClicks = 0, noClickAttempts = 0;
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const distFill = document.getElementById('dist-fill'), kmText = document.getElementById('km-text'), bubble = document.getElementById('bubble'), hpFill = document.getElementById('hp-fill'), bossTag = document.getElementById('boss-tag');
-    const letterContent = `Lexi, They say in most games you only get one life, but honestly? Being with you feels like a permanent power-up... (rest of letter)`;
+    const kmText = document.getElementById('km-text'), distFill = document.getElementById('dist-fill'), bubble = document.getElementById('bubble'), hpFill = document.getElementById('hp-fill'), bossTag = document.getElementById('boss-tag');
 
-    // MODERNIZE OBBY PLATFORMS
+    const letterContent = `Lexi, They say in most games you only get one life, but honestly? Being with you feels like a permanent power-up. Whether we’re locked in on a mission or just yapping until the stars fade into the morning, you’re the only one I want on my team. No debate.\n\nDistance is just a glitch in the system—a temporary lag spike in a connection that’s already written in the stars. My heart is permanently synced to yours. The numbers on a screen could never measure the way you make me feel; you are the only thing that feels real in this digital multiverse.\n\nYou’ve guarded my heart better than any high score, and I promise to keep yours on lock forever. You aren't just my Player Two; you’re my sanctuary, my endgame, and my entire world.\n\nI’m so cooked for you, Lexi. I'm choosing you today, tomorrow, and every day after that.\n\nYours forever, CJ Morales`;
+
     const platforms = [
-        { x: 0, y: 750, w: 450, h: 50 }, // Starting Floor
+        { x: 0, y: 750, w: 450, h: 50 },
         { x: 50, y: 620, w: 120, h: 15 },
         { x: 280, y: 530, w: 120, h: 15 },
         { x: 100, y: 440, w: 120, h: 15 },
         { x: 280, y: 350, w: 120, h: 15 },
-        { x: 50, y: 260, w: 350, h: 20, goal: true } // Goal Platform
+        { x: 50, y: 260, w: 350, h: 20, goal: true }
     ];
 
     window.onload = () => {
         canvas.width = 450; canvas.height = 800;
-        let p = 0; const itv = setInterval(() => {
-            p++; document.getElementById('percent-text').innerText = p+"%";
-            document.getElementById('load-bar-fill').style.width = p+"%";
-            if(p%14===0) document.getElementById('trivia-box').innerText = triviaList[Math.floor(p/14)%7];
-            if(p>=100) { clearInterval(itv); showScreen('scr-title'); }
-        }, 35);
+        let progress = 0;
+        const itv = setInterval(() => {
+            progress++;
+            document.getElementById('load-bar-fill').style.width = progress + "%";
+            document.getElementById('percent-text').innerText = progress + "%";
+            if (progress % 15 === 0) document.getElementById('trivia-box').innerText = triviaList[Math.floor(Math.random()*triviaList.length)];
+            if (progress >= 100) { clearInterval(itv); setTimeout(() => showScreen('scr-title'), 500); }
+        }, 40);
     };
 
-    window.addEventListener('keydown', e => keys[e.code] = true);
-    window.addEventListener('keyup', e => keys[e.code] = false);
+    window.addEventListener('keydown', e => state.keys[e.code] = true);
+    window.addEventListener('keyup', e => state.keys[e.code] = false);
 
-    function startVibe() { document.getElementById('yt-player').src = "https://www.youtube.com/embed/Uj93hicGDNc?autoplay=1"; showScreen('scr-gate1'); }
+    function startAdventureWithMusic() {
+        document.getElementById('music-player').innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/Uj93hicGDNc?autoplay=1&loop=1&playlist=Uj93hicGDNc" frameborder="0" style="display:none;"></iframe>`;
+        showScreen('scr-gate1');
+    }
+
     function handleYesSequence() { gateYesClicks++; teleportNo(); if(gateYesClicks >= 3) startQuiz(); }
     function teleportNo() { const noBtn = document.getElementById('no-run'); noBtn.style.position = 'absolute'; const area = document.getElementById('gate-area-logic'); noBtn.style.left = Math.random()*(area.clientWidth-80)+'px'; noBtn.style.top = Math.random()*(area.clientHeight-40)+'px'; }
     function handleNoClick() { if(++noClickAttempts >= 20) { alert("Halaa di mo na ako lab? :<<"); noClickAttempts=0; } teleportNo(); }
-    function startQuiz() { showScreen('scr-quiz'); renderQuiz(); }
     
+    function startQuiz() { showScreen('scr-quiz'); renderQuiz(); }
     function renderQuiz() {
         if(state.qIdx >= 10) return startStage('harvest');
-        const d = quizData[state.qIdx]; document.getElementById('quiz-count').innerText = `SYNC: ${state.qIdx+1}/10`;
+        const d = quizData[state.qIdx];
+        document.getElementById('quiz-count').innerText = `SYNC: ${state.qIdx+1}/10`;
         document.getElementById('quiz-q').innerText = d.q;
         const cont = document.getElementById('quiz-options'); cont.innerHTML = '';
-        d.a.forEach(opt => { const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt; b.onclick = () => { state.qIdx++; renderQuiz(); }; cont.appendChild(b); });
+        d.a.forEach(opt => {
+            const b = document.createElement('button'); b.className = 'btn tight-btn'; b.innerText = opt;
+            b.onclick = () => { state.qIdx++; renderQuiz(); };
+            cont.appendChild(b);
+        });
     }
 
     function startStage(s) {
         state.stage = s; state.active = false; state.score = 0; state.enemies = []; state.obstacles = []; state.bullets = [];
         state.pX = 225; state.pY = 700; state.velX = 0; state.velY = 0;
         showScreen('ready-overlay');
-        const cfg = { harvest: ["THE HARVEST", "Catch 10 Hearts! Avoid 👾"], obby: ["THE LEAP", "MODERN OBBY: FREE PLAY! Use Left screen to move, Right to Jump."], memory: ["HEART SNAP", "Match Pairs!"], boss: ["FINAL BOSS", "Defeat Distance!"] };
+        const cfg = { harvest: ["THE HARVEST", "Catch 10 Hearts! Avoid 👾"], obby: ["THE LEAP", "Touch Left Half to move, Right Half to Jump!"], memory: ["HEART SNAP", "Match all 🧩 pairs!"], boss: ["FINAL BOSS", "Defeat Distance!"] };
         document.getElementById('ready-title').innerText = cfg[s][0];
         document.getElementById('ready-instr').innerText = cfg[s][1];
         let c = 3; document.getElementById('countdown').innerText = c;
@@ -180,7 +236,6 @@
         else { state.active = true; requestAnimationFrame(engine); }
     }
 
-    // --- MODERN OBBY ENGINE (STAGE 5 FIX) ---
     function engine() {
         if(!state.active || state.stage === 'boss' || state.stage === 'memory') return;
         ctx.clearRect(0,0,450,800);
@@ -190,106 +245,91 @@
             if(Math.random() < 0.05) state.enemies.push({x: Math.random()*400 + 25, y: -50, t: Math.random() > 0.3 ? '💖' : '👾'});
             state.enemies.forEach((it, i) => {
                 it.y += 6; ctx.font = "40px Arial"; ctx.fillText(it.t, it.x - 20, it.y);
-                if(it.y > 670 && it.y < 730 && Math.abs(it.x - state.pX) < 50) {
-                    if(it.t === '💖') state.score++; else hit();
-                    state.enemies.splice(i,1);
-                }
-                if(it.y > 850) state.enemies.splice(i,1);
+                if(it.y > 670 && it.y < 730 && Math.abs(it.x - state.pX) < 50) { if(it.t === '💖') state.score++; else hit(); state.enemies.splice(i,1); }
             });
             ctx.fillStyle = "#5d4037"; ctx.font = "bold 20px Fredoka One"; ctx.fillText(`Hearts: ${state.score}/10`, 20, 50);
             drawP("🧺", 700); if(state.score >= 10) startStage('obby');
         }
 
         if(state.stage === 'obby') {
-            // 1. HORIZONTAL PHYSICS (FREE MOVEMENT)
-            let accel = 0.8;
-            let maxSpeed = 6;
-            let friction = 0.85;
-
-            // Handle Desktop Inputs
-            if (keys['ArrowLeft'] || keys['KeyA']) state.velX -= accel;
-            if (keys['ArrowRight'] || keys['KeyD']) state.velX += accel;
-            
-            // Apply Friction & Speed Limit
-            state.velX *= friction;
-            if(state.velX > maxSpeed) state.velX = maxSpeed;
-            if(state.velX < -maxSpeed) state.velX = -maxSpeed;
-
-            // 2. VERTICAL PHYSICS
-            state.velY += 0.7; // Gravity
-            state.pX += state.velX;
-            state.pY += state.velY;
-
-            // 3. COLLISION & PLATFORMS
+            if (state.keys['ArrowLeft'] || state.keys['KeyA']) state.velX -= 0.8;
+            if (state.keys['ArrowRight'] || state.keys['KeyD']) state.velX += 0.8;
+            state.velX *= 0.85; state.velY += 0.7; state.pX += state.velX; state.pY += state.velY;
             platforms.forEach(plat => {
-                ctx.fillStyle = plat.goal ? var(--gold) : var(--accent-red);
-                // Modern Rounded Platforms
-                ctx.beginPath();
-                ctx.roundRect(plat.x, plat.y, plat.w, plat.h, 5);
-                ctx.fill();
-                ctx.strokeStyle = "white";
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // Player Collision
+                ctx.fillStyle = plat.goal ? '#ffd700' : '#ff4d6d'; ctx.beginPath(); ctx.roundRect(plat.x, plat.y, plat.w, plat.h, 5); ctx.fill();
                 if(state.pX + 15 > plat.x && state.pX - 15 < plat.x + plat.w && state.pY > plat.y && state.pY < plat.y + plat.h) {
-                    if(state.velY > 0) { // Falling onto platform
-                        state.pY = plat.y;
-                        state.velY = 0;
-                        state.onGround = true; // For Jump Logic
-                        if(plat.goal) startStage('memory');
-                    }
+                    if(state.velY > 0) { state.pY = plat.y; state.velY = 0; state.onGround = true; if(plat.goal) startStage('memory'); }
                 }
             });
-
-            // 4. BOUNDARIES & DEATH
-            if(state.pX < 20) state.pX = 20;
-            if(state.pX > 430) state.pX = 430;
+            if(state.pX < 20) state.pX = 20; if(state.pX > 430) state.pX = 430;
             if(state.pY > 850) { hit(); state.pX = 225; state.pY = 700; state.velY = 0; }
-
-            ctx.font = "40px Arial";
-            ctx.fillText("🧍‍♀️", state.pX - 20, state.pY); // Lexi
-            ctx.fillText("👧", 210, 230); // CJ at end
+            ctx.font = "40px Arial"; ctx.fillText("🧍‍♀️", state.pX - 20, state.pY); ctx.fillText("👧", 210, 230);
         }
-        
         requestAnimationFrame(engine);
     }
 
-    // --- REFINED INPUT SYSTEM ---
-    const handleInput = (e) => {
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const rect = canvas.getBoundingClientRect();
-        const touchX = (clientX - rect.left) * (canvas.width / rect.width);
-
-        if (state.stage === 'obby') {
-            // Left Half: Move based on offset from player
-            if (clientX < window.innerWidth / 2) {
-                let diff = touchX - state.pX;
-                state.velX += (diff > 0 ? 0.8 : -0.8);
-            } 
-            // Right Half: Jump
-            else if (e.type === 'touchstart' || e.type === 'mousedown') {
-                if (state.onGround || state.velY < 2) { // Coyote Time Jump
-                    state.velY = -16;
-                    state.onGround = false;
-                }
-            }
-        } else {
-            state.pX = touchX;
+    function loopBoss() {
+        if(!state.active || state.stage !== 'boss') return;
+        state.frameCount++;
+        state.pX += (state.targetX - state.pX) * 0.15; state.pY += (state.targetY - state.pY) * 0.15;
+        if(!state.boss.active) {
+            state.travel += 0.085; distFill.style.width = state.travel + '%'; kmText.innerText = Math.floor(10500 * (1 - state.travel/100)).toLocaleString() + " KM";
+            if(state.travel >= 30 && state.currentBossStage === 0) startBossInstance("STORM", "Lexi, you can't pass!", "⛈️", 250);
+            if(state.travel >= 65 && state.currentBossStage === 1) startBossInstance("GHOST", "7 hour gap!", "👻", 350);
+            if(state.travel >= 98 && state.currentBossStage === 2) startBossInstance("WORLD", "GIVE UP!", "🌍", 650);
         }
-    };
+        if(state.frameCount % 8 === 0) state.bullets.push({x: state.pX, y: state.pY, s: 16});
+        state.bullets.forEach((b, i) => {
+            b.y -= b.s; if(state.boss.active && b.y < 200 && Math.abs(b.x - 225) < 80) { state.boss.hp -= 5; state.bullets.splice(i, 1); hpFill.style.width = (state.boss.hp/state.boss.max*100) + '%'; if(state.boss.hp <= 0) winBossInstance(); }
+        });
+        if(state.boss.active && state.frameCount % 20 === 0) state.obstacles.push({x: Math.random()*450, y: 150, t: '⚡'});
+        state.obstacles.forEach((o, i) => { o.y += 7; if(Math.hypot(state.pX-o.x, state.pY-o.y) < 35) { state.travel=Math.max(0, state.travel-2); state.obstacles.splice(i,1); } });
+        drawBoss(); requestAnimationFrame(loopBoss);
+    }
 
-    window.addEventListener('mousedown', handleInput);
-    window.addEventListener('touchstart', handleInput);
+    function startBossInstance(name, txt, icon, hp) { state.boss = { active: true, name, icon, hp, max: hp, timer: 0 }; document.getElementById('boss-label').innerText = name; bossTag.style.display='flex'; bubble.style.display='block'; bubble.innerText=txt; bubble.style.left='135px'; bubble.style.top='200px'; }
+    function winBossInstance() { state.boss.active=false; bossTag.style.display='none'; bubble.style.display='none'; if(state.currentBossStage === 2) { state.active=false; showFinalScroll(); } else state.currentBossStage++; }
+    function drawBoss() { ctx.clearRect(0,0,450,800); state.bullets.forEach(b => { ctx.font='20px Arial'; ctx.fillText('❤️', b.x-10, b.y); }); state.obstacles.forEach(o => { ctx.font='24px Arial'; ctx.fillText(o.t, o.x-12, o.y); }); ctx.font='45px Arial'; ctx.fillText('🍓', state.pX-22, state.pY); if(state.boss.active) { ctx.font='100px Arial'; ctx.textAlign='center'; ctx.fillText(state.boss.icon, 225, 180); } }
+
+    function setupMemory() {
+        const grid = document.getElementById('memory-grid'); const emojis = ['🦄', '🌈', '👩‍❤️‍👩', '🌸', '✨', '🍓'];
+        let cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+        grid.innerHTML = '';
+        cards.forEach(emoji => {
+            const card = document.createElement('div'); card.className = 'card'; card.innerText = emoji;
+            card.onclick = () => {
+                if(card.classList.contains('flipped') || (state.flippedCards && state.flippedCards.length >= 2)) return;
+                card.classList.add('flipped'); state.flippedCards = state.flippedCards || []; state.flippedCards.push(card);
+                if(state.flippedCards.length === 2) {
+                    if(state.flippedCards[0].innerText === state.flippedCards[1].innerText) { state.flippedCards.forEach(c => c.classList.add('matched')); state.flippedCards = []; if(document.querySelectorAll('.matched').length === 12) startStage('boss'); }
+                    else { setTimeout(() => { state.flippedCards.forEach(c => c.classList.remove('flipped')); state.flippedCards = []; }, 800); }
+                }
+            }; grid.appendChild(card);
+        });
+    }
+
+    function showFinalScroll() {
+        const scroll = document.getElementById('final-scroll'); scroll.style.display='block'; setTimeout(() => scroll.classList.add('open'), 10);
+        let i = 0; function type() { if(i < letterContent.length) { document.getElementById('letter').innerHTML += letterContent[i]==='\n'?'<br>':letterContent[i]; i++; setTimeout(type, 30); scroll.scrollTop=scroll.scrollHeight; } } type();
+    }
+
+    const handleInput = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const touchX = (clientX - rect.left) * (canvas.width / rect.width);
+        if (state.stage === 'obby') {
+            if (clientX > window.innerWidth / 2) { if (state.onGround) { state.velY = -16; state.onGround = false; } } 
+            else { state.velX += (touchX < state.pX) ? -1.2 : 1.2; }
+        } else { state.targetX = touchX; state.pX = touchX; }
+    };
+    window.addEventListener('mousedown', handleInput); window.addEventListener('touchstart', handleInput);
     window.addEventListener('mousemove', (e) => { if(state.stage !== 'obby') handleInput(e); });
 
-    // Boss & Memory Logic (Intact) ...
-    function setupMemory() { /* ... unchanged ... */ }
-    function loopBoss() { /* ... unchanged ... */ }
+    function drawP(e, y) { ctx.font="50px Arial"; ctx.fillText(e, state.pX-25, y); }
     function hit() { state.lives--; updateUI(); if(state.lives<=0) { state.active=false; document.getElementById('death-screen').style.display='flex'; } }
     function updateUI() { document.getElementById('lives-ui').innerText = "❤️".repeat(state.lives); }
     function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
-    async function initMic() { state.lives = 9; updateUI(); document.getElementById('death-screen').style.display='none'; state.active=true; requestAnimationFrame(engine); }
+    async function initMic() { state.lives = 9; updateUI(); document.getElementById('death-screen').style.display='none'; state.active=true; if(state.stage==='boss') loopBoss(); else requestAnimationFrame(engine); }
 </script>
 </body>
 </html>
