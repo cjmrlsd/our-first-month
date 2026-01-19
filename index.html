@@ -2,237 +2,298 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Strawberry Multiverse 🍓</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Silkscreen&family=Quicksand:wght@500;700&display=swap');
-        
-        :root { 
-            --pink: #ffc1cc; --hot-pink: #ff4d6d; --berry: #5d2e0c; 
-            --gold: #ffd700; --gold-light: #fff9c4;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            background: #1a0508; font-family: 'Quicksand', sans-serif; 
-            height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; 
-        }
-
-        #game-container { 
-            width: 100%; height: 100%; max-width: 450px; background: #fff5f5; 
-            position: relative; border: 4px solid white; overflow: hidden;
-        }
-
-        .screen { 
-            position: absolute; inset: 0; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 10; background: #fff5f5;
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Quicksand:wght@500;700&display=swap');
+        :root { --pink: #ffc1cc; --hot-pink: #ff4d6d; --cream: #fff5f5; --berry: #5d2e0c; --btn-shadow: #e63958; --gold: #ffd700; }
+        * { touch-action: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #1a0508; font-family: 'Quicksand', sans-serif; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        #game-container { width: 100vw; height: 100vh; max-width: 450px; max-height: 850px; background: var(--cream); position: relative; border: 4px solid white; overflow: hidden; }
+        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; z-index: 10; background: var(--cream); }
         .hidden { display: none !important; }
-
-        /* BUTTONS */
-        .btn { 
-            background: var(--hot-pink); color: white; border: none; padding: 15px 30px; 
-            border-radius: 50px; font-family: 'Silkscreen'; box-shadow: 0 6px 0 #e63958; 
-            cursor: pointer; font-size: 14px; position: relative;
-        }
-        .btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #e63958; }
-
-        /* LOADING BAR */
-        #load-bar-container { width: 80%; height: 20px; background: #eee; border-radius: 10px; border: 2px solid var(--berry); overflow: hidden; margin: 20px 0; }
-        #load-bar-fill { width: 0%; height: 100%; background: var(--hot-pink); }
+        .btn { background: var(--hot-pink); color: white; border: none; padding: 12px 20px; border-radius: 15px; font-family: 'Silkscreen'; font-size: 11px; box-shadow: 0 8px 0 var(--btn-shadow); cursor: pointer; margin: 5px; width: 85%; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 var(--btn-shadow); }
         
-        /* NO BUTTON */
-        #no-run { position: absolute; transition: 0.1s; background: #555; box-shadow: 0 6px 0 #333; }
-
-        /* GAMEPLAY */
+        /* STAGE 1: LOADING */
+        #load-bar-container { width: 80%; height: 20px; background: #eee; border-radius: 10px; border: 2px solid var(--berry); overflow: hidden; margin: 20px 0; }
+        #load-bar-fill { width: 0%; height: 100%; background: var(--hot-pink); transition: width 0.1s linear; }
+        
         #stats-bar { position: absolute; top: 20px; width: 100%; display: none; justify-content: space-around; z-index: 100; font-family: 'Silkscreen'; color: var(--hot-pink); }
-        canvas { width: 100%; height: 100%; display: none; background: #fff5f5; }
-
-        /* HEARTFELT MESSAGE CARD */
-        #heartfelt-card {
-            background: white; padding: 25px; border-radius: 20px; width: 90%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 3px solid var(--pink);
-            animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .gold-border { border: 4px solid var(--gold) !important; background: var(--gold-light) !important; }
-
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        #death-screen { position: absolute; inset: 0; background: rgba(26, 5, 8, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        canvas { background: #fff5f5; width: 100%; height: 100%; display: none; }
+        #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+        .card { width: 70px; height: 70px; background: var(--hot-pink); border-radius: 8px; font-size: 30px; display: flex; align-items: center; justify-content: center; color: transparent; }
+        .card.flipped { background: white; color: initial; transform: rotateY(180deg); transition: 0.3s; pointer-events: none; }
+        #final-card { background:white; padding:25px; border-radius:15px; width:90%; box-shadow:0 10px 30px rgba(0,0,0,0.1); max-height: 80vh; overflow-y: auto; touch-action: pan-y; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="scr-start" class="screen">
-        <div style="font-size: 80px; margin-bottom: 20px;">🍓</div>
-        <h1 style="font-family:'Silkscreen'; color:var(--hot-pink); font-size: 20px;">STRAWBERRY MULTIVERSE</h1>
-        <p style="margin-bottom: 30px; font-size: 14px; color: var(--berry);">For my favorite girl, Lexi.</p>
-        <button class="btn" onclick="startVibe()">START THE VIBE ✨</button>
-        <iframe id="yt-player" width="1" height="1" src="" frameborder="0" style="visibility: hidden;"></iframe>
-    </div>
+    <div id="stats-bar"><div id="lives-ui">❤️❤️❤️❤️❤️❤️❤️❤️❤️</div></div>
 
-    <div id="scr-load" class="screen hidden">
-        <div style="font-size:60px; animation: float 2s infinite ease-in-out;">🍓</div>
-        <div id="percent-text" style="font-family:'Silkscreen'; color:var(--hot-pink); margin-top:10px;">0%</div>
+    <div id="scr-load" class="screen">
+        <div style="font-size:60px; animation: pulse 1s infinite;">🍓</div>
+        <div id="percent-text" style="font-family:'Silkscreen'; color:var(--hot-pink);">0%</div>
         <div id="load-bar-container"><div id="load-bar-fill"></div></div>
-        <div id="trivia-box" style="font-size:12px; font-weight:bold; color:var(--berry); height: 40px;">Syncing with Lexi...</div>
+        <div id="trivia-box" style="height:60px; font-size:12px; font-weight:bold; padding:0 20px; color:var(--berry);">Initializing Heart...</div>
     </div>
 
-    <div id="scr-gate" class="screen hidden">
-        <h2 style="color: var(--berry); margin-bottom: 50px;">DO YOU REALLY LOVE ME?</h2>
-        <div id="gate-area" style="position:relative; width:100%; height:300px;">
-            <button class="btn" onclick="showScreen('scr-quiz'); renderQuiz();">YES, FOREVER!</button>
-            <button id="no-run" class="btn">NO</button>
+    <div id="scr-title" class="screen hidden">
+        <h1 style="font-family:'Silkscreen'; color:var(--hot-pink)">STRAWBERRY MULTIVERSE</h1>
+        <button class="btn" style="margin-top:20px" onclick="startVibe()">START ADVENTURE ✨</button>
+        <iframe id="yt-player" width="1" height="1" src="" frameborder="0" style="visibility: hidden; position: absolute;"></iframe>
+    </div>
+
+    <div id="scr-gate1" class="screen hidden"><h2>DO YOU LOVE ME?</h2><button class="btn" onclick="showScreen('scr-gate2')">YES</button></div>
+    <div id="scr-gate2" class="screen hidden">
+        <h2>DO YOU REALLY LOVE ME?</h2>
+        <div id="gate2-area" style="width:100%; height:200px; position:relative;">
+            <button id="yes-grow" class="btn" style="position:absolute; left:50%; transform:translateX(-50%)" onclick="startQuiz()">YES!</button>
+            <button id="no-run" class="btn" style="position:absolute; left:50%; top:100px; transform:translateX(-50%); background:#555; width:60px;">NO</button>
         </div>
     </div>
 
     <div id="scr-quiz" class="screen hidden">
-        <p id="quiz-q" style="font-weight:bold; color:var(--berry); margin-bottom:20px;"></p>
-        <div id="quiz-options" style="display:grid; gap:12px; width:100%;"></div>
+        <h2 id="quiz-count" style="font-size:11px; color:var(--hot-pink)">SYNCING...</h2>
+        <p id="quiz-q" style="min-height:50px; font-weight:bold; font-size:14px; padding:0 10px;"></p>
+        <div id="quiz-options" style="display:flex; flex-direction:column; width:100%;"></div>
     </div>
 
-    <div id="stats-bar"><div id="lives-ui">❤️❤️❤️❤️❤️❤️❤️❤️❤️</div></div>
-    <canvas id="gameCanvas"></canvas>
+    <div id="death-screen">
+        <h1 style="font-family:'Silkscreen';">YOU DIED</h1>
+        <div id="fill-ui" style="font-size:24px; margin:15px;"></div>
+        <p id="mic-status">BLOW INTO MIC TO REVIVE!</p>
+        <button id="revive-btn" class="btn" onclick="initMic()">REVIVE</button>
+    </div>
 
-    <div id="scr-final" class="screen hidden" style="background:var(--pink);">
-        <div id="heartfelt-card">
-            <div id="final-icon" style="font-size:60px; margin-bottom:15px;">🍓</div>
-            <h2 id="final-title" style="font-family:'Silkscreen'; color:var(--hot-pink); margin-bottom:15px;">I LOVE YOU</h2>
-            <div id="final-text" style="font-size:15px; line-height:1.6; color:var(--berry); text-align:left;">
-                </div>
-            <p style="margin-top:20px; font-family:'Silkscreen'; font-size:12px; color:var(--hot-pink);">— CJ, Your Programmer</p>
+    <div id="ready-overlay" class="screen hidden" style="background:rgba(255,245,245,0.98); z-index:1000;">
+        <h2 id="ready-title" style="font-family:'Silkscreen'; color:var(--hot-pink)"></h2>
+        <p id="ready-instr" style="font-weight:bold; margin-bottom:20px;"></p>
+        <h1 id="countdown" style="font-size:60px; font-family:'Silkscreen'">3</h1>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+    <div id="scr-memory" class="screen hidden"><h2 style="font-family:'Silkscreen'">HEART SNAP 🧩</h2><div id="memory-grid"></div></div>
+
+    <div id="scr-bottle" class="screen hidden">
+        <div id="drop-gift" class="hidden" style="font-size:80px;">🗺️<br><span style="font-family:'Silkscreen'; font-size:40px;">5</span></div>
+        <h2 id="victory-header" style="font-family:'Silkscreen'; margin-top:20px;">RUB TO POP! 🍾</h2>
+        <div id="bottle" style="font-size:100px;">🍾</div>
+    </div>
+
+    <div id="scr-final" class="screen hidden">
+        <div id="final-card">
+            <div id="final-icon" style="font-size:60px;">🍓</div>
+            <h2 id="final-status" style="font-family: 'Silkscreen'; color: var(--hot-pink); margin-bottom: 20px;">VIBE CHECK: PASSED ✅</h2>
+            <div id="final-text"></div>
         </div>
-        <button class="btn" style="margin-top:25px;" onclick="location.reload()">REPLAY ADVENTURE ❤️</button>
+        <button class="btn" style="margin-top:20px;" onclick="location.reload()">REPLAY ❤️</button>
     </div>
 </div>
 
 <script>
-    let state = { 
-        loading: 0, qIdx: 0, lives: 9, deathCount: 0, stage: 'start', 
-        pX: 200, pY: 600, active: false, score: 0, enemies: [] 
+    const triviaList = ["LDR Love Language: Videocalls until we fall asleep. 💤", "Who yaps more? Definitely one of us. 🎤", "Time zones can't keep us apart! ⏰", "CJ + Lexi = The Ultimate Duo. 🍓", "Syncing braincells in 3... 2... 1...", "Did you know CJ loves you more than iced coffee?", "Distance is just a number."];
+    
+    const quizData = [
+        {q: "What’s our official LDR love language?", a: ["virtual movie marathons.", "Sending TikToks I’ve already seen.", "Falling asleep on the phone together.", "All of the above (We’re obsessed)."]},
+        {q: "The most flirty thing you can say to me right now is...", a: ["'I booked a flight.'", "'Check your door, I sent food.'", "'I'm wearing that shirt you like.'", "None (It's actually 'I bought you a Squishmallow')."]},
+        {q: "Who is the designated 'Yap-Master' during calls?", a: ["You (and it's adorable).", "Me (sorry for the 20-minute rant).", "We both fight for the mic.", "The dog that won't stop barking."]},
+        {q: "What’s my favorite 'view' whilst we’re apart?", a: ["Your morning selfies.", "Your message or call notifications.", "The countdown app on my home screen.", "All (but mostly your face)."]},
+        {q: "Our first physical meeting would be like...", a: ["A slow-mo movie scene.", "Pure chaos and crying.", "'Finally, I can stop smelling my screen.'", "A Pinterest board coming to life."]},
+        {q: "What is the ultimate 'LDR struggle' we’ve mastered?", a: ["Bad Wi-Fi during the best part.", "Time zone math.", "The 'I miss you' loop.", "All of the above."]},
+        {q: "Which red flag I’d actually ignore for you?", a: ["You leave me on read for 2 mins.", "Your music taste is interesting.", "You’re a miles-away-princess.", "None (You're a green flag with glitter)."]},
+        {q: "If we were in a 'U-Haul' movie, who’s driving?", a: ["You (The Captain).", "Me (The Navigator).", "We’re both in the back with snacks.", "We aren't driving, we're already moved in."]},
+        {q: "The most 'us' thing we do is...", a: ["Virtual date nights.", "Sending 'this reminded me of you'.", "Competitive flirting.", "All of the above."]},
+        {q: "How much do I actually love you?", a: ["To the moon and back.", "More than iced coffee/strawberry.", "Enough to fight Distance Boss forever.", "All that is mentioned and more."]}
+    ];
+
+    let state = { lives: 9, deaths: 0, stage: 'load', active: false, score: 0, pX: 225, pY: 700, bullets: [], enemies: [], bossHP: 100, invinc: 0, qIdx: 0, isReviving: false, sq: 0, dy: 0 };
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    window.onload = () => {
+        let p = 0; const itv = setInterval(() => {
+            p++; document.getElementById('percent-text').innerText = p+"%";
+            document.getElementById('load-bar-fill').style.width = p+"%";
+            if(p%14===0) document.getElementById('trivia-box').innerText = triviaList[Math.floor(p/14)%7];
+            if(p>=100) { clearInterval(itv); showScreen('scr-title'); }
+        }, 35);
     };
 
     function startVibe() {
-        // Load the Boba Date track via YouTube Embed (No ads/UI)
         document.getElementById('yt-player').src = "https://www.youtube.com/embed/Uj93hicGDNc?autoplay=1&loop=1&playlist=Uj93hicGDNc";
-        showScreen('scr-load');
-        runLoader();
+        showScreen('scr-gate1');
     }
 
-    function runLoader() {
-        const trivia = ["Preparing the Multiverse...", "Scaling for mobile...", "Buying virtual flowers...", "Checking braincell sync..."];
-        const itv = setInterval(() => {
-            state.loading++;
-            document.getElementById('percent-text').innerText = state.loading + "%";
-            document.getElementById('load-bar-fill').style.width = state.loading + "%";
-            if(state.loading % 25 === 0) document.getElementById('trivia-box').innerText = trivia[state.loading/25-1];
-            if(state.loading >= 100) { clearInterval(itv); setupGate(); }
-        }, 35);
-    }
-
-    function setupGate() {
-        showScreen('scr-gate');
-        const no = document.getElementById('no-run');
-        const moveNo = (e) => {
-            if(e) e.preventDefault();
-            const x = Math.random() * 60 + 10;
-            const y = Math.random() * 60 + 10;
-            no.style.left = x + "%";
-            no.style.top = y + "%";
-        };
-        no.addEventListener('touchstart', moveNo);
-        no.addEventListener('mouseover', moveNo);
-    }
-
-    const quizData = [
-        {q: "Our official Love Language?", a: ["Boba Dates", "FaceTime 24/7", "Gaming", "All the above!"]},
-        {q: "Is Lexi the prettiest girl?", a: ["Yes", "Obviously", "No competition", "💍"]}
-    ];
-
+    function startQuiz() { showScreen('scr-quiz'); renderQuiz(); }
     function renderQuiz() {
-        const q = quizData[state.qIdx];
-        if(!q) return startShootingGame();
-        document.getElementById('quiz-q').innerText = q.q;
-        const opt = document.getElementById('quiz-options');
-        opt.innerHTML = '';
-        q.a.forEach(text => {
-            const b = document.createElement('button');
-            b.className = 'btn';
-            b.innerText = text;
+        if(state.qIdx >= 10) return startStage('harvest');
+        const d = quizData[state.qIdx];
+        document.getElementById('quiz-count').innerText = `SYNC: ${state.qIdx+1}/10`;
+        document.getElementById('quiz-q').innerText = d.q;
+        const cont = document.getElementById('quiz-options'); cont.innerHTML = '';
+        d.a.forEach(opt => {
+            const b = document.createElement('button'); b.className = 'btn'; b.innerText = opt;
             b.onclick = () => { state.qIdx++; renderQuiz(); };
-            opt.appendChild(b);
+            cont.appendChild(b);
         });
     }
 
-    function startShootingGame() {
-        showScreen('gameCanvas');
-        document.getElementById('gameCanvas').style.display = 'block';
+    function startStage(s) {
+        state.stage = s; state.active = false; state.score = 0; state.enemies = []; state.bullets = []; state.bossHP = 100;
+        showScreen('ready-overlay');
+        const cfg = { 
+            harvest: ["THE HARVEST", "Drag 🧺 to catch 10 Hearts! Avoid 👾 Vibes."], 
+            obby: ["THE LEAP", "👧 Jump over Rocks, Planes, and bricks to find CJ!"], 
+            memory: ["HEART SNAP", "Match all 🧩 pairs of our heart!"], 
+            boss: ["FINAL BOSS: DISTANCE", "Shoot 🌰 Seeds at 🌍 Earth! Dodge ⚡ Bolts!"] 
+        };
+        document.getElementById('ready-title').innerText = cfg[s][0];
+        document.getElementById('ready-instr').innerText = cfg[s][1];
+        let c = 3; document.getElementById('countdown').innerText = c;
+        const itv = setInterval(() => {
+            c--; document.getElementById('countdown').innerText = c;
+            if(c <= 0) { clearInterval(itv); document.getElementById('ready-overlay').classList.add('hidden'); state.active = true; initLogic(s); }
+        }, 1000);
+    }
+
+    function initLogic(s) {
         document.getElementById('stats-bar').style.display = 'flex';
-        state.active = true;
-        // Simple Game Engine logic for mobile
-        requestAnimationFrame(gameLoop);
+        if(s === 'memory') { showScreen('scr-memory'); setupMemory(); }
+        else { canvas.style.display = 'block'; state.pY = 700; requestAnimationFrame(engine); }
     }
 
-    function gameLoop() {
-        if(!state.active) return;
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 450; canvas.height = 800;
-        ctx.clearRect(0,0,450,800);
-        
-        // Draw Player (Strawberry)
-        ctx.font = "50px Arial";
-        ctx.fillText("🍓", state.pX - 25, 700);
+    function engine() {
+        if(!state.active || state.isReviving) return;
+        ctx.clearRect(0,0,450,850); updateUI();
+        if(state.lives <= 0) return triggerDeath();
 
-        // Enemy logic (Distance bolts)
-        if(Math.random() < 0.05) state.enemies.push({x: Math.random()*400, y: 0});
-        state.enemies.forEach((en, i) => {
-            en.y += 5;
-            ctx.fillText("👾", en.x, en.y);
-            if(en.y > 650 && Math.abs(en.x - state.pX) < 40) {
-                state.lives--; 
-                state.enemies.splice(i, 1);
-                if(state.lives <= 0) { state.deathCount++; state.lives = 9; }
-            }
-            if(en.y > 800) { state.score++; state.enemies.splice(i, 1); }
-        });
-
-        document.getElementById('lives-ui').innerText = "❤️".repeat(state.lives);
-        if(state.score > 20) winGame();
-        else requestAnimationFrame(gameLoop);
-    }
-
-    function winGame() {
-        state.active = false;
-        showScreen('scr-final');
-        const card = document.getElementById('heartfelt-card');
-        const text = document.getElementById('final-text');
-        const title = document.getElementById('final-title');
-        const icon = document.getElementById('final-icon');
-
-        if(state.deathCount === 0) {
-            card.classList.add('gold-border');
-            icon.innerText = "🏆";
-            title.innerText = "PERFECT SYNC! ⭐";
-            text.innerHTML = "Lexi, you're not just a gamer queen, you're my absolute everything. You beat this game without breaking a single heart, just like you've protected mine. Distance is just a number, but my love for you is infinite. You're my endgame, forever and always.";
-        } else {
-            text.innerHTML = "You did it, Lexi! Every obstacle you cleared represents a mile we've conquered together. No matter how many 'respawns' we need, I'll always be here waiting for you. I love you more than any high score.";
+        if(state.stage === 'harvest') {
+            if(Math.random()<0.05) state.enemies.push({x: Math.random()*400, y: -50, t: Math.random()>0.3?'💖':'👾'});
+            state.enemies.forEach((it, i) => {
+                it.y += 6; ctx.font = "40px Arial"; ctx.fillText(it.t, it.x, it.y);
+                if(Math.hypot(it.x - state.pX, it.y - state.pY) < 50) {
+                    if(it.t === '💖') state.score++; else hit();
+                    state.enemies.splice(i,1);
+                }
+            });
+            drawP("🧺"); if(state.score >= 10) startStage('obby');
         }
+
+        if(state.stage === 'obby') {
+            state.dy = (state.dy||0) + 0.8; state.pY += state.dy;
+            if(state.pY > 700) { if(state.dy>5) state.sq=10; state.pY=700; state.dy=0; }
+            if(Math.random()<0.02) state.enemies.push({x: 500, y: 700, t: ['🪨','✈️','⏰','💸','🧱'][Math.floor(Math.random()*5)]});
+            state.enemies.forEach((it, i) => {
+                it.x -= 7; ctx.fillText(it.t, it.x, it.y);
+                if(it.x<80 && it.x>20 && state.pY>650) { hit(); state.enemies.splice(i,1); }
+            });
+            ctx.fillText("👧", 40, state.pY); 
+            ctx.fillText("👧", 400, 700); // CJ waiting
+            state.score++; if(state.score > 400) startStage('memory');
+        }
+
+        if(state.stage === 'boss') {
+            let bx = 225 + Math.sin(Date.now()/500)*120;
+            ctx.font = "80px Arial"; ctx.fillText("🌍", bx-40, 150);
+            if(Date.now()%200<20) state.bullets.push({x: state.pX, y: state.pY-20});
+            state.bullets.forEach((b,i) => {
+                b.y-=12; ctx.fillText("🌰", b.x-10, b.y);
+                if(b.y<180 && Math.abs(b.x-bx)<60) { state.bossHP-=2; state.bullets.splice(i,1); }
+            });
+            if(Math.random()<0.06) state.enemies.push({x: Math.random()*400, y: 150});
+            state.enemies.forEach((e,i)=>{
+                e.y+=8; ctx.fillText("⚡", e.x, e.y);
+                if(Math.hypot(e.x-state.pX, e.y-state.pY)<40) { hit(); state.enemies.splice(i,1); }
+            });
+            drawBossUI(); drawP("🍓"); if(state.bossHP<=0) winBoss();
+        }
+        requestAnimationFrame(engine);
     }
 
-    // Touch controls for the Strawberry
-    window.addEventListener('touchmove', (e) => {
-        const touch = e.touches[0];
-        const rect = document.getElementById('game-container').getBoundingClientRect();
-        state.pX = touch.clientX - rect.left;
-    });
-
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-        document.getElementById('gameCanvas').style.display = 'none';
-        document.getElementById(id).classList.remove('hidden');
+    function drawP(e) {
+        ctx.save(); if(state.sq>0) { ctx.scale(1, 0.7); state.sq--; }
+        if(state.invinc>0) { ctx.globalAlpha = Math.sin(Date.now()/50)>0?0.2:0.8; state.invinc--; }
+        ctx.font = "50px Arial"; ctx.fillText(e, state.pX-25, state.pY); ctx.restore();
     }
+
+    function hit() { if(state.invinc>0) return; state.lives--; state.invinc=90; }
+    function updateUI() { document.getElementById('lives-ui').innerText = "❤️".repeat(Math.max(0, Math.floor(state.lives))); }
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+    function drawBossUI() { ctx.fillStyle="#333"; ctx.fillRect(125,30,200,10); ctx.fillStyle="red"; ctx.fillRect(125,30,state.bossHP*2,10); }
+
+    async function initMic() {
+        try {
+            const s = await navigator.mediaDevices.getUserMedia({audio:true});
+            const ctxA = new AudioContext(); const an = ctxA.createAnalyser();
+            ctxA.createMediaStreamSource(s).connect(an); an.fftSize = 256;
+            const data = new Uint8Array(an.frequencyBinCount);
+            document.getElementById('revive-btn').style.display='none';
+            state.isReviving = true;
+            const check = () => {
+                an.getByteFrequencyData(data);
+                if(data.reduce((a,b)=>a+b)>4000) { state.lives += 0.2; renderFill(); }
+                if(state.lives >= 9) { state.lives=9; state.isReviving=false; document.getElementById('death-screen').style.display='none'; state.active=true; engine(); }
+                else requestAnimationFrame(check);
+            }; check();
+        } catch(e) { alert("Mic required!"); }
+    }
+
+    function renderFill() { document.getElementById('fill-ui').innerText = "❤️".repeat(Math.floor(state.lives)); }
+    function triggerDeath() { state.active=false; state.deaths++; document.getElementById('death-screen').style.display='flex'; document.getElementById('revive-btn').style.display='block'; renderFill(); }
+
+    function setupMemory() {
+        const g = document.getElementById('memory-grid'); const icons = ['🍓','🍓','💖','💖','✈️','✈️','📱','📱','💍','💍','💑','💑'].sort(()=>Math.random()-0.5);
+        g.innerHTML = ''; let f = [];
+        icons.forEach(i => {
+            const c = document.createElement('div'); c.className='card'; c.innerText=i;
+            c.onclick = () => {
+                if(f.length<2 && !c.classList.contains('flipped')) {
+                    c.classList.add('flipped'); f.push(c);
+                    if(f.length==2) { if(f[0].innerText!=f[1].innerText) setTimeout(()=>{ f.forEach(x=>x.classList.remove('flipped')); f=[]; }, 800); else f=[]; }
+                    if(document.querySelectorAll('.flipped').length==12) setTimeout(()=>startStage('boss'), 1000);
+                }
+            }; g.appendChild(c);
+        });
+    }
+
+    function winBoss() {
+        state.active = false; canvas.style.display = 'none'; showScreen('scr-bottle');
+        document.getElementById('drop-gift').classList.remove('hidden');
+        if(state.deaths === 0) { document.getElementById('final-card').style.background = "linear-gradient(45deg, #fff, #ffd700)"; }
+        
+        document.getElementById('final-text').innerHTML = `
+            <div style="text-align: left; font-family: 'Quicksand', sans-serif; color: var(--berry);">
+                <p style="font-size: 1.1em; font-weight: 700;">Lexi,</p><br>
+                <p>They say in most games you only get one life, but honestly? Being with you feels like a permanent power-up. Whether we’re locked in on a mission or just yapping until the stars fade into the morning, you’re the only one I want on my team. No debate.</p><br>
+                <p>Distance is just a glitch in the system—a temporary lag spike in a connection that’s already written in the stars. My heart is permanently synced to yours. The numbers on a screen could never measure the way you make me feel; you are the only thing that feels real in this digital multiverse.</p><br>
+                <p>You’ve guarded my heart better than any high score, and I promise to keep yours on lock forever. You aren't just my Player Two; you’re my sanctuary, my endgame, and my entire world.</p><br>
+                <p>I’m so cooked for you, Lexi. I'm choosing you today, tomorrow, and every day after that.</p><br>
+                <p style="margin-top: 10px;"><strong>Yours forever,</strong><br>
+                <span style="font-family: 'Silkscreen'; color: var(--hot-pink); font-size: 1.2em;">CJ Morales</span></p>
+            </div>
+        `;
+
+        let rub = 0; const bot = document.getElementById('bottle');
+        const handleRub = () => {
+            rub += 1.5; bot.style.transform = `scale(${1+rub/100}) rotate(${Math.sin(rub)*5}deg)`;
+            if(rub>100) { bot.onmousemove = null; bot.ontouchmove = null; showScreen('scr-final'); }
+        };
+        bot.onmousemove = handleRub; bot.ontouchmove = handleRub;
+    }
+
+    window.onmousemove = window.ontouchmove = (e) => {
+        const x = e.touches ? e.touches[0].clientX : e.clientX;
+        state.pX = x - (window.innerWidth - 450)/2;
+        if(state.stage === 'obby' && state.pY==700) state.dy = -18;
+    };
+
+    document.getElementById('no-run').onmouseover = document.getElementById('no-run').ontouchstart = (e) => {
+        e.preventDefault(); const no = e.target;
+        no.style.left = Math.random()*80+"%"; no.style.top = Math.random()*80+"%";
+    };
 </script>
 </body>
 </html>
