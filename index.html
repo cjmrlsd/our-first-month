@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Strawberry Multiverse 🍓</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        /* Using Silkscreen as the closest high-quality 'Bubbly' Arcade Pixel Font */
+        @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap');
 
         :root {
             --pink: #ffb7c5;
             --hot-pink: #ff4d6d;
+            --arcade-pink: #ff85a1; /* Brighter arcade pink for text */
             --cream: #fff5f5;
         }
 
@@ -17,37 +19,35 @@
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             background-color: var(--pink);
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Silkscreen', cursive;
             overflow: hidden;
             display: flex; justify-content: center; align-items: center;
-            touch-action: none; /* Prevents scrolling while playing */
+            touch-action: none;
         }
 
         #game-container {
             width: 100vw; height: 100vh;
             max-width: 375px; max-height: 667px;
             background: var(--cream);
-            border: 4px solid white;
+            border: 6px solid white;
             position: relative;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 20px;
         }
 
-        /* UI Layer */
+        /* Pink Arcade Text Styling */
+        h1, h2, p, #q-num, #lvl-display, #timer {
+            color: var(--hot-pink);
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 1);
+            letter-spacing: 1px;
+        }
+
         #ui-layer {
             position: absolute; top: 15px; left: 15px; right: 15px;
             z-index: 100; display: none; justify-content: space-between;
         }
-        #heart-bar { color: var(--hot-pink); font-size: 10px; }
 
-        /* Navigation Safeguard */
-        #emergency-next {
-            position: absolute; bottom: 10px; right: 10px;
-            font-size: 8px; opacity: 0.5; z-index: 5000;
-            background: none; border: none; color: #aaa;
-        }
-
-        /* Screens */
         .screen {
             position: absolute; inset: 0;
             display: flex; flex-direction: column;
@@ -56,38 +56,40 @@
             background: var(--cream);
             z-index: 10;
         }
+
         .hidden { display: none !important; }
 
-        /* Buttons Optimized for Mobile Hit-Area */
+        /* Bubbly Arcade Buttons */
         .btn {
             background: var(--hot-pink); color: white;
-            border: none; padding: 20px 30px; 
-            border-radius: 12px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 12px; cursor: pointer;
-            box-shadow: 0 5px 0 #c9184a;
+            border: none; padding: 15px 20px; 
+            border-radius: 50px; /* Bubbly shape */
+            font-family: 'Silkscreen', cursive;
+            font-size: 10px; cursor: pointer;
+            box-shadow: 0 6px 0 #c9184a;
             margin: 10px;
+            transition: transform 0.1s;
             -webkit-tap-highlight-color: transparent;
+            width: 85%;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #c9184a;
         }
 
         #no-btn {
             position: absolute; z-index: 1000;
             top: 65%; left: 50%; transform: translateX(-50%);
-            transition: all 0.1s ease-out; /* Faster jump */
-        }
-
-        /* Level 2 Landscape Warning */
-        #landscape-warning {
-            position: absolute; inset: 0; background: var(--hot-pink);
-            color: white; z-index: 3000; display: none;
-            flex-direction: column; align-items: center; justify-content: center;
+            width: auto;
+            background: #ff85a1; /* Slightly different pink for the 'trick' button */
         }
 
         canvas { display: none; width: 100%; height: 100%; background: #fff0f3; }
 
         .instruction-overlay {
             position: absolute; inset: 0;
-            background: rgba(255, 255, 255, 0.98);
+            background: rgba(255, 245, 245, 0.95);
             z-index: 2000; display: flex; flex-direction: column;
             align-items: center; justify-content: center; padding: 30px;
         }
@@ -98,53 +100,47 @@
 <div id="game-container">
     <div id="ui-layer">
         <div id="heart-bar">❤️</div>
-        <div id="lvl-display" style="font-size: 8px;">LVL: 1</div>
-    </div>
-
-    <button id="emergency-next" class="hidden" onclick="nextLevel()">SKIP LVL</button>
-
-    <div id="landscape-warning">
-        <div style="font-size: 30px;">🔄</div>
-        <p style="font-size: 10px; margin-top: 15px;">Rotate Phone for Strawberry Impact!</p>
+        <div id="lvl-display" style="font-size: 10px;">LVL: 1</div>
     </div>
 
     <div id="instruction-screen" class="instruction-overlay hidden">
-        <h2 id="ins-title" style="color: var(--hot-pink); font-size: 14px;"></h2>
-        <p id="ins-text" style="font-size: 10px; line-height: 1.6; margin: 20px 0;"></p>
-        <div id="countdown" style="font-size: 20px; color: var(--hot-pink); margin-bottom: 10px;"></div>
-        <button id="start-lvl-btn" class="btn" onclick="initLevelTimer()">START LEVEL</button>
+        <h2 id="ins-title"></h2>
+        <p id="ins-text" style="font-size: 11px;"></p>
+        <div id="countdown" style="font-size: 30px; color: var(--hot-pink); margin-bottom: 10px;"></div>
+        <button id="start-lvl-btn" class="btn" style="width: auto;" onclick="initLevelTimer()">START</button>
     </div>
 
     <div id="scr-intro" class="screen">
-        <div style="font-size: 40px; margin-bottom: 20px;">🍓</div>
-        <h1>Strawberry Multiverse</h1>
-        <button class="btn" onclick="goToStep(1)">START ADVENTURE</button>
+        <div style="font-size: 50px; margin-bottom: 20px; filter: drop-shadow(2px 2px 0 white);">🍓</div>
+        <h1 style="font-size: 22px;">Strawberry<br>Multiverse</h1>
+        <button class="btn" style="width: auto; padding: 20px 40px;" onclick="goToStep(1)">PLAY!</button>
     </div>
 
     <div id="scr-love1" class="screen hidden">
         <h1>Do you love me?</h1>
-        <button class="btn" onclick="goToStep(2)">YES</button>
-        <button class="btn" onclick="goToStep(2)">YES</button>
+        <button class="btn" onclick="goToStep(2)">YES!</button>
+        <button class="btn" onclick="goToStep(2)">YES!</button>
     </div>
 
     <div id="scr-love2" class="screen hidden">
         <h1>Do you REALLY<br>love me?</h1>
-        <button class="btn" onclick="nextLevel()">YES</button>
+        <button class="btn" style="width: auto;" onclick="nextLevel()">YES!</button>
         <button class="btn" id="no-btn" onmouseover="dodge(event)" onclick="dodge(event)" ontouchstart="dodge(event)">NO</button>
     </div>
 
     <div id="scr-quiz" class="screen hidden">
         <h1 id="q-num">Q1</h1>
-        <p id="q-text" style="margin-bottom:20px; font-size: 10px;"></p>
-        <div id="quiz-options"></div>
+        <p id="q-text" style="margin-bottom:20px; font-size: 12px;"></p>
+        <div id="quiz-options" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
     </div>
 
     <canvas id="mainCanvas"></canvas>
 
     <div id="scr-final" class="screen hidden">
-        <h1>Happy 1st Month!</h1>
+        <h1>Level Clear!</h1>
         <div style="font-size: 60px; margin: 20px;">👩‍❤️‍💋‍👩</div>
-        <div id="timer" style="font-size: 10px; color: var(--hot-pink);"></div>
+        <p style="font-size: 10px;">Happy 1st Month, Baby!</p>
+        <div id="timer" style="font-size: 12px; margin-top: 10px;"></div>
     </div>
 </div>
 
@@ -153,40 +149,36 @@
     const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
     
-    // --- UPDATED ULTRA-DODGE ---
+    // --- NO BUTTON DODGE ---
     function dodge(e) { 
         if(e) e.preventDefault(); 
         const b = document.getElementById('no-btn');
         const container = document.getElementById('game-container');
-        
-        // Calculate random coordinates inside the container
         const maxX = container.clientWidth - b.clientWidth;
         const maxY = container.clientHeight - b.clientHeight;
-        
-        const randomX = Math.floor(Math.random() * maxX);
-        const randomY = Math.floor(Math.random() * maxY);
-
-        b.style.left = randomX + 'px';
-        b.style.top = randomY + 'px';
+        b.style.left = Math.floor(Math.random() * maxX) + 'px';
+        b.style.top = Math.floor(Math.random() * maxY) + 'px';
         b.style.transform = 'none'; 
     }
 
-    function goToStep(s) { document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden')); if(s===1) document.getElementById('scr-love1').classList.remove('hidden'); if(s===2) document.getElementById('scr-love2').classList.remove('hidden'); }
+    function goToStep(s) { 
+        document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden')); 
+        if(s===1) document.getElementById('scr-love1').classList.remove('hidden'); 
+        if(s===2) document.getElementById('scr-love2').classList.remove('hidden'); 
+    }
 
     function updateHearts() { document.getElementById('heart-bar').innerText = "❤️".repeat(state.hearts); }
 
-    // --- LEVEL MANAGEMENT ---
     function nextLevel() {
         state.level++;
         document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
         document.getElementById('ui-layer').style.display = 'flex';
         document.getElementById('lvl-display').innerText = "LVL: " + state.level;
-        document.getElementById('emergency-next').classList.remove('hidden');
         updateHearts();
         
         const instructions = {
-            1: { title: "LVL 1: Connection Quiz", text: "10 questions to test our digital chemistry. Tap the heart-answers!" },
-            2: { title: "LVL 2: Strawberry Impact", text: "RAPID FIRE MODE! Triple seeds fire every 200ms. DRAG TO MOVE and destroy the distance!" }
+            1: { title: "LVL 1: Connection", text: "Answer 10 questions to sync our hearts!" },
+            2: { title: "LVL 2: Impact", text: "RAPID FIRE MODE! Drag 🍓 to shoot 🌱 and clear the path!" }
         };
 
         const ins = instructions[state.level];
@@ -206,10 +198,7 @@
         const timer = setInterval(() => {
             cd.innerText = count > 0 ? count : "GO!";
             count--;
-            if(count < -1) {
-                clearInterval(timer);
-                startLevelAfterInstructions();
-            }
+            if(count < -1) { clearInterval(timer); startLevelAfterInstructions(); }
         }, 800);
     }
 
@@ -220,12 +209,17 @@
         if(state.level === 2) startStrawberryImpact();
     }
 
-    // --- LEVEL 1: QUIZ ---
     const quizData = [
-        { q: "Who yaps more on the phone?", a: ["Me", "You"] },
-        { q: "Who falls asleep on FaceTime?", a: ["Me", "You"] },
-        { q: "Who is the softest?", a: ["Me", "You"] },
-        { q: "Ready for Space?", a: ["YES", "Ready!"] }
+        { q: "Who yaps more on the phone?", a: ["Definitely Me", "100% You"] },
+        { q: "Who is the first to fall asleep?", a: ["Me (the sleepyhead)", "You (the koala)"] },
+        { q: "Who is more likely to cry during a movie?", a: ["Me", "You"] },
+        { q: "Who gives the best digital hugs?", a: ["Me", "You"] },
+        { q: "Who is the most stubborn?", a: ["Me", "You"] },
+        { q: "Our favorite thing to do?", a: ["Gaming together", "Virtual dates", "Just talking"] },
+        { q: "Who is the morning person?", a: ["Me", "You"] },
+        { q: "Who is the protective one?", a: ["Me", "You"] },
+        { q: "Who fell in love first?", a: ["Me", "You"] },
+        { q: "Ready to fight the distance?", a: ["YES!", "Lez get it on!"] }
     ];
 
     function startQuiz() {
@@ -246,18 +240,18 @@
         });
     }
 
-    // --- LEVEL 2: STRAWBERRY IMPACT (Rapid Triple-Shoot) ---
+    // --- LVL 2: RAPID FIRE (200ms) ---
     function startStrawberryImpact() {
         canvas.style.display = 'block';
         canvas.width = 375; canvas.height = 667;
         let ship = { x: 50, y: 330 }, seeds = [], enemies = [], frames = 0;
 
-        // RAPID FIRE: 200ms with triple spread
         const shootInterval = setInterval(() => {
             if(state.level === 2 && !state.isPaused) {
-                seeds.push({x: ship.x + 25, y: ship.y, vy: 0});   // Center
-                seeds.push({x: ship.x + 25, y: ship.y, vy: -1.5}); // Up Angle
-                seeds.push({x: ship.x + 25, y: ship.y, vy: 1.5});  // Down Angle
+                // Triple shot pattern
+                seeds.push({x: ship.x + 25, y: ship.y, vy: 0});
+                seeds.push({x: ship.x + 25, y: ship.y, vy: -1.8});
+                seeds.push({x: ship.x + 25, y: ship.y, vy: 1.8});
             }
         }, 200);
 
@@ -272,20 +266,17 @@
         function loop() {
             if(state.level !== 2 || state.isPaused) { clearInterval(shootInterval); return; }
             ctx.clearRect(0,0,canvas.width, canvas.height);
-            
             ctx.font = "30px Arial"; ctx.fillText("🍓", ship.x, ship.y + 10);
-            if(frames < 100) { ctx.font = "10px 'Press Start 2P'"; ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.fillText("DRAG ME!", ship.x - 20, ship.y - 30); }
-
+            
             seeds.forEach((s, i) => {
-                s.x += 12; // High speed
-                s.y += s.vy; 
-                ctx.fillText("🌱", s.x, s.y + 10);
+                s.x += 12; s.y += s.vy; 
+                ctx.font = "16px Arial"; ctx.fillText("🌱", s.x, s.y + 10);
                 if(s.x > canvas.width) seeds.splice(i,1);
             });
 
             if(frames % 35 === 0) enemies.push({x: 400, y: Math.random()*580 + 40, t: Math.random()>0.5?"⏰":"🚩"});
             enemies.forEach((en, i) => {
-                en.x -= 4; ctx.fillText(en.t, en.x, en.y);
+                en.x -= 4; ctx.font = "24px Arial"; ctx.fillText(en.t, en.x, en.y);
                 seeds.forEach((sd, si) => {
                     if(Math.abs(sd.x - en.x) < 30 && Math.abs(sd.y - en.y) < 30) { enemies.splice(i,1); seeds.splice(si,1); }
                 });
@@ -307,10 +298,9 @@
     function showFinal() {
         document.getElementById('scr-final').classList.remove('hidden');
         document.getElementById('ui-layer').style.display = 'none';
-        document.getElementById('emergency-next').classList.add('hidden');
         setInterval(() => {
             const diff = (new Date().setMonth(new Date().getMonth()+1)) - new Date();
-            document.getElementById('timer').innerText = Math.floor(diff/86400000) + "d to next monthsary";
+            document.getElementById('timer').innerText = Math.floor(diff/86400000) + " Days to month 2!";
         }, 1000);
     }
 </script>
